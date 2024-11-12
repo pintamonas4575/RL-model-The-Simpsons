@@ -11,13 +11,13 @@ def capturar_y_guardar():
         width = window.winfo_width()
         height = window.winfo_height()
 
-        # Capturar la ventana
         imagen = ImageGrab.grab(bbox=(x, y, x + width, y + height))
-        imagen.save("captura_ventana.png")  # Guardar la imagen
-        print("Captura guardada como 'captura_ventana.png'")
-        window.quit()  # Cerrar la ventana (opcional)
+        imagen.save("1-window-image.png") 
+        print("Captura guardada")
+        window.quit()
     except Exception as e:
         print("Error al capturar la ventana:", e)
+# ------------------------------------------------------------
 
 # symbols = ["🔨", "🪓", "💣", "🍩", "⭐"]
 symbols = ["hammer.png", "axe.png", "bomb.png", "doughnut.png", "star.png"]

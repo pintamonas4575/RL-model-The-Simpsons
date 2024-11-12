@@ -1,5 +1,5 @@
 # RL-model-The-Simpsons
-Implementation of a Reinforcement Learning (RL) model to learn to scratch the less possible surface on the scratch game of the Badulaque of the app "the Simpsons Springfield".
+Implementation of a Reinforcement Learning (RL) model to learn to scratch the less possible surface on the scratch game of the Badulaque of the app "The Simpsons Springfield".
 
 # Flujo a seguir
 1. generar boletos random en cada ejecución
@@ -8,25 +8,25 @@ Implementation of a Reinforcement Learning (RL) model to learn to scratch the le
 4. obtener porcentaje de superficie rascada 
 5. modelo de RL para rascar (lo difícil, el tema de las recompensas)
 
-# Objetivo del modelo
-Obtener la menor cantidad de superficie rascada para desvelar los premios. No se juega con las recompensas.
+# Model´s objective
+Obtain the less scrathced surface as possible, obviously showing the three symbols. There aren´t any rewards for same symbols.
 
-**NOTA:** Los símbolos del boleto cambian con cada boleto.
+**NOTE:** Symbols change in every ticket generation.
 
-# Resursos utilizados
-ChatGPT
+# Used resorces
+ChatGPT: [ChatGPT](https://chatgpt.com/)
 
 Github emojis: [ikatyang](https://github.com/ikatyang/emoji-cheat-sheet?tab=readme-ov-file#tool)
 
-Emojipedia: [Emojipedia](https://emojipedia.org/)
+Emojipedia (iOS emoji versions): [Emojipedia](https://emojipedia.org/)
+
+Tkinter: [Available web](https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/index.html)
 
 
-# ⚖️ Licencia 
+# ⚖️ License 
+Spanish governement surely scratches our pockets.
 
-El gobierno sí que nos rasca los bolsillos.
-
-# 👤 Contacto
-
-Cualquier duda o sugerencia contactar con el autor:
+# 👤 Contact
+Any doubt or suggestion contact with the author:
 
 Alejandro Mendoza: alejandro.embi@gmail.com 
