@@ -1,12 +1,19 @@
 # RL-model-The-Simpsons
 Implementation of a Reinforcement Learning (RL) model to learn to scratch the less possible surface on the scratch game of the Badulaque of the app "The Simpsons Springfield".
 
-# Flujo a seguir
-1. generar boletos random en cada ejecución
-2. generar boletos con la capa de rascar
-3. rascar de forma automática
-4. obtener porcentaje de superficie rascada 
-5. modelo de RL para rascar (lo difícil, el tema de las recompensas)
+# Workflow
+1. Generate random tickets in every execution
+2. Generate tickets with scrathing surface above
+3. Automated scratching
+4. Obtain percentage of scratched surface 
+5. Animate/Warn when a symbol is fully discovered
+6. RL model for scratching
+   1. Step 1
+   2. Step 2
+   3. Step 3
+
+RECORDAR: Sustituir rectángulo gris por imagen. 
+RECORDAR: Cambiar fondo de ventana a otro color. 
 
 # Model´s objective
 Obtain the less scrathced surface as possible, obviously showing the three symbols. There aren´t any rewards for same symbols.
