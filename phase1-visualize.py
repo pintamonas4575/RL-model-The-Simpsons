@@ -35,7 +35,7 @@ try:
     window.title("RL model Scratch & Win")
     window.geometry('1000x500')
 
-    # Disable window decorations (for straight bottom corners and not rounded)
+    # Disable window decorations (for straight bottom corners and not rounded in screenshots)
     window.overrideredirect(True)
 
     # mantain images "alive"

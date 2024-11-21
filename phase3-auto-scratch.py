@@ -5,7 +5,7 @@ import random
 symbols = ["hammer.png", "axe.png", "bomb.png", "doughnut.png", "star.png"]
 emojis = random.choices(symbols, k=3)
 
-# Maintain images and emoji labels alive
+# Maintain images and emoji labels "alive"
 images = []
 emoji_labels = []
 scratched_count = 0  # Counter for scratched squares
@@ -33,7 +33,6 @@ window.geometry('1000x500')
 # Display emojis
 for i, emoji in enumerate(emojis):
     emoji_image = tk.PhotoImage(name=emoji, file=f"emojis/{emoji}")
-    emoji_image = emoji_image.subsample(1, 1)
     images.append(emoji_image)  # Save reference
     label = ttk.Label(window, image=emoji_image)
     label.place(relx=0.3 + i * 0.2, rely=0.5, anchor="center")
@@ -70,6 +69,6 @@ for i in range(squares_to_remove):
 finish_button = ttk.Button(window, text="Finish Game", command=calculate_scratched_percentage)
 finish_button.place(relx=0.5, rely=0.9, anchor="center")
 
-window.after(2000, finish_button.invoke) # invoke button´s command
+# window.after(2000, finish_button.invoke) # invoke button´s command
 
 window.mainloop()

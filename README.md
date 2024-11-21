@@ -7,13 +7,14 @@ Implementation of a Reinforcement Learning (RL) model to learn to scratch the le
 3. Automated scratching
 4. Obtain percentage of scratched surface 
 5. Animate/Warn when a symbol is fully discovered
-6. RL model for scratching
+6. Esthetic look of window
+7. RL model for scratching
    1. Step 1
    2. Step 2
    3. Step 3
 
-RECORDAR: Sustituir rectángulo gris por imagen. 
-RECORDAR: Cambiar fondo de ventana a otro color. 
+REMAINDER: Replace gray rectangle with image, if possible. 
+REMAINDER: Change window background to another color or image. 
 
 # Model´s objective
 Obtain the less scrathced surface as possible, obviously showing the three symbols. There aren´t any rewards for same symbols.
@@ -31,7 +32,7 @@ Tkinter: [Available web](https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/
 
 
 # ⚖️ License 
-Spanish governement surely scratches our pockets.
+Spanish governement surely scratches the money out of our pockets.
 
 # 👤 Contact
 Any doubt or suggestion contact with the author:
