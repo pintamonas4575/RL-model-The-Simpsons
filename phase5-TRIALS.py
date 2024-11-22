@@ -1,7 +1,7 @@
 import tkinter as tk
 import random
 from tkinter import ttk
-from PIL import ImageGrab, Image
+from PIL import ImageGrab, Image, ImageTk
 import cv2
 import numpy as np
 
@@ -23,7 +23,7 @@ def get_window_image_and_save(save: bool, file_name: str) -> Image.Image | None:
 
     return pil_image if save else None
 # -------------------------------------------------------
-def display_emojis() -> None:
+def display_emojis_BACK() -> None:
     """Place 3 emojis alligned in the center of the window"""
 
     symbols = ["hammer.png", "axe.png", "bomb.png", "doughnut.png", "star.png"]
@@ -34,6 +34,23 @@ def display_emojis() -> None:
         label = ttk.Label(window, image=emoji_image)
         label.place(relx=0.3 + i * 0.2, rely=0.5, anchor="center")
         emoji_labels.append(label)
+
+def display_emojis() -> None:
+    """Display emojis with transparent backgrounds on the tkinter window."""
+    symbols = ["hammer.png", "axe.png", "bomb.png", "doughnut.png", "star.png"]
+    emojis = random.choices(symbols, k=3)
+
+    for i, emoji in enumerate(emojis):
+        emoji_image = Image.open(f"emojis/{emoji}").convert("RGBA")
+        emoji_photo = ImageTk.PhotoImage(emoji_image)
+
+        images.append(emoji_photo)
+
+        canvas = tk.Canvas(window, width=emoji_image.width, height=emoji_image.height, highlightthickness=0, bg="white")
+        canvas.place(relx=0.3 + i * 0.2, rely=0.5, anchor="center")
+        canvas.create_image(0, 0, image=emoji_photo, anchor="nw")
+
+        emoji_labels.append(canvas)
 # -------------------------------------------------------
 def get_contours_mask() -> Image.Image:
     """Gets initial image and creates the symbol's contours"""
@@ -46,7 +63,7 @@ def get_contours_mask() -> Image.Image:
     background = np.ones_like(pil_image) * 255  # White background
 
     numpy_contours = cv2.drawContours(background, contours, -1, (0, 0, 0), thickness=cv2.FILLED)  # black fill, BGR mode
-    cv2.imwrite("3-coloured-contours.png", numpy_contours)
+    cv2.imwrite("2-dinamic-contours.png", numpy_contours)
 
     contour_mask = Image.fromarray(numpy_contours).convert("L") # to gray scale
 
@@ -83,7 +100,7 @@ def add_scratching_frames(window: tk.Tk, contour_mask: np.ndarray) -> dict[int, 
             rect.bind("<Button-1>",lambda event, r=rect, coords=(x, y): remove_square(r, coords, rect_size, emoji_scratch_track))
             squares.append(rect)
     
-    get_window_image_and_save(True, "4-learnable-contours.png")
+    get_window_image_and_save(True, "3-learnable-contours.png")
 
     return emoji_scratch_track
 # -------------------------------------------------------
@@ -115,6 +132,7 @@ def calculate_scratched_percentage() -> None:
     print(f"Final scratched area: {final_percentage_scratched:.2f}%")
     window.destroy()
 # ------------------------------------------------------
+# ------------------------------------------------------
 # Maintain images and emoji labels "alive"
 images = []
 emoji_labels = []
@@ -128,11 +146,17 @@ emoji_bboxes = [
     (618, 168, 618+164, 168+164),  # Emoji 3
 ]
 # ------------------------------------------------------
+
 window = tk.Tk()
+window.config(bg="black")
 window.title("RL Model Scratch & Win")
 window.geometry('1000x500')
 
 # 1: Display emojis
+# canvas = Canvas(window, width=500, height=250)
+# canvas.pack(fill="both", expand=True)
+# display_emojis(canvas)
+# display_emojis_BACK()
 display_emojis()
 
 # 2: Get contours mask
@@ -143,12 +167,23 @@ contour_mask = get_contours_mask() # PIL image
 squares: list[tk.Frame] = []
 emoji_scratch_track = add_scratching_frames(window, np.asarray(contour_mask))
 
+# image: Image.Image = Image.open("utils/darth-vader1.jpg")  # Replace with your image path
+# image = image.resize((1000, 500), Image.Resampling.LANCZOS)  # Resize to 1000x500
+# background_image = ImageTk.PhotoImage(image)
+# background_label = tk.Label(window, image=background_image)
+# background_label.place(x=0, y=0, relwidth=1, relheight=1)
+# background_label.lower()
+
+
+
+
+
 # for automatic initial scratch
 total_squares = len(squares)
 random_percentage = random.randint(80, 90)
 squares_to_remove = int(total_squares * (random_percentage / 100))
 random.shuffle(squares)
-for i in range(squares_to_remove):
+for i in range(squares_to_remove): # funciona
     rect = squares[i]  
     coords = rect.place_info()  # Get coordinates of the square
     x = int(coords['x'])  # x coordinate
@@ -159,4 +194,5 @@ for i in range(squares_to_remove):
 finish_button = ttk.Button(window, text="Finish Game", command=calculate_scratched_percentage)
 finish_button.place(relx=0.5, rely=0.9, anchor="center")
 
+# finish_button.invoke()
 window.mainloop()

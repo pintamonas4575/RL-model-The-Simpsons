@@ -7,7 +7,7 @@ Implementation of a Reinforcement Learning (RL) model to learn to scratch the le
 3. Automated scratching
 4. Obtain percentage of scratched surface 
 5. Animate/Warn when a symbol is fully discovered
-6. Esthetic look of window
+6. (Esthetic look of window)
 7. RL model for scratching
    1. Step 1
    2. Step 2
@@ -26,7 +26,7 @@ ChatGPT: [ChatGPT](https://chatgpt.com/)
 
 Github emojis: [ikatyang](https://github.com/ikatyang/emoji-cheat-sheet?tab=readme-ov-file#tool)
 
-Emojipedia (iOS emoji versions): [Emojipedia](https://emojipedia.org/)
+Emojipedia (use iOS emoji versions): [Emojipedia](https://emojipedia.org/)
 
 Tkinter: [Available web](https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/index.html)
 
