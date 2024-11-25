@@ -1,7 +1,7 @@
-# RL-model-The-Simpsons
+# 🤖 RL-model-The-Simpsons
 Implementation of a Reinforcement Learning (RL) model to learn to scratch the less possible surface on the scratch game of the Badulaque of the app "The Simpsons Springfield".
 
-# Workflow
+# 🧭 Workflow
 1. Generate random tickets in every execution
 2. Generate tickets with scrathing surface above
 3. Automated scratching
@@ -15,12 +15,29 @@ Implementation of a Reinforcement Learning (RL) model to learn to scratch the le
 
 REMAINDER: Replace gray rectangles with image or other, if possible. 
 
-# Model´s objective
+# 🏆 Model´s objective
 Obtain the less scrathced surface as possible, obviously showing the three symbols. There aren´t any rewards for same symbols.
 
 **NOTE:** Symbols change in every ticket generation.
 
-# Used resorces
+# 📘 Notebooks "auxiliar" and "contours"
+*"auxiliar.ipynb"* is used for different tests.📜
+
+*"contours.ipynb"* is used for showing the creation of the pixel mask and obtaining the valid contours.
+
+# 📜 Scripts "phaseX.py"
+Incremental versions of the game. 
+
+# 📂 Folder "checkpoint-photos"
+Different phases that a ticket has during the game.
+
+# 📂 Folder "emojis"
+Emoji images used for generating the tickets. Downloaded from the Emojipedia.
+
+# 📂 Folder "utils"
+Some useful files like the window background of the tickets.
+
+# 🛠️ Used resorces
 Github emojis: [ikatyang](https://github.com/ikatyang/emoji-cheat-sheet)
 
 Emojipedia (use last iOS emoji versions): [Emojipedia](https://emojipedia.org/)
