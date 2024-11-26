@@ -47,7 +47,7 @@ def display_emojis(window: QMainWindow) -> None:
     # Add horizontal layout into the vertical layout
     vertical_layout.addLayout(h_layout)
 
-    # Create a central widget to set the layout in the window
+    # Add vertical layout into the window
     central_widget = QWidget(window)
     central_widget.setLayout(vertical_layout)
     window.setCentralWidget(central_widget)
@@ -69,7 +69,7 @@ def get_contours_mask() -> Image.Image:
 
     return contour_mask
 # --------------------------------------------------
-def add_scratching_frames(window: QWidget, contour_mask: np.ndarray) -> tuple[list[QFrame],dict[int, set]]:
+def add_scratching_frames(window: QMainWindow, contour_mask: np.ndarray) -> tuple[list[QFrame],dict[int, set]]:
     """Add all the scratchable areas and update a dictionary of frames with black mask pixels."""
     
     emoji_bboxes = [
@@ -92,7 +92,7 @@ def add_scratching_frames(window: QWidget, contour_mask: np.ndarray) -> tuple[li
 
             frame = QFrame(window)
             frame.setGeometry(QRect(x, y, square_size, square_size))
-            frame.setStyleSheet("background-color: gray")
+            frame.setStyleSheet("background-color: blue")
 
             for i, (ex1, ey1, ex2, ey2) in enumerate(emoji_bboxes):
                 # Calculate the intersection area between the frame and emoji bounding box
@@ -107,6 +107,8 @@ def add_scratching_frames(window: QWidget, contour_mask: np.ndarray) -> tuple[li
             frame.mousePressEvent = lambda event, s=frame, coords=(x, y): remove_square(s, coords, square_size, emoji_scratch_track)
             squares.append(frame)
 
+    get_window_image_and_save(window, True, "4-learnable-contours.png")
+    
     return squares, emoji_scratch_track 
 # --------------------------------------------------
 def remove_square(frame: QFrame, frame_coords: tuple[int, int], square_size: int, emoji_scratch_track: dict[int,set]) -> None:
@@ -147,7 +149,9 @@ FRAME_SIZE = 20
 app = QApplication([])
 window = QMainWindow()
 window.setWindowTitle("RL Model Scratch & Win")
-window.setGeometry(500, 250, 1000, 500)
+window.setGeometry(500, 250, 1000, 500) # 1000x500
+# central_widget = QWidget(window)
+# window.setCentralWidget(central_widget)
 
 # 1: Display emojis
 display_emojis(window)
@@ -164,14 +168,14 @@ total_squares = len(squares)
 random_percentage = random.randint(80, 90)
 squares_to_remove = int(total_squares * (random_percentage / 100))
 random.shuffle(squares)
-# for i in range(squares_to_remove): # funciona
-#     square = squares[i]  
-#     frame_pos = square.pos() 
-#     x, y = frame_pos.x(), frame_pos.y()
-#     remove_square(square, (x, y), FRAME_SIZE, emoji_scratch_track)
+for i in range(squares_to_remove): # funciona
+    square = squares[i]  
+    frame_pos = square.pos() 
+    x, y = frame_pos.x(), frame_pos.y()
+    remove_square(square, (x, y), FRAME_SIZE, emoji_scratch_track)
 
 # background image
-background_pixmap = QPixmap("utils/bg.png")  
+background_pixmap = QPixmap("utils/space.jpg")  
 background_pixmap = background_pixmap.scaled(1000, 500, Qt.KeepAspectRatioByExpanding) # resize
 background_label = QLabel(window)
 background_label.setPixmap(background_pixmap)

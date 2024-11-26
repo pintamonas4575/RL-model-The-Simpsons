@@ -44,7 +44,7 @@ Emojipedia (use last iOS emoji versions): [Emojipedia](https://emojipedia.org/)
 
 Tkinter 8.6 (later unsed): [Poor Python documentation](https://docs.python.org/3.11/library/tkinter.html)
 
-PyQT5 (later the one used): [A doc web](https://www.riverbankcomputing.com/static/Docs/PyQt5/)
+PyQT5 (later, the one used): [A doc web](https://www.riverbankcomputing.com/static/Docs/PyQt5/)
 
 ChatGPT: [ChatGPT](https://chatgpt.com/)
 

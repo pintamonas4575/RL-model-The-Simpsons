@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import QLabel
 from PIL import Image
-from PyQt5.QtCore import QRect
+from PyQt5.QtCore import QRect, Qt
 import numpy as np
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget
@@ -36,10 +36,8 @@ def add_scratching_frames_debug(window: QWidget, image_path: str) -> list[QLabel
             # Create QLabel and set its pixmap
             label = QLabel(window)
             label.setGeometry(QRect(start_x + x, start_y + y, square_size, square_size))
-            label.setStyleSheet("border: 2px solid red;")
             label.setPixmap(pixmap)
             label.setScaledContents(True)  # Ensure the image fits the label
-            label.show()
 
             # Add a mousePressEvent to make it scratchable
             label.mousePressEvent = lambda event, lbl=label: lbl.hide()  # Hide the frame on click
@@ -50,23 +48,31 @@ def add_scratching_frames_debug(window: QWidget, image_path: str) -> list[QLabel
 
 # -----------------------------------------------------------------------
 # -----------------------------------------------------------------------
-FRAME_SIZE = 50  # Define the size of each frame (change as needed)
-IMAGE_PATH = "utils/bg.png"  # Path to your image file (ensure this is correct)
+FRAME_SIZE = 25 
+IMAGE_PATH = "utils/space.jpg" 
+bg_image = "utils/bg.png"
+
+# IMAGE_PATH, bg_image = bg_image, IMAGE_PATH
 
 class ScratchableWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Scratchable Frames")
-        self.setGeometry(100, 100, 1000, 600)  # Set the size of the main window
+        self.setGeometry(100, 100, 1000, 500)  # Set the size of the main window
         
         # Create a central widget
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
+
+        background_pixmap = QPixmap(bg_image)  
+        background_pixmap = background_pixmap.scaled(1000, 500, Qt.KeepAspectRatioByExpanding) # resize
+        background_label = QLabel(self)
+        background_label.setPixmap(background_pixmap)
+        background_label.setGeometry(0, 0, 1000, 500)
+        background_label.lower()
         
         # Add the scratchable frames
         self.frames = add_scratching_frames_debug(central_widget, IMAGE_PATH)
-        
-        # Show all frames
         for frame in self.frames:
             frame.show()
 
@@ -74,5 +80,6 @@ class ScratchableWindow(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = ScratchableWindow()
+    
     window.show()
     sys.exit(app.exec_())
