@@ -150,8 +150,6 @@ app = QApplication([])
 window = QMainWindow()
 window.setWindowTitle("RL Model Scratch & Win")
 window.setGeometry(500, 250, 1000, 500) # 1000x500
-# central_widget = QWidget(window)
-# window.setCentralWidget(central_widget)
 
 # 1: Display emojis
 display_emojis(window)
@@ -161,18 +159,18 @@ contour_mask = get_contours_mask() # PIL image
 
 # 3: Add scratching layer
 # 4: Check removed frames and warn if symbol found
-squares, emoji_scratch_track = add_scratching_frames(window, np.asarray(contour_mask))  # Example dimensions
+squares, emoji_scratch_track = add_scratching_frames(window, np.asarray(contour_mask))
 
-# for automatic initial scratch
 total_squares = len(squares)
 random_percentage = random.randint(80, 90)
 squares_to_remove = int(total_squares * (random_percentage / 100))
-random.shuffle(squares)
-for i in range(squares_to_remove): # funciona
-    square = squares[i]  
-    frame_pos = square.pos() 
-    x, y = frame_pos.x(), frame_pos.y()
-    remove_square(square, (x, y), FRAME_SIZE, emoji_scratch_track)
+# for automatic initial scratch
+# random.shuffle(squares)
+# for i in range(squares_to_remove): # funciona
+#     square = squares[i]  
+#     frame_pos = square.pos() 
+#     x, y = frame_pos.x(), frame_pos.y()
+#     remove_square(square, (x, y), FRAME_SIZE, emoji_scratch_track)
 
 # background image
 background_pixmap = QPixmap("utils/space.jpg")  
