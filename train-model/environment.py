@@ -16,7 +16,7 @@ class Scratch_Game_Environment():
             (618, 168, 618+164, 168+164),  # Emoji 3
     ]
     
-    def __init__(self, frame_size: int, initial_push: bool):
+    def __init__(self, frame_size: int, initial_push: bool, show_results: bool):
         self.images = []
         self.emoji_labels = []
         self.scratched_count = 0  
@@ -47,6 +47,20 @@ class Scratch_Game_Environment():
         self.close_button = QPushButton("Finish Game", self.window)
         self.close_button.setGeometry(450, 450, 100, 40)  
         self.close_button.clicked.connect(self.calculate_scratched_percentage)
+
+        background_pixmap = QPixmap("utils/space.jpg")  
+        background_pixmap = background_pixmap.scaled(1000, 500, Qt.KeepAspectRatioByExpanding) # resize
+        background_label = QLabel(self.window)
+        background_label.setPixmap(background_pixmap)
+        background_label.setGeometry(0, 0, 1000, 500)
+        background_label.lower()
+
+        if show_results:
+            self.window.show()
+        else:
+            QTimer.singleShot(500, self.close_button.click)
+        # sys.exit(self.app.exec_())
+        self.app.exec_()
     
     def get_window_image_and_save(self, save: bool, file_name: str) -> Image.Image:
         """Get window state and optionally save as an image."""
@@ -163,14 +177,6 @@ class Scratch_Game_Environment():
         print(f"Final scratched area: {final_percentage_scratched:.2f}%")
         self.window.close()
 
-    def show_results(self) -> None:
-        """Display the game situation whenever needed"""
-
-        # QTimer.singleShot(500, self.close_button.click)
-        self.window.show()
-        sys.exit(self.app.exec_())
-
 """----------------------------------------------------------------------------"""
 
-my_game = Scratch_Game_Environment(frame_size=20, initial_push=False)
-my_game.show_results()
+# my_game = Scratch_Game_Environment(frame_size=20, initial_push=True, show_results=True)

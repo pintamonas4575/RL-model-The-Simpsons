@@ -9,11 +9,9 @@ Implementation of a Reinforcement Learning (RL) model to learn to scratch the le
 5. Animate/Warn when a symbol is fully discovered
 6. (Esthetic look of window)
 7. RL model for scratching
-   1. Step 1
-   2. Step 2
-   3. Step 3
-
-REMAINDER: Replace gray rectangles with image or other, if possible. 
+   1. Test to remove all the frames with the agent to see if the game works
+   2. (random scratching strategy)
+   3. Reward scratching stategy
 
 # 🏆 Model´s objective
 Obtain the less scrathced surface as possible, obviously showing the three symbols. There aren´t any rewards for same symbols.
@@ -40,7 +38,7 @@ Some useful files like the window background of the tickets.
 # 🛠️ Used resorces
 Github emojis: [ikatyang](https://github.com/ikatyang/emoji-cheat-sheet)
 
-Emojipedia (use last iOS emoji versions): [Emojipedia](https://emojipedia.org/)
+Emojipedia (downloaded last iOS emoji versions): [Emojipedia](https://emojipedia.org/)
 
 Tkinter 8.6 (later unsed): [Poor Python documentation](https://docs.python.org/3.11/library/tkinter.html)
 
