@@ -1,7 +1,12 @@
+import sys
 import random
+import io
+import cv2
 import numpy as np
-
-from environment import Scratch_Game_Environment
+from PIL import Image
+from PyQt5.QtCore import Qt, QBuffer, QRect, QTimer
+from PyQt5.QtGui import QPixmap, QImage, QBrush, QPalette
+from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QHBoxLayout, QWidget, QPushButton, QVBoxLayout, QFrame
 
 class ScratchEnv:
     def reset(self):
@@ -32,6 +37,7 @@ class ScratchEnv:
         """
         # Your implementation
         return []
+
 
 class RLAgent:
     def __init__(self, state_size, action_size, alpha=0.1, gamma=0.99, epsilon=0.1):

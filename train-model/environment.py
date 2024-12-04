@@ -9,21 +9,17 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QHBoxLayout, QWidget, QPushButton, QVBoxLayout, QFrame
 
 class Scratch_Game_Environment():
-
-    emoji_bboxes = [
-            (218, 168, 218+164, 168+164),  # Emoji 1 (x1, y1, x2, y2)
-            (418, 168, 418+164, 168+164),  # Emoji 2
-            (618, 168, 618+164, 168+164),  # Emoji 3
-    ]
+    """Scratch Game environment used to play the Scratch&Win game. No rewards, only discover the symbols"""
     
-    def __init__(self, frame_size: int, initial_push: bool, show_results: bool):
-        self.images = []
-        self.emoji_labels = []
+    def __init__(self, frame_size: int, initial_push: bool, num_emojis: int):
+        self.emoji_labels: list[QLabel] = []
+        self.emoji_bboxes = []
         self.scratched_count = 0  
         self.total_squares = 0 
         self.FRAME_SIZE = frame_size
-        self.squares: list[QFrame] = []
-        self.emoji_scratch_track = {i: set() for i in range(len(self.emoji_bboxes))}
+        self.squares: list[QFrame] = [] # all the squares to later call and remove them
+        self.emoji_frame_track = {i: set() for i in range(num_emojis)} # adding the good frames to later check
+
         # --------------------------------------------
         self.app = QApplication([])
         self.window = QMainWindow()
@@ -32,6 +28,7 @@ class Scratch_Game_Environment():
 
         self.display_emojis()
         contour_mask = self.get_contours_mask()
+        self.set_emoji_bboxes()
         self.add_scratching_frames(np.asarray(contour_mask))
 
         if initial_push:
@@ -55,12 +52,11 @@ class Scratch_Game_Environment():
         background_label.setGeometry(0, 0, 1000, 500)
         background_label.lower()
 
-        if show_results:
-            self.window.show()
-        else:
-            QTimer.singleShot(500, self.close_button.click)
-        # sys.exit(self.app.exec_())
-        self.app.exec_()
+        # if show_results:
+        #     self.window.show()
+        # else:
+        #     QTimer.singleShot(500, self.close_button.click)
+        # sys.exit(self.app.exec())
     
     def get_window_image_and_save(self, save: bool, file_name: str) -> Image.Image:
         """Get window state and optionally save as an image."""
@@ -81,13 +77,13 @@ class Scratch_Game_Environment():
         """Place 3 emojis alligned in the center of the window"""
 
         symbols = ["hammer.png", "axe.png", "bomb.png", "doughnut.png", "star.png"]
-        emojis = random.choices(symbols, k=3)
+        emojis = random.choices(symbols, k=len(self.emoji_frame_track))
 
         vertical_layout = QVBoxLayout()
-        vertical_layout.setAlignment(Qt.AlignmentFlag(0))  # vertical 'Qt.AlignCenter'
+        vertical_layout.setAlignment(Qt.AlignCenter)  
 
         h_layout = QHBoxLayout()
-        h_layout.setAlignment(Qt.AlignmentFlag(4))  # horizontal 'Qt.AlignCenter'
+        h_layout.setAlignment(Qt.AlignCenter)
         h_layout.setSpacing(40)  # space between emojis
 
         for emoji in emojis:
@@ -121,6 +117,16 @@ class Scratch_Game_Environment():
         contour_mask = Image.fromarray(numpy_contours).convert("L") # to gray scale
 
         return contour_mask
+    
+    def set_emoji_bboxes(self) -> None:
+        """Set the bboxes for the displayed emojis. For later checking each frame removed"""
+
+        for label in self.emoji_labels:
+            x = label.pos().x()
+            y = label.pos().y()
+            width = label.width()
+            height = label.height()
+            self.emoji_bboxes.append((x, y, x + width, y + height))
 
     def add_scratching_frames(self, contour_mask: np.ndarray) -> None:
         """Add all the scratchable areas and update a dictionary of frames with black mask pixels."""
@@ -133,7 +139,6 @@ class Scratch_Game_Environment():
 
         for x in range(start_x, start_x + rect_width, square_size):
             for y in range(start_y, start_y + rect_height, square_size):
-                frame_bbox = (x, y, x + square_size, y + square_size)
 
                 frame = QFrame(self.window)
                 frame.setGeometry(QRect(x, y, square_size, square_size))
@@ -145,30 +150,32 @@ class Scratch_Game_Environment():
                     ix2, iy2 = min(x + square_size, ex2), min(y + square_size, ey2)
 
                     mask_area = contour_mask[iy1:iy2, ix1:ix2]
-                    if np.any(mask_area == 0):  # Check for black pixels in the mask
-                        self.emoji_scratch_track[i].add(frame_bbox)
+                    if np.sum(mask_area == 0) > 10:  # threshold for black pixels in the mask
+                        self.emoji_frame_track[i].add(frame)
                         frame.setStyleSheet("background-color: red")
 
-                frame.mousePressEvent = lambda event, s=frame, coords=(x, y): self.remove_square(s, coords)
+                frame.mousePressEvent = lambda event, s=frame: self.remove_square(s)
                 self.squares.append(frame)
         self.total_squares = len(self.squares)
 
-    def remove_square(self, frame: QFrame, frame_coords: tuple[int, int]) -> None:
+    def remove_square(self, frame: QFrame) -> bool:
         """Function to remove a square, update the count, and check for symbol overlap and emoji completion."""
 
         frame.hide() 
         self.scratched_count += 1 
-        x, y = frame_coords
-        frame_bbox = (x, y, x + self.FRAME_SIZE, y + self.FRAME_SIZE)
+        good_frame = False
 
-        for i in range(len(self.emoji_scratch_track)):
-            if frame_bbox in self.emoji_scratch_track[i]:
-                self.emoji_scratch_track[i].remove(frame_bbox)
-                if len(self.emoji_scratch_track[i]) == 0: # all emoji parts have been removed
-                    print("Congratulations!", f"You revealed Emoji {i+1}!")
-                    if all(not s for s in self.emoji_scratch_track.values()): # if all sets are empty
-                        print("¡¡¡ All emojis revealed !!!")
-                        break
+        for i in range(len(self.emoji_frame_track)):
+            if frame in self.emoji_frame_track[i]:
+                self.emoji_frame_track[i].remove(frame)
+                # if len(self.emoji_frame_track[i]) == 0: # all emoji parts have been removed
+                    # print("Congratulations!", f"You revealed Emoji {i+1}!")
+                if all(not s for s in self.emoji_frame_track.values()): # if all sets are empty
+                    print("¡¡¡ All emojis revealed !!!")
+                    break
+                good_frame = True
+
+        return good_frame
 
     def calculate_scratched_percentage(self) -> None:
         """Function to calculate and display scratched percentages"""
@@ -176,7 +183,8 @@ class Scratch_Game_Environment():
         final_percentage_scratched = (self.scratched_count / len(self.squares)) * 100
         print(f"Final scratched area: {final_percentage_scratched:.2f}%")
         self.window.close()
+        self.app.closeAllWindows()
 
 """----------------------------------------------------------------------------"""
 
-# my_game = Scratch_Game_Environment(frame_size=20, initial_push=True, show_results=True)
+# my_game = Scratch_Game_Environment(frame_size=20, initial_push=False, show_results=True, num_emojis=3)

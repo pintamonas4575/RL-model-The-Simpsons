@@ -1,5 +1,6 @@
 import sys
 import random
+import time
 import io
 import cv2
 import numpy as np
@@ -25,6 +26,40 @@ from environment import Scratch_Game_Environment
 #             next_state, reward, done = env.act(action)
 #             print(f"Action: {action}, State: {next_state}, Reward: {reward}, Done: {done}")
 
-my_env = Scratch_Game_Environment(frame_size=20, initial_push=False, show_results=True)
+class Agent():
+
+    def __init__(self):
+        self.global_reward = 0
+        pass
+
+    def make_action(self, env: Scratch_Game_Environment):
+        """Remove a scratchable square as an action"""
+
+        frame_to_remove = random.choice(env.squares)
+        response = env.remove_square(frame_to_remove)
+        self.reward(response)
 
 
+    def reward(self, action: bool):
+        """Give a reward based on the quality of the removed frame"""
+        if action:
+            self.global_reward += 10
+        else:
+            self.global_reward -= 2
+        pass
+
+agent = Agent()
+my_env = Scratch_Game_Environment(frame_size=20, initial_push=False, num_emojis=3)
+
+"""---------------------------------------------------------"""
+
+num_actions = 0
+
+for i in range(10):
+    agent.make_action(my_env)
+
+print(agent.global_reward)
+
+
+my_env.window.show()
+sys.exit(my_env.app.exec())
