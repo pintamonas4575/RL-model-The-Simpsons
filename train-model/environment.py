@@ -171,7 +171,7 @@ class Scratch_Game_Environment():
         # final_percentage_scratched = (self.scratched_count / len(self.squares)) * 100
         # print(f"Final scratched area: {final_percentage_scratched:.2f}%")
         self.app.quit()
-        del self.app
+        # del self.app
 
     def reset_env(self):
         """Function to clean and reset the environment in place, ready for another play"""
