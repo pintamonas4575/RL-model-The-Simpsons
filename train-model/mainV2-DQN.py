@@ -42,7 +42,7 @@ class RL_Agent2():
         self.target_dqn = Custom_DQN(nn_arquitecture).to(device)
         self.optimizer = torch.optim.Adam(self.policy_dqn.parameters(), lr=0.0001)
         self.loss_fn = nn.MSELoss()
-        self.batch_size = 4
+        self.batch_size = 64
         self.gamma = 0.99
         self.epsilon = 0.15
         self.epsilon_decay = 0.995
@@ -88,7 +88,6 @@ class RL_Agent2():
     
     def replay(self, batch_size: int):
         if len(self.memory) < batch_size:
-            print("Replay passed")
             return
         batch = random.sample(self.memory, batch_size)
         states, actions, rewards, next_states, dones = zip(*batch)
@@ -100,17 +99,17 @@ class RL_Agent2():
         dones = torch.FloatTensor(dones).to(device)
 
         one_hot_states = torch.zeros((batch_size, self.num_states), dtype=torch.float32).to(device)
-        # print("one_hot_states 1:", one_hot_states.shape) # type: torch.Tensor
-
         for idx, state in enumerate(states):
             state = int(state.item())
             one_hot_states[idx, state] = 1.0
 
-        # print("one_hot_states 2:", one_hot_states.shape) # type: torch.Tensor
+        one_hot_next_states = torch.zeros((batch_size, self.num_states), dtype=torch.float32).to(device)
+        for idx, state in enumerate(next_states):
+            state = int(state.item())
+            one_hot_next_states[idx, state] = 1.0
 
-        # q_values = self.policy_dqn(states).gather(1, actions.unsqueeze(1)).squeeze(1)
         q_values = self.policy_dqn(one_hot_states).gather(1, actions.unsqueeze(1)).squeeze(1)
-        next_q_values = self.target_dqn(next_states).max(1)[0]
+        next_q_values = self.target_dqn(one_hot_next_states).max(1)[0]
         expected_q_values = rewards + self.gamma * next_q_values * (1 - dones)
 
         loss = self.loss_fn(q_values, expected_q_values.detach())
@@ -154,6 +153,7 @@ min_area_scratched = 999
 
 start = time.time()
 for i in range(EPISODES):
+    print(f"-----------------EPOCH {i + 1}---------------------")
     agent.game_env.reset_env()
     agent.reset_agent()
 
