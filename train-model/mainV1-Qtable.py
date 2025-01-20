@@ -1,35 +1,27 @@
-import sys
 import random
 import math
 import time
 import matplotlib.pyplot as plt
-import io
-import cv2
-import psutil
-import os
 import gc
 import numpy as np
-from PIL import Image
-from PyQt5.QtCore import Qt, QBuffer, QRect, QTimer
-from PyQt5.QtGui import QPixmap, QImage, QBrush, QPalette
-from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QHBoxLayout, QWidget, QPushButton, QVBoxLayout, QFrame
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QFrame
 
 from environment import Scratch_Game_Environment
 
 class RL_Agent1():
 
-    def __init__(self):
+    def __init__(self, game_env: Scratch_Game_Environment):
         self.global_reward = 0
         self.alpha = 0.1  # Learning rate
         self.gamma = 1.0  # Discount factor
         self.epsilon = 0.25  # Exploration rate
 
-    def add_env(self, game_env: Scratch_Game_Environment):
         self.game_env = game_env
         self.num_states = self.game_env.total_squares # total states (cells); ej:585
         self.q_table = np.zeros(shape=(self.num_states, self.num_states)) # each action goes to every state
         self.visited_frames = set()
-        
+
     def choose_action(self, current_state: int) -> int:
         if random.random() < self.epsilon:  # Exploration
             return random.randint(0, self.num_states - 1)
@@ -71,8 +63,8 @@ class RL_Agent1():
         return reward
 
     def update_q_table(self, current_state: int, action: int, reward: int, next_state: int):
-        """with training loop, action==next_state
-
+        """
+        with training loop, action==next_state
         update q-table value based on Bellman´s equation
         """
         self.q_table[current_state, action] += self.alpha * (reward + self.gamma * np.max(self.q_table[next_state, :]) - self.q_table[current_state, action])
@@ -86,15 +78,14 @@ class RL_Agent1():
 
 """---------------------------------------------------------"""
 """---------------------------------------------------------"""
-agent = RL_Agent1()
+my_env = Scratch_Game_Environment(frame_size=20, scratching_area=(110,98,770,300), num_emojis=3)
+agent = RL_Agent1(game_env=my_env)
+
 EPISODES = 1000
 trace = 100
 max_reward = -9999999
 min_actions_done = 9999999
 min_area_scratched = 999
-
-my_env = Scratch_Game_Environment(frame_size=20, scratching_area=(110,98,770,300), num_emojis=3)
-agent.add_env(my_env)
 
 rewards = []
 max_rewards = []
@@ -134,7 +125,7 @@ for i in range(EPISODES):
     max_reward = agent.global_reward if agent.global_reward > max_reward else max_reward
     min_actions_done = num_actions_done if num_actions_done < min_actions_done else min_actions_done
 
-    final_percentage_scratched = (agent.game_env.scratched_count / len(agent.game_env.squares)) * 100
+    final_percentage_scratched = (agent.game_env.scratched_count / agent.game_env.total_squares) * 100
     min_area_scratched = final_percentage_scratched if final_percentage_scratched < min_area_scratched else min_area_scratched
     if i % trace == 0 or i == EPISODES-1:
         print(f"-----------------EPOCH {i+1}---------------------")
@@ -165,6 +156,7 @@ minutos, segundos = divmod(time.time()-start, 60)
 print(f"****Tiempo total: {int(minutos)} minutos y {segundos:.2f} segundos****")
 
 """**********************************************************"""
+"""**********************************************************"""
 
 plt.figure(figsize=(18, 12))
 
@@ -193,5 +185,5 @@ plt.title('Area Scratched vs Episodes')
 plt.legend()
 
 plt.tight_layout()
-plt.savefig("episodes/PLOT.png")
+plt.savefig(f"results/plot1-Qtable-{EPISODES}.png")
 plt.close()
