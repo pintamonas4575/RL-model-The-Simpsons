@@ -1,6 +1,8 @@
 # 🤖 RL-model-The-Simpsons
 Implementation of a Reinforcement Learning (RL) model to learn to scratch the less possible surface on the scratch game of the Badulaque of the app "The Simpsons Springfield".
 
+🙋‍♂️ This project, and as a consequence, its files, belongs to the master´s final project (thesis) of Alejandro Mendoza in Machine Learning and Big Data master degree of the Polytechnic University of Madrid (UPM).
+
 # 🧭 Workflow
 1. Generate random tickets in every execution
 2. Generate tickets with scrathing surface above
