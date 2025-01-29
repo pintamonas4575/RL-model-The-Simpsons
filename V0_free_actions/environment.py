@@ -33,13 +33,6 @@ class Scratch_Game_Environment():
         self.set_emoji_bboxes()
         self.add_scratching_frames(np.asarray(contour_mask))
 
-        # random_percentage = random.randint(80, 90)
-        # squares_to_remove = int(self.total_squares * (random_percentage / 100))
-        # random.shuffle(self.squares)
-        # for i in range(squares_to_remove): # funciona
-        #         square = self.squares[i] 
-        #         self.remove_square(square)
-
         self.close_button = QPushButton("Finish Game", self.window)
         self.close_button.setGeometry(450, 450, 100, 40)  
         self.close_button.clicked.connect(self.calculate_scratched_percentage)

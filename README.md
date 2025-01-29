@@ -21,12 +21,12 @@ Obtain the less scrathced surface as possible, obviously showing the three symbo
 **NOTE:** Symbols change in every ticket generation.
 
 # 📘 Notebooks "auxiliar" and "contours"
-*"auxiliar.ipynb"* is used for different tests.📜
+*"auxiliar.ipynb"* is used for different tests.
 
 *"contours.ipynb"* is used for showing the creation of the pixel mask and obtaining the valid contours.
 
 # 📜 Scripts "phaseX.py"
-Incremental versions of the game. 
+Incremental versions of the game until having the complete functionality. You can execute "phase6-final-game.py" to play yourself. 
 
 # 📂 Folder "checkpoint-photos"
 Different phases that a ticket has during the game.
@@ -35,7 +35,16 @@ Different phases that a ticket has during the game.
 Emoji images used for generating the tickets. Downloaded from the Emojipedia.
 
 # 📂 Folder "utils"
-Some useful files like the window background of the tickets.
+Some useful files like the window background of the tickets or the script to plot the training process.
+
+# 📂 Folder "V0"
+Agents trained with full liberty configuration. This means, after removing a cell, the agent can go to any cell (including repetition).
+
+# 📂 Folder "V1"
+Agents trained with radial strategies towards the game. This means, after removing a cell, the agent can go to any cell around the removed one.
+
+# 📂 Folder "results"
+Results of all agents of all versions of the game.
 
 # 🛠️ Used resorces
 Github emojis: [ikatyang](https://github.com/ikatyang/emoji-cheat-sheet)
