@@ -1,12 +1,23 @@
 import random
 import math
 import time
-import matplotlib.pyplot as plt
 import gc
+import sys
+import os
 import numpy as np
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QFrame
+# ------------------------------
+# Get the absolute path of the directory containing this script
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
+# Get the project root directory (go up one level from "V0_free_actions")
+project_root = os.path.abspath(os.path.join(current_dir, '..'))
+
+# Add the project root to sys.path to allow imports
+if project_root not in sys.path:
+    sys.path.append(project_root)
+# ------------------------------
 from environment import Scratch_Game_Environment # V0_free_actions/environment.py
 from utils.functionalities import plot_results
 
@@ -50,14 +61,14 @@ class RL_Agent_01():
 
     def get_reward(self, next_frame: QFrame):
         if next_frame in self.visited_frames:
-            reward = -50  # Penalty for revisiting
+            reward = -10  # Penalty for revisiting
         else:
             self.visited_frames.add(next_frame)
             response = self.game_env.remove_square(next_frame)
             if response: # red frame
                 reward = 100
             else: # blue frame
-                reward = -10
+                reward = -1
         return reward
 
     def update_q_table(self, current_state: int, action: int, reward: int, next_state: int):
@@ -78,8 +89,8 @@ class RL_Agent_01():
 my_env = Scratch_Game_Environment(frame_size=20, scratching_area=(110,98,770,300), num_emojis=3)
 agent = RL_Agent_01(game_env=my_env)
 
-EPISODES = 100
-trace = 10
+EPISODES = 1000
+trace = 100
 rewards = []
 max_rewards = []
 actions_done = []
@@ -120,13 +131,14 @@ for i in range(EPISODES):
         current_state = next_state
         done = all(not s for s in agent.game_env.emoji_frame_track.values())
 
+    episode_percentage = (agent.game_env.scratched_count / agent.game_env.total_squares) * 100
+
     max_reward = episode_reward if episode_reward > max_reward else max_reward
     min_actions = episode_actions if episode_actions < min_actions else min_actions
-
-    episode_percentage = (agent.game_env.scratched_count / agent.game_env.total_squares) * 100
     min_area_scratched = episode_percentage if episode_percentage < min_area_scratched else min_area_scratched
+
     if i % trace == 0 or i == EPISODES-1:
-        print(f"-----------------EPOCH {i+1}---------------------")
+        print(f"-----------------EPISODE {i+1}---------------------")
         print(f"Actions done: {episode_actions}")
         print(f"Reward: {episode_reward}")
         print(f"Final scratched area: {episode_percentage:.2f}%")
@@ -139,10 +151,10 @@ for i in range(EPISODES):
     
     # ---------------data for graphics----------------
     rewards.append(episode_reward)
-    max_rewards.append(max_reward)
     actions_done.append(episode_actions)
-    min_actions_done.append(min_actions_done)
     areas_scratched.append(episode_percentage)
+    max_rewards.append(max_reward)
+    min_actions_done.append(min_actions)
     min_areas_scratched.append(min_area_scratched)
     # ---------------data for graphics----------------
 
@@ -151,11 +163,11 @@ for i in range(EPISODES):
     agent.game_env.app.exec() # run app
 
 minutes, seconds = divmod(time.time()-start, 60)
-print(f"****Total trining time: {int(minutes)} minutes y {seconds:.2f} seconds****")
+print(f"****Total trining time: {int(minutes)} minutes and {seconds:.2f} seconds****")
 
 """**********************************************************"""
 """**********************************************************"""
 
 plot_results(rewards, actions_done, areas_scratched,
              max_rewards, min_actions_done, min_areas_scratched,
-             EPISODES, f"results/V0_1_Qtable_{EPISODES}.png")
+             f"V0_1_Qtable_{EPISODES}.png", (int(minutes), seconds))
