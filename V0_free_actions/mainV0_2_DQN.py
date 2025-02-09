@@ -2,141 +2,25 @@ import random
 import time
 import gc
 import torch
-from torch import nn
-from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QFrame
-from collections import deque
 
 from environment import Scratch_Game_Environment # V0_free_actions/environment.py
 from utils.functionalities import plot_results
+from agentV0_2_DQN import RL_Agent_02
+from agentV0_2_DQN_change import RL_Agent_02_change
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(device)
+print("device:", device)
 
-class Custom_DQN(nn.Module):
-    """Neural Network"""
-    def __init__(self, layer_dims: list):
-        super(Custom_DQN, self).__init__()
-        layers = []
-        for i in range(len(layer_dims) - 1):
-            layers.append(nn.Linear(layer_dims[i], layer_dims[i + 1]))
-            if i < len(layer_dims) - 2:  # No ReLU on the output layer
-                layers.append(nn.ReLU())
-        self.network = nn.Sequential(*layers)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.network(x)
-
-    def print_num_parameters(self) -> None:
-        total_params = sum(p.numel() for p in self.parameters())
-        print(f"Total number of parameters: {total_params}")
-
-class ReplayMemory:
-    """Memory replay for batch training"""
-    def __init__(self, capacity: int):
-        self.memory = deque(maxlen=capacity)
-
-    def __len__(self) -> int:
-        return len(self.memory)
-    
-    def add(self, state, action, reward, next_state, done) -> None:
-        self.memory.append((state, action, reward, next_state, done))
-
-    def sample(self, batch_size: int) -> list[tuple]:
-        return random.sample(self.memory, batch_size)
-
-class RL_Agent_02():
-    """Reinforcement Learning Agent"""
-    def __init__(self, game_env: Scratch_Game_Environment, nn_arquitecture: list): 
-        self.game_env = game_env
-        self.visited_frames = set()
-        self.num_states = self.game_env.total_squares
-
-        self.epsilon = 1.0
-        self.epsilon_decay = 0.996
-        self.epsilon_min = 0.08
-        self.gamma = 0.99
-        self.batch_size = 16
-        self.learning_rate = 0.0001
-        self.memory = ReplayMemory(capacity=100000)
-        self.policy_dqn = Custom_DQN(nn_arquitecture).to(device)
-        self.target_dqn = Custom_DQN(nn_arquitecture).to(device)
-        self.optimizer = torch.optim.Adam(self.policy_dqn.parameters(), lr=self.learning_rate)
-        self.loss_fn = nn.MSELoss()
-
-    def remember(self, state, action, reward, next_state, done) -> None:
-        self.memory.add(state, action, reward, next_state, done)
-    
-    def choose_action(self, state: int) -> int:
-        if random.random() < self.epsilon:
-            return random.randint(0, self.num_states - 1)  # Exploración
-        one_hot_state = torch.zeros(self.num_states, dtype=torch.float32).to(device) # One-hot encoding
-        one_hot_state[state] = 1.0
-        q_values = self.policy_dqn(one_hot_state)
-        return torch.argmax(q_values).item()
-
-    def get_reward(self, frame: QFrame) -> int:
-        if frame in self.visited_frames:
-            reward = -10  # Penalty for revisiting
-        else:
-            self.visited_frames.add(frame)
-            response = self.game_env.remove_square(frame)
-            if response: # red frame
-                reward = 100
-            else: # blue frame
-                reward = -1
-        return reward
-    
-    def replay(self, batch_size: int) -> None:
-        if len(self.memory) < batch_size: # Not enough samples to train
-            return
-        batch = self.memory.sample(batch_size)
-        states, actions, rewards, next_states, dones = zip(*batch)
-
-        states = torch.FloatTensor(states).to(device)
-        actions = torch.LongTensor(actions).to(device)
-        rewards = torch.FloatTensor(rewards).to(device)
-        next_states = torch.FloatTensor(next_states).to(device)
-        dones = torch.FloatTensor(dones).to(device)
-
-        one_hot_states = torch.zeros((batch_size, self.num_states), dtype=torch.float32).to(device)
-        for idx, state in enumerate(states):
-            state = int(state.item())
-            one_hot_states[idx, state] = 1.0
-
-        one_hot_next_states = torch.zeros((batch_size, self.num_states), dtype=torch.float32).to(device)
-        for idx, state in enumerate(next_states):
-            state = int(state.item())
-            one_hot_next_states[idx, state] = 1.0
-
-        q_values = self.policy_dqn.forward(one_hot_states).gather(1, actions.unsqueeze(1)).squeeze(1)
-        next_q_values = self.target_dqn.forward(one_hot_next_states).max(1)[0]
-        expected_q_values = rewards + self.gamma * next_q_values * (1 - dones)
-
-        loss = self.loss_fn.forward(q_values, expected_q_values.detach())
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
-    
-    def update_target_network(self):
-        self.target_dqn.load_state_dict(self.policy_dqn.state_dict())
-
-    def finish_game(self) -> None:
-        QTimer.singleShot(0, self.game_env.close_button.click)
-    
-    def reset_agent(self):
-        self.visited_frames.clear()
-
-"""---------------------------------------------------------"""
-"""---------------------------------------------------------"""
+"""**********************************************************"""
 my_env = Scratch_Game_Environment(frame_size=20, scratching_area=(110,98,770,300), num_emojis=3)
-layer_dims = [my_env.total_squares,512,256,512,my_env.total_squares]
+layer_dims = [my_env.total_squares,512,512,1024,512,512,my_env.total_squares]
 agent = RL_Agent_02(game_env=my_env, nn_arquitecture=layer_dims)
+# agent = RL_Agent_02_change(game_env=my_env, nn_arquitecture=layer_dims)
 
-# agent.policy_dqn.print_num_parameters()
-# agent.target_dqn.print_num_parameters()
+agent.policy_dqn.print_num_parameters()
+agent.target_dqn.print_num_parameters()
 
-EPISODES = 30
+EPISODES = 10
 trace = 2
 rewards = []
 max_rewards = []
@@ -146,7 +30,7 @@ areas_scratched = []
 min_areas_scratched = []
 max_reward = -9999999
 min_actions = 9999999
-min_area_scratched = 999
+min_area_scratched = 100 # % of the area
 
 start = time.time()
 for i in range(EPISODES):
@@ -173,10 +57,10 @@ for i in range(EPISODES):
         agent.replay(agent.batch_size)
         done = all(not s for s in agent.game_env.emoji_frame_track.values())
 
-    if agent.epsilon > agent.epsilon_min:
-        agent.epsilon *= agent.epsilon_decay
+        if episode_actions % 1000 == 0:
+            agent.update_target_network()
 
-    agent.update_target_network()
+    agent.epsilon = max(agent.epsilon_min, agent.epsilon * agent.epsilon_decay)
 
     episode_percentage = (agent.game_env.scratched_count / agent.game_env.total_squares) * 100
 
@@ -213,7 +97,10 @@ minutes, seconds = divmod(time.time()-start, 60)
 print(f"****Total trining time: {int(minutes)} minutes y {seconds:.2f} seconds****")
 
 """**********************************************************"""
-"""**********************************************************"""
+
+# save models
+torch.save(agent.policy_dqn.state_dict(), f"results/models/V0_2_policy_DQN_{EPISODES}.pt")
+torch.save(agent.target_dqn.state_dict(), f"results/models/V0_2_target_DQN_{EPISODES}.pt")
 
 # always saves in "results" folder
 plot_results(rewards, actions_done, areas_scratched,

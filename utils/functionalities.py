@@ -92,7 +92,6 @@ def plot_results(rewards: list, actions_done: list, areas_scratched: list,
 
     minutes, seconds = time_taken
     plt.suptitle(f"Time taken: {minutes} minutes and {seconds:.2f} seconds", fontsize=16, ha='center', fontweight='bold')
-        # plt.suptitle(f"Time taken: {minutes} minutes and {seconds:.2f} seconds", fontsize=16, ha='center', fontweight='bold')
     plt.tight_layout()
     root_dir = get_git_root() or os.getcwd()  # if not a repo, use current directory
     results_dir = os.path.join(root_dir, "results")

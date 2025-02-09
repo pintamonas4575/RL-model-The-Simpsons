@@ -11,8 +11,8 @@ from agentV0_1_Qtable import RL_Agent_01
 my_env = Scratch_Game_Environment(frame_size=20, scratching_area=(110,98,770,300), num_emojis=3)
 agent = RL_Agent_01(game_env=my_env)
 
-EPISODES = 1000
-trace = 250
+EPISODES = 10000
+trace = 500
 rewards = []
 max_rewards = []
 actions_done = []

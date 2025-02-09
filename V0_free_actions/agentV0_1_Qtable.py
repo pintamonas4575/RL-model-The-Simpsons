@@ -12,7 +12,7 @@ class RL_Agent_01():
     def __init__(self, game_env: Scratch_Game_Environment):
         self.alpha = 0.1  # Learning rate
         self.gamma = 0.98  # Discount factor
-        self.epsilon = 0.20  # Exploration rate
+        self.epsilon = 0.15  # Exploration rate
 
         self.game_env = game_env
         self.num_states = self.game_env.total_squares # total states (cells); ej:585
