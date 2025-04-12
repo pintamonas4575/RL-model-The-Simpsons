@@ -12,7 +12,7 @@ def get_git_root():
 
 def plot_results(rewards: list, actions_done: list, areas_scratched: list,
                  max_rewards: list, min_actions_done: list, min_areas_scratched: list, 
-                 file_name: str, time_taken: tuple[int, float]):
+                 file_name: str, time_taken: tuple[int, float]) -> None:
     """
     Plot the results of the training process. Includes 3 graphics: Rewards, Actions Done and Area Scratched.
     
@@ -96,4 +96,17 @@ def plot_results(rewards: list, actions_done: list, areas_scratched: list,
     root_dir = get_git_root() or os.getcwd()  # if not a repo, use current directory
     results_dir = os.path.join(root_dir, "results")
     plt.savefig(os.path.join(results_dir, file_name)) # always in folder results
+    plt.close()
+
+def plot_epsilon_history(epsilon_history: list, file_name: str) -> None:
+    """
+    Plot the epsilon history during the training process.
+    """
+    plt.figure(figsize=(12, 6))
+    plt.plot(epsilon_history, label='Epsilon')
+    plt.xlabel('Episodes')
+    plt.ylabel('Epsilon')
+    plt.title('Epsilon vs Episodes')
+    plt.legend()
+    plt.savefig(file_name) # always in folder results
     plt.close()
