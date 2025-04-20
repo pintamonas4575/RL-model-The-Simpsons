@@ -32,7 +32,6 @@ class Scratch_Game_Environment4():
         self.total_squares = self.number_of_rows * self.number_of_columns 
 
         self.frames = np.array([], dtype=object) # list of QFrames
-        self.frames_mask = np.full(shape=self.total_squares, fill_value=False, dtype=bool) # mask to check if the frame has been removed
         # --------------------------------------------
         self.app = QApplication([])
         self.window = QMainWindow()
@@ -153,9 +152,6 @@ class Scratch_Game_Environment4():
                 frame.mousePressEvent = create_event_handler(frame)
                 self.frames = np.append(self.frames, frame)
         
-        self.frames = self.frames.reshape(self.number_of_rows, self.number_of_columns)  # reshape to matrix
-        self.frames_mask = np.full(shape=self.frames.shape, fill_value=False, dtype=bool)  # reshape mask
-
     def remove_square(self, frame: QFrame) -> tuple[bool, bool]:
         """
         Function to remove a square, update the count, and check for symbol overlap and emoji completion.
@@ -168,8 +164,6 @@ class Scratch_Game_Environment4():
         self.scratched_count += 1 # the sum won't add if you click hidden frames
         good_frame = False
         game_done = False
-        # self.frames = np.delete(self.frames, np.where(self.frames == frame))
-        self.frames_mask[self.frames == frame] = True
 
         for i in range(len(self.emoji_frame_track)):
             if frame in self.emoji_frame_track[i]:
@@ -194,60 +188,34 @@ class Scratch_Game_Environment4():
     # --------------------------------------------------------------------------------
     # --------------------------------------------------------------------------------
 
-    def env_step(self, action: int) -> tuple[np.ndarray, int, bool]:
-        """
-        Function to perform an action in the environment and return a tuple like Gym's env.step() method.
-        After removing the selected cell, returns the indices of the 4 surrounding cells
-        in the matrix (if they exist), the reward based on the action, and whether the game is done.
-
-        Returns
-            next_state: numpy array of indices for the valid surrounding cells.
-            reward: Reward for removing the selected frame. (+20 for a "good" frame, -1 otherwise).
-            game_done: True if all the good frames have been removed, False otherwise.
-        """
-        # Remove the selected frame.
-        action_frame = self.frames[action]
-        response, game_done = self.remove_square(action_frame)
-        reward = 20 if response else -1
-
-        # Determine the row and column of the selected cell.
-        row = action // self.number_of_columns
-        col = action % self.number_of_columns
-
-        # Get valid neighboring cell indices: up, down, left, and right.
-        neighbors = []
-        if row > 0:  # up
-            neighbors.append((row - 1) * self.number_of_columns + col)
-        if row < self.number_of_rows - 1:  # down
-            neighbors.append((row + 1) * self.number_of_columns + col)
-        if col > 0:  # left
-            neighbors.append(row * self.number_of_columns + (col - 1))
-        if col < self.number_of_columns - 1:  # right
-            neighbors.append(row * self.number_of_columns + (col + 1))
-
-        next_state = np.array(neighbors)
-
-        return next_state, reward, game_done
-
-
-    def env_step_backup(self, action: int) -> tuple[np.ndarray, int, bool]:
-        """
-        Function to perform an action in the environment and return the tuple like Gym's env.step() method. 
-
-        Returns
-            **next_state**: Next state of the environment after the action is taken. The boolean mask of the frames.
-            **reward**: Reward for the frame removed. Depending if the frame is good or bad.
-            **game_done**: True if all the good frames have been removed, False otherwise. If True, the game is over.
-        """
-
-        game_done = False
-        action_frame = self.frames[action]
-        response, game_done = self.remove_square(action_frame) # the frame mask is updated here
+    def env_step(self, action_index: int) -> tuple[np.ndarray, int, bool]:
+        response, game_done = self.remove_square(self.frames[action_index])
         if response: # red frame
             reward = 15
         else: # blue frame
             reward = -1
-        next_state = self.frames_mask
+
+        cell_row = action_index // self.number_of_columns
+        cell_col = action_index % self.number_of_columns
+        above_idx = (cell_row - 1) * self.number_of_columns + cell_col
+        below_idx = (cell_row + 1) * self.number_of_columns + cell_col
+        left_idx = cell_row * self.number_of_columns + (cell_col - 1)
+        right_idx = cell_row * self.number_of_columns + (cell_col + 1)
+
+        neighbor_indices = [above_idx, below_idx, left_idx, right_idx]
+
+        for i, idx in enumerate(neighbor_indices.copy()):
+            # Check if index is within valid range
+            if idx < 0 or idx >= self.frames.size:
+                neighbor_indices.remove(idx)
+                continue
+
+            # For horizontal neighbors, ensure they remain in the same row as 'index_to_select'
+            neighbor_row = idx // self.number_of_columns
+            if abs(idx - action_index) == 1 and neighbor_row != cell_row:
+                neighbor_indices.remove(idx)
+
+        next_state = np.array(neighbor_indices)
         return next_state, reward, game_done
 
     def env_reset(self):
@@ -258,12 +226,11 @@ class Scratch_Game_Environment4():
 
 """----------------------------------------------------------------------------"""
 
-# my_env = Scratch_Game_Environment3(frame_size=20, scratching_area=(110,98,770,300))
-# next_state, reward, game_done = my_env.env_step(20)
-# next_state, reward, game_done = my_env.env_step(344)
+# my_env = Scratch_Game_Environment4(frame_size=40, scratching_area=(110,98,770,300))
 # print(f"total number of cells: {my_env.total_squares}")
 # good_cells = sum([len(my_env.emoji_frame_track[i]) for i in range(3)])
 # print(f"total number of good cells: {good_cells}")
 # print(f"percentage of good cells: {good_cells/my_env.total_squares*100:.2f}%")
+# next_state, reward, game_done = my_env.env_step(10)
 # my_env.window.show()
 # my_env.app.exec()
