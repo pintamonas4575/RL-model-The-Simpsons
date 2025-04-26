@@ -1,27 +1,18 @@
-import sys
 import random
-import math
 import time
-import io
-import cv2
-import psutil
-import os
-import gc
 import numpy as np
-from PIL import Image
-from PyQt5.QtCore import Qt, QBuffer, QRect, QTimer
-from PyQt5.QtGui import QPixmap, QImage, QBrush, QPalette
-from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QHBoxLayout, QWidget, QPushButton, QVBoxLayout, QFrame
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QFrame
 
-from ..V4_easier_agent_moves.environmentV4 import Scratch_Game_Environment4
+from V4_easier_agent_moves.environmentV4 import Scratch_Game_Environment4
 
 class Agent():
 
     def __init__(self):
         self.global_reward = 0
         self.alpha = 0.1  # Learning rate
-        self.gamma = 0.5  # Discount factor
-        self.epsilon = 0.5  # Exploration rate
+        self.gamma = 0.99  # Discount factor
+        self.epsilon = 0.3  # Exploration rate
 
     def add_env(self, game_env: Scratch_Game_Environment4):
         self.game_env = game_env
@@ -69,10 +60,10 @@ class Agent():
 agent = Agent()
 max_reward = -9999999
 
-my_env = Scratch_Game_Environment4(frame_size=20, scratching_area=(110,98,770,300), num_emojis=3)
+my_env = Scratch_Game_Environment4(frame_size=20, scratching_area=(110,98,770,300))
 agent.add_env(my_env)
 
-agent.game_env.reset_env()
+agent.game_env.env_reset()
 agent.reset_agent()
 agent.game_env.window.show()
 
@@ -86,7 +77,7 @@ while not done:
     # Choose an action (next state)
     action: int = agent.choose_action(current_state)
     next_state = action  # Since the actions are cells, the destiny is the action
-    next_frame = agent.game_env.squares[next_state]
+    next_frame = agent.game_env.frames[next_state]
 
     # Calculate reward
     reward: int = agent.get_reward(next_frame)
@@ -101,7 +92,7 @@ while not done:
     agent.game_env.app.processEvents()
     time.sleep(0.02)  # Add a delay to see the changes in the window
 
-final_percentage_scratched = (agent.game_env.scratched_count / len(agent.game_env.squares)) * 100
+final_percentage_scratched = (agent.game_env.scratched_count / len(agent.game_env.frames)) * 100
 print(f"Final scratched area: {final_percentage_scratched:.2f}%")
 
 
