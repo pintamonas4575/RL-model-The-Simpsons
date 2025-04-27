@@ -188,15 +188,16 @@ class Scratch_Game_Environment4():
     # --------------------------------------------------------------------------------
     # --------------------------------------------------------------------------------
 
-    def env_step(self, action_index: int) -> tuple[np.ndarray, int, bool]:
-        response, game_done = self.remove_square(self.frames[action_index])
+    def env_step(self, cell_index: int) -> tuple[np.ndarray, int, bool]:
+        """Given the selected cell index, remove the frame and return the valid neighbor_indices, reward, and game status"""
+        response, game_done = self.remove_square(self.frames[cell_index])
         if response: # red frame
             reward = 15
         else: # blue frame
             reward = -1
 
-        cell_row = action_index // self.number_of_columns
-        cell_col = action_index % self.number_of_columns
+        cell_row = cell_index // self.number_of_columns
+        cell_col = cell_index % self.number_of_columns
         above_idx = (cell_row - 1) * self.number_of_columns + cell_col
         below_idx = (cell_row + 1) * self.number_of_columns + cell_col
         left_idx = cell_row * self.number_of_columns + (cell_col - 1)
@@ -204,7 +205,7 @@ class Scratch_Game_Environment4():
 
         neighbor_indices = [above_idx, below_idx, left_idx, right_idx]
 
-        for i, idx in enumerate(neighbor_indices.copy()):
+        for idx in neighbor_indices.copy():
             # Check if index is within valid range
             if idx < 0 or idx >= self.frames.size:
                 neighbor_indices.remove(idx)
@@ -212,11 +213,11 @@ class Scratch_Game_Environment4():
 
             # For horizontal neighbors, ensure they remain in the same row as 'index_to_select'
             neighbor_row = idx // self.number_of_columns
-            if abs(idx - action_index) == 1 and neighbor_row != cell_row:
+            if abs(idx - cell_index) == 1 and neighbor_row != cell_row:
                 neighbor_indices.remove(idx)
 
-        next_state = np.array(neighbor_indices)
-        return next_state, reward, game_done
+        neighbor_indices = np.array(neighbor_indices)
+        return neighbor_indices, reward, game_done
 
     def env_reset(self):
         """Function to clean and reset the environment in place, ready for another play"""

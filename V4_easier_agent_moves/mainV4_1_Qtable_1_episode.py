@@ -45,7 +45,7 @@ class RL_Agent_41():
 my_env = Scratch_Game_Environment4(frame_size=40, scratching_area=(110,98,770,300))
 agent = RL_Agent_41(game_env=my_env)
 
-epsilon = 0.5
+epsilon = 0.9
 agent.game_env.env_reset()
 agent.game_env.window.show()
 
