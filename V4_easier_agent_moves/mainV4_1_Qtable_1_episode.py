@@ -45,19 +45,9 @@ class RL_Agent_41():
 my_env = Scratch_Game_Environment4(frame_size=40, scratching_area=(110,98,770,300))
 agent = RL_Agent_41(game_env=my_env)
 
-rewards, max_rewards = [], []
-actions_done, min_actions_done = [], []
-areas_scratched, min_areas_scratched = [], []
-max_reward = -99999
-min_actions = 99999
-min_area_scratched = 999
-path_to_save = f"V4_version/V4_1_Qtable_{my_env.total_squares}_1"
-
-# epsilon = 0.9 
 epsilon = 0.5
-# epsilon = 0.0  
-agent.game_env.window.show()
 agent.game_env.env_reset()
+agent.game_env.window.show()
 
 done = False
 episode_actions = 0
@@ -82,31 +72,8 @@ while not done:
     agent.game_env.app.processEvents()
     time.sleep(0.02)  # Add a delay to see the changes in the window
 
-episode_percentage = (agent.game_env.scratched_count / agent.game_env.total_squares) * 100
-
-max_reward = episode_reward if episode_reward > max_reward else max_reward
-min_actions = episode_actions if episode_actions < min_actions else min_actions
-min_area_scratched = episode_percentage if episode_percentage < min_area_scratched else min_area_scratched
-
-print(f"-----------------EPISODE 1---------------------")
 print(f"Actions done: {episode_actions}")
 print(f"Reward: {episode_reward}")
-print(f"Final scratched area: {episode_percentage:.2f}%")
-print(f"Min actions done: {min_actions}")
-print(f"Max reward: {max_reward}")
-print(f"Min scratched area: {min_area_scratched:.2f}%")
-
-agent.game_env.app.processEvents()
-agent.game_env.get_window_image_and_save(True, f"episodes/V4_1_episode_1.png")
-
-# ---------------data for graphics----------------
-rewards.append(episode_reward)
-actions_done.append(episode_actions)
-areas_scratched.append(episode_percentage)
-max_rewards.append(max_reward)
-min_actions_done.append(min_actions)
-min_areas_scratched.append(min_area_scratched)
-# ---------------data for graphics----------------
 
 agent.finish_game() # "app.quit" and "del app"
 # gc.collect()  # Explicitly run garbage collection to free resources
