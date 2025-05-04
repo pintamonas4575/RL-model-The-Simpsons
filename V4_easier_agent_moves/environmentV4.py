@@ -160,8 +160,9 @@ class Scratch_Game_Environment4():
             **good_frame**: True if the removed square was an emoji frame, False otherwise.
             **game_done**: True if all the good frames have been removed, False otherwise.   
         """
-        frame.hide() # once you hide it, you can't "click" it again
-        self.scratched_count += 1 # the sum won't add if you click hidden frames
+        if not frame.isHidden():
+            frame.hide() # once you hide it, you can't "click" it again
+            self.scratched_count += 1
         good_frame = False
         game_done = False
 
@@ -188,14 +189,8 @@ class Scratch_Game_Environment4():
     # --------------------------------------------------------------------------------
     # --------------------------------------------------------------------------------
 
-    def env_step(self, cell_index: int) -> tuple[np.ndarray, int, bool]:
-        """Given the selected cell index, remove the frame and return the valid neighbor_indices, reward, and game status"""
-        response, game_done = self.remove_square(self.frames[cell_index])
-        if response: # red frame
-            reward = 15
-        else: # blue frame
-            reward = -1
-
+    def get_neighbor_indices(self, cell_index: int) -> np.ndarray:
+        """Get the valid actions for the agent. The agent can only move to the neighbors of the selected cell."""
         cell_row = cell_index // self.number_of_columns
         cell_col = cell_index % self.number_of_columns
         above_idx = (cell_row - 1) * self.number_of_columns + cell_col
@@ -205,18 +200,33 @@ class Scratch_Game_Environment4():
 
         neighbor_indices = [above_idx, below_idx, left_idx, right_idx]
 
-        for idx in neighbor_indices.copy():
+        for i, idx in enumerate(neighbor_indices.copy()):
             # Check if index is within valid range
             if idx < 0 or idx >= self.frames.size:
-                neighbor_indices.remove(idx)
+                neighbor_indices[i] = -1  # Mark as invalid
                 continue
 
             # For horizontal neighbors, ensure they remain in the same row as 'index_to_select'
             neighbor_row = idx // self.number_of_columns
             if abs(idx - cell_index) == 1 and neighbor_row != cell_row:
-                neighbor_indices.remove(idx)
+                neighbor_indices[i] = -1  # Mark as invalid
 
-        neighbor_indices = np.array(neighbor_indices)
+        return np.array(neighbor_indices)
+
+    def env_step(self, cell_index: int, only_neighbors: bool = False) -> tuple[np.ndarray, int, bool]:
+        """Given the selected cell index, remove the frame and return the neighbor indices, reward, and game status"""
+
+        if only_neighbors: # for q-table update of next cell
+            reward = 0
+            game_done = False
+        else:
+            response, game_done = self.remove_square(self.frames[cell_index])
+            if response: # red frame
+                reward = 15
+            else: # blue frame
+                reward = -1
+
+        neighbor_indices = self.get_neighbor_indices(cell_index)
         return neighbor_indices, reward, game_done
 
     def env_reset(self):
@@ -226,12 +236,33 @@ class Scratch_Game_Environment4():
         self.__init__(frame_size=self.FRAME_SIZE, scratching_area=(self.rect_x, self.rect_y, self.rect_width, self.rect_height))
 
 """----------------------------------------------------------------------------"""
-
+# import time
+# from PyQt5.QtCore import QTimer
 # my_env = Scratch_Game_Environment4(frame_size=40, scratching_area=(110,98,770,300))
-# print(f"total number of cells: {my_env.total_squares}")
-# good_cells = sum([len(my_env.emoji_frame_track[i]) for i in range(3)])
-# print(f"total number of good cells: {good_cells}")
-# print(f"percentage of good cells: {good_cells/my_env.total_squares*100:.2f}%")
-# next_state, reward, game_done = my_env.env_step(10)
 # my_env.window.show()
-# my_env.app.exec()
+# my_env.app.processEvents()
+
+# # print(f"total number of cells: {my_env.total_squares}")
+# # good_cells = sum([len(my_env.emoji_frame_track[i]) for i in range(3)])
+# # print(f"total number of good cells: {good_cells}")
+# # print(f"percentage of good cells: {good_cells/my_env.total_squares*100:.2f}%")
+
+# for i in range(1, 10):
+#     a, b = my_env.remove_square(my_env.frames[i])
+#     my_env.app.processEvents()
+#     print(f"removed frame {i}")
+#     time.sleep(2)
+
+# # my_env.env_reset()
+# # my_env.window.show()
+# # my_env.app.processEvents()
+# # print(f"reset env")
+# # time.sleep(2)
+# # for index in [4, 70]:
+# #     a, b = my_env.remove_square(my_env.frames[index])
+# #     my_env.app.processEvents()
+# #     print(f"removed frame {index}")
+# #     time.sleep(2)
+
+# my_env.app.quit()
+# print(f"app finished")

@@ -21,36 +21,28 @@ class RL_Agent_41():
         self.num_actions = 4
         self.q_table = np.zeros(shape=(self.num_states, self.num_actions)) # every cell; up, down, left, right; ej: 585x4
 
-    # def choose_action(self, state: np.ndarray[int], epsilon: float) -> int:
-    def choose_move_action_up_down_left_right(self, possible_actions: list, epsilon: float) -> int:
+    def choose_move_action_up_down_left_right(self, cell_index: int, possible_actions: np.ndarray, epsilon: float) -> int:
         """Choose the next action between up, down, left, right based on epsilon-greedy policy."""
+        # me pasan los índices de las celdas vecinas (arriba, abajo, izquierda, derecha)
+        # ej: np.array([-1, 9, 3, -1]); tengo que coger las que no sean -1
+        # y mirar en la q-table los valores de las acciones que corresponden a las celdas válidas
+        possible_valid_actions = np.where(possible_actions != -1)[0] # índices de acciones válidas; ej: [1,3], sólo puedo ir abajo y derecha
 
         if random.random() < epsilon:
-            # 'state' es un array de índices de los vecinos válidos
-            # action_index = np.random.randint(self.q_table[cell_index, :].shape[0]) # random action from 0 to 3 (up, down, left, right)
-            action_index = random.choice(possible_actions)  # choose a random neighbor index from the list of valid neighbors
+            action_index = random.choice(possible_valid_actions)
         else:
-            # look in q-table[cell_index] between up, down, left, right and choose the one with the highest q-values
-            # q_values = agent.q_table[cell_index, :]
-            # action_index = np.argmax(q_values)
-            q_values = self.q_table[possible_actions, :]
+            q_values = self.q_table[cell_index, possible_valid_actions]
             action_index = np.argmax(q_values)  # choose the action with the highest q-value among the valid neighbors
         return action_index
 
-    def update_q_table(self, cell_index: int, move_action_index: int, reward: int, next_state_index: list[int]) -> None:
+    def update_q_table(self, cell_index: int, move_action_index: int, reward: int, next_cell_index: int) -> None:
         """Update q-table value based on Bellman´s equation."""
+        # Bellman equation: Q(s, a) = Q(s, a) + alpha * (reward + gamma * max(Q(s', a')) - Q(s, a))
 
-        # self.q_table[current_state, action] += self.alpha * (reward + self.gamma * np.max(self.q_table[next_state, :]) - self.q_table[current_state, action])
-        self.q_table[cell_index, move_action_index] += self.alpha * (reward + self.gamma * np.max(self.q_table[next_state_index, :]) - self.q_table[cell_index, move_action_index])
+        next_cell_neighbors, _, _ = self.game_env.env_step(next_cell_index, only_neighbors=True)  # valid neighbors of the next cell
+        next_cell_valid_actions = np.where(next_cell_neighbors != -1)[0]
 
-        # # Estado actual, acción y siguiente estado
-        # estado_actual = 4
-        # accion_tomada = "arriba"
-        # estado_siguiente = 1
-        # recompensa = 3333  # recompensa recibida
-
-        # acciones = {"arriba":0, "abajo":1, "izquierda":2, "derecha":3}
-        # Q[estado_actual, acciones[accion_tomada]] += alpha * (recompensa + gamma * np.max(Q[estado_siguiente, :]) - Q[estado_actual, acciones[accion_tomada]])
+        self.q_table[cell_index, move_action_index] += self.alpha * (reward + self.gamma * np.max(self.q_table[next_cell_index, next_cell_valid_actions]) - self.q_table[cell_index, move_action_index])
 
     def finish_game(self) -> None:
         QTimer.singleShot(0, self.game_env.close_button.click)
@@ -59,8 +51,8 @@ class RL_Agent_41():
 my_env = Scratch_Game_Environment4(frame_size=40, scratching_area=(110,98,770,300))
 agent = RL_Agent_41(game_env=my_env)
 
-EPISODES = 1
-trace = 1
+EPISODES = 100
+trace = 10
 rewards, max_rewards = [], []
 actions_done, min_actions_done = [], []
 areas_scratched, min_areas_scratched = [], []
@@ -69,12 +61,9 @@ min_actions = 99999
 min_area_scratched = 999
 path_to_save = f"V4_version/V4_1_Qtable_{agent.game_env.total_squares}_{EPISODES}"
 
-# epsilon = 0.9 
-epsilon = 0.5
+epsilon = 0.9
+# epsilon = 0.5
 # epsilon = 0.0
-
-# agent.game_env.env_reset()
-# agent.game_env.window.show()
 
 start = time.time()
 for i in range(EPISODES):
@@ -88,39 +77,20 @@ for i in range(EPISODES):
     # Update epsilon at the beginning of the episode using exponential decay.
     epsilon *= np.exp(-0.001 * i)
 
-    # while not done:
-    #     if episode_actions == 0:
-    #         current_action: int = random.randint(0, agent.num_states - 1)  # Start at a random cell
-    #         current_state, _, _ = my_env.env_step(current_action)
-    #     action_index = agent.choose_action(current_state, epsilon)
-    #     next_state, reward, done = my_env.env_step(action_index)
-    #     agent.update_q_table(current_action, action_index, reward, next_state)
-
-    # while not done:
-    #     if episode_actions == 0:
-    #         cell_index = random.randint(0, agent.num_states - 1)  # Start at a random cell
-    #         neighbor_indices, reward, done = agent.game_env.env_step(cell_index)
-    #         move_action_index = agent.choose_move_action_up_down_left_right(cell_index, epsilon)
-    #         agent.update_q_table(cell_index, move_action_index, reward, neighbor_indices)
-    #     else:
-    #         # next_state, reward, done = agent.game_env.env_step(cell_index)
-    #         neighbor_indices, reward, done = agent.game_env.env_step(cell_index)
-    #         move_action_index = agent.choose_move_action_up_down_left_right(current_state, epsilon)
-    #         agent.update_q_table(cell_index, move_action_index, reward, neighbor_indices)
-
-    estado_actual = random.randint(0, agent.num_states - 1)  # Start at a random cell
+    indice_celda_actual = random.randint(0, agent.num_states - 1) # first cell of the episode
 
     while not done:
-        # 1. consigo las posibles acciones (arriba, abajo, izquierda, derecha) y la recompensa
-        posibles_acciones, reward, done = agent.game_env.env_step(cell_index=estado_actual)
-        # 2. elijo una acción de entre las posibles (arriba, abajo, izquierda, derecha) con epsilon-greedy
-        move_action_index = agent.choose_move_action_up_down_left_right(state=posibles_acciones, epsilon=epsilon)
-        # 3. actualizo la q-table
-        agent.update_q_table(cell_index=estado_actual, move_action_index=move_action_index, reward=reward, next_state_indices=posibles_acciones)
+        fila_actual = agent.q_table[indice_celda_actual, :]
+        indices_celdas_vecinas, reward, done = agent.game_env.env_step(cell_index=indice_celda_actual)
+        move_action_index = agent.choose_move_action_up_down_left_right(cell_index=indice_celda_actual, possible_actions=fila_actual, epsilon=epsilon) # devuelve [0,1,2,3]
+        indice_proxima_celda = indices_celdas_vecinas[move_action_index]  # el índice de la celda a la que me muevo (0-N-1)
+        fila_siguiente = agent.q_table[indice_proxima_celda, :]
+        agent.update_q_table(cell_index=indice_celda_actual, move_action_index=move_action_index, reward=reward, next_cell_index=indice_proxima_celda)
 
         episode_actions += 1
         episode_reward += reward
-        current_state = neighbor_indices
+        indice_celda_actual = indice_proxima_celda
+        fila_actual = fila_siguiente
 
         # agent.game_env.app.processEvents()
         # time.sleep(0.02)  # delay to see the changes in the window
@@ -136,9 +106,7 @@ for i in range(EPISODES):
         print(f"Actions done: {episode_actions}")
         print(f"Reward: {episode_reward}")
         print(f"Final scratched area: {episode_percentage:.2f}%")
-        print(f"Min actions done: {min_actions}")
-        print(f"Max reward: {max_reward}")
-        print(f"Min scratched area: {min_area_scratched:.2f}%")
+        print(f"Frames removed: {agent.game_env.scratched_count}")
 
         agent.game_env.app.processEvents()
         agent.game_env.get_window_image_and_save(True, f"episodes/V4_1_episode_{i}.png")
@@ -154,7 +122,13 @@ for i in range(EPISODES):
 
     agent.finish_game() # "app.quit" and "del app"
     gc.collect()  # Explicitly run garbage collection to free resources
-    agent.game_env.app.exec() # run app
+    # agent.game_env.app.exec() # run app
+
+print("*" * 50)
+print(f"Total game frames: {agent.game_env.total_squares}")
+print(f"Max reward: {max_reward}")
+print(f"Min actions done: {min_actions}")
+print(f"Min scratched area: {min_area_scratched:.2f}%")
 
 minutes, seconds = divmod(time.time()-start, 60)
 print(f"***** Total training time: {int(minutes)} minutes and {seconds:.2f} seconds *****")
