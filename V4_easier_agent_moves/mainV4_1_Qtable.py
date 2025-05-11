@@ -21,7 +21,7 @@ class RL_Agent_41():
         self.num_actions = 4
         self.q_table = np.zeros(shape=(self.num_states, self.num_actions)) # every cell; up, down, left, right; ej: 585x4
 
-    def choose_move_action_up_down_left_right(self, cell_index: int, possible_actions: np.ndarray, epsilon: float) -> int:
+    def choose_action_up_down_left_right(self, cell_index: int, possible_actions: np.ndarray, epsilon: float) -> int:
         """Choose the next action between up, down, left, right based on epsilon-greedy policy."""
         # me pasan los índices de las celdas vecinas (arriba, abajo, izquierda, derecha)
         # ej: np.array([-1, 9, 3, -1]); tengo que coger las que no sean -1
@@ -39,8 +39,8 @@ class RL_Agent_41():
         """Update q-table value based on Bellman´s equation."""
         # Bellman equation: Q(s, a) = Q(s, a) + alpha * (reward + gamma * max(Q(s', a')) - Q(s, a))
 
-        next_cell_neighbors, _, _ = self.game_env.env_step(next_cell_index, only_neighbors=True)  # valid neighbors of the next cell
-        next_cell_valid_actions = np.where(next_cell_neighbors != -1)[0]
+        next_cell_neighbors, _, _ = self.game_env.env_step(next_cell_index, only_neighbors=True)  # 4 neighbors of the next cell
+        next_cell_valid_actions = np.where(next_cell_neighbors != -1)[0] # valid neighbors of the next cell
 
         self.q_table[cell_index, move_action_index] += self.alpha * (reward + self.gamma * np.max(self.q_table[next_cell_index, next_cell_valid_actions]) - self.q_table[cell_index, move_action_index])
 
@@ -77,12 +77,14 @@ for i in range(EPISODES):
     # Update epsilon at the beginning of the episode using exponential decay.
     epsilon *= np.exp(-0.001 * i)
 
-    indice_celda_actual = random.randint(0, agent.num_states - 1) # first cell of the episode
+    # indice_celda_actual = random.randint(0, agent.num_states - 1) # first cell of the episode
+    indice_celda_actual = 0 # always start on the top left corner
+    # indice_celda_actual = agent.num_states // 2 # start in the middle of the grid
 
     while not done:
         fila_actual = agent.q_table[indice_celda_actual, :]
         indices_celdas_vecinas, reward, done = agent.game_env.env_step(cell_index=indice_celda_actual)
-        move_action_index = agent.choose_move_action_up_down_left_right(cell_index=indice_celda_actual, possible_actions=fila_actual, epsilon=epsilon) # devuelve [0,1,2,3]
+        move_action_index = agent.choose_action_up_down_left_right(cell_index=indice_celda_actual, possible_actions=fila_actual, epsilon=epsilon) # devuelve [0,1,2,3]
         indice_proxima_celda = indices_celdas_vecinas[move_action_index]  # el índice de la celda a la que me muevo (0-N-1)
         fila_siguiente = agent.q_table[indice_proxima_celda, :]
         agent.update_q_table(cell_index=indice_celda_actual, move_action_index=move_action_index, reward=reward, next_cell_index=indice_proxima_celda)
@@ -106,7 +108,7 @@ for i in range(EPISODES):
         print(f"Actions done: {episode_actions}")
         print(f"Reward: {episode_reward}")
         print(f"Final scratched area: {episode_percentage:.2f}%")
-        print(f"Frames removed: {agent.game_env.scratched_count}")
+        # print(f"Frames removed: {agent.game_env.scratched_count}")
 
         agent.game_env.app.processEvents()
         agent.game_env.get_window_image_and_save(True, f"episodes/V4_1_episode_{i}.png")

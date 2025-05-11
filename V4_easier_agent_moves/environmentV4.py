@@ -152,27 +152,28 @@ class Scratch_Game_Environment4():
                 frame.mousePressEvent = create_event_handler(frame)
                 self.frames = np.append(self.frames, frame)
         
-    def remove_square(self, frame: QFrame) -> tuple[bool, bool]:
+    def remove_square(self, frame: QFrame) -> tuple[int, bool]:
         """
         Function to remove a square, update the count, and check for symbol overlap and emoji completion.
 
         Returns
-            **good_frame**: True if the removed square was an emoji frame, False otherwise.
+            **frame_type**: -1 for already scratched frame, 0 for "blue" frame, 1 for symbol frame.
             **game_done**: True if all the good frames have been removed, False otherwise.   
         """
+        frame_type = 0 # by default, blue frame
         if not frame.isHidden():
             frame.hide() # once you hide it, you can't "click" it again
             self.scratched_count += 1
-        good_frame = False
-        game_done = False
+            for i in range(len(self.emoji_frame_track)):
+                if frame in self.emoji_frame_track[i]:
+                    frame_type = 1
+                    self.emoji_frame_track[i].remove(frame)
+            game_done = all(not s for s in self.emoji_frame_track.values()) # if all sets are empty
+        else:
+            frame_type = -1
+            game_done = False
 
-        for i in range(len(self.emoji_frame_track)):
-            if frame in self.emoji_frame_track[i]:
-                good_frame = True
-                self.emoji_frame_track[i].remove(frame)
-                game_done = all(not s for s in self.emoji_frame_track.values()) # if all sets are empty
-
-        return good_frame, game_done
+        return frame_type, game_done
 
     def calculate_scratched_percentage(self) -> None:
         """Function to calculate and display scratched percentages"""
@@ -220,11 +221,15 @@ class Scratch_Game_Environment4():
             reward = 0
             game_done = False
         else:
-            response, game_done = self.remove_square(self.frames[cell_index])
-            if response: # red frame
-                reward = 15
-            else: # blue frame
+            frame_type, game_done = self.remove_square(self.frames[cell_index])
+            if frame_type == -1: # already scratched frame
+                reward = -5
+            elif frame_type == 0: # blue frame
                 reward = -1
+            else: # red frame
+                reward = 50
+            # reward_mapping = {-1: -5, 0: -1, 1: 20}
+            # reward = reward_mapping[frame_type]
 
         neighbor_indices = self.get_neighbor_indices(cell_index)
         return neighbor_indices, reward, game_done
