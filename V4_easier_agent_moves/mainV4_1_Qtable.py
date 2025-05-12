@@ -56,9 +56,7 @@ trace = 10
 rewards, max_rewards = [], []
 actions_done, min_actions_done = [], []
 areas_scratched, min_areas_scratched = [], []
-max_reward = -99999
-min_actions = 99999
-min_area_scratched = 999
+max_reward, min_actions, min_area_scratched = -99999, 99999, 999
 path_to_save = f"V4_version/V4_1_Qtable_{agent.game_env.total_squares}_{EPISODES}"
 
 epsilon = 0.9

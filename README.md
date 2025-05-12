@@ -1,6 +1,7 @@
 # 🤖 TFM-RL-model-The-Simpsons 🤖
 Implementation of a Reinforcement Learning (RL) model to learn to scratch the less possible surface on the scratch game of the Badulaque of the app "The Simpsons Springfield".
 
+---
 🙋‍♂️ This project, and as a consequence, its files, belongs to the **master´s final project** (thesis) of **Alejandro Mendoza** in **Machine Learning and Big Data master degree** of the Polytechnic University of Madrid (UPM).
 
 # 🧭 Workflow
@@ -37,12 +38,6 @@ Emoji images used for generating the tickets. Downloaded from the Emojipedia.
 # 📂 Folder "utils"
 Some useful files like the window background of the tickets or the script to plot the training process.
 
-# 📂 Folder "V0"
-Agents trained with full liberty configuration. This means, after removing a cell, the agent can go to any cell (including repetition).
-
-# 📂 Folder "V1"
-Agents trained with radial strategies towards the game. This means, after removing a cell, the agent can go to any cell around the removed one.
-
 # 📂 Folder "results"
 Results of all agents of all versions of the game.
 
@@ -58,6 +53,10 @@ PyQT5 (later, the one used): [Official web](https://www.riverbankcomputing.com/s
 PyQT5 better documentation: [Qt.io](https://doc.qt.io/qt-5/classes.html) 
 
 ChatGPT: [ChatGPT](https://chatgpt.com/)
+
+Perplexity: [Perplexity](https://www.perplexity.ai/)
+
+Github Copilot: [Github Copilot](https://github.com/features/copilot)
 
 Stackoverflow: [Searching questions](https://stackoverflow.com/)
 
