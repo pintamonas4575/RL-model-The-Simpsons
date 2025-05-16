@@ -146,7 +146,7 @@ class Scratch_Game_Environment5():
                 frame.mousePressEvent = create_event_handler(frame)
                 self.frames.append(frame)
 
-    def remove_frame(self, frame: QFrame) -> tuple[int, bool]:
+    def remove_frame(self, frame: QFrame) -> tuple[int, bool]: # CAMBIO IMPORTANTE
         """Returns reward and if the game status."""
         frame.hide()
         self.scratched_count += 1
@@ -162,20 +162,18 @@ class Scratch_Game_Environment5():
 
         numero_de_0s = self.frames_mask.count(0)
         numero_de_1s = self.frames_mask.count(1)
-        recompensa_por_0s = -1 * numero_de_0s
-        recompensa_por_1s = 10 * numero_de_1s
+        recompensa_por_0s = -2 * numero_de_0s
+        recompensa_por_1s = 3 * numero_de_1s
         recompensa_total = recompensa_por_0s + recompensa_por_1s
-
-        print(f"recompensa por el frame {frame_index}: {recompensa_total}")
+        # print(f"recompensa por el frame {frame_index}: {recompensa_total}")
 
         return recompensa_total, game_done
 
     def calculate_scratched_percentage(self) -> None:
         """Calculate the percentage of scratched areas and print it."""
-        scratched_percentage = (self.scratched_count / self.total_squares) * 100
-        print(f"frames scratched: {self.scratched_count}")
-        print(f"Scratched percentage: {scratched_percentage:.2f}%")
-        print(self.frames_mask)
+        # scratched_percentage = (self.scratched_count / self.total_squares) * 100
+        # print(f"frames scratched: {self.scratched_count}")
+        # print(f"Scratched percentage: {scratched_percentage:.2f}%")
         self.app.exit()
 
     # --------------------------------------------------------------------------------
@@ -199,15 +197,8 @@ class Scratch_Game_Environment5():
 
 """----------------------------------------------------------------------------"""
 
-my_env = Scratch_Game_Environment5(frame_size=50, scratching_area=(110,98,770,300))
-
-next_state, reward, game_done = my_env.env_step(0)
-
-# next_state, reward, game_done = my_env.env_step(344)
-# print(f"total number of cells: {my_env.total_squares}")
-# good_cells = sum([len(my_env.emoji_frame_track[i]) for i in range(3)])
-# print(f"total number of good cells: {good_cells}")
-# print(f"percentage of good cells: {good_cells/my_env.total_squares*100:.2f}%")
-
-my_env.window.show()
-my_env.app.exec()
+# my_env = Scratch_Game_Environment5(frame_size=50, scratching_area=(110,98,770,300))
+# next_state, reward, game_done = my_env.env_step(0)
+# next_state, reward, game_done = my_env.env_step(50)
+# my_env.window.show()
+# my_env.app.exec()
