@@ -1,4 +1,5 @@
 .venv
+.vscode
 episodes
 # Ignore all directories named __pycache__
 **/__pycache__/ 
