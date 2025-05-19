@@ -34,14 +34,16 @@ class RL_Agent_51():
 
         return action_index
 
-    def update_q_table(self, current_state: int, action: int, reward: int, next_state: list[int]) -> None:
+    def update_q_table(self, current_action: int, action: int, reward: int, next_state: list[int]) -> None:
         """Update q-table value based on Bellman´s equation."""
 
+        # TODO: check if next_state is a valid way to look in the q_table
+
         # next_possible_actions = [i for i, val in enumerate(next_state) if val == -1]
-        next_possible_actions = next_state
         # print("possible next actions:")
         # print(next_possible_actions)
-        self.q_table[current_state, action] += self.alpha * (reward + self.gamma * np.max(self.q_table[next_possible_actions, :]) - self.q_table[current_state, action])
+        next_possible_actions = next_state
+        self.q_table[current_action, action] += self.alpha * (reward + self.gamma * np.max(self.q_table[next_possible_actions, :]) - self.q_table[current_state, action])
 
     def finish_game(self) -> None:
         QTimer.singleShot(0, self.game_env.close_button.click)
@@ -50,7 +52,7 @@ class RL_Agent_51():
 my_env = Scratch_Game_Environment5(frame_size=50, scratching_area=(110,98,770,300))
 agent = RL_Agent_51(game_env=my_env)
 
-EPISODES = 1000
+EPISODES = 500
 trace = 100
 rewards, max_rewards = [], []
 actions_done, min_actions_done = [], []
@@ -59,8 +61,8 @@ max_reward, min_actions, min_area_scratched = -99999, 99999, 999
 path_to_save = f"V5_version/V5_1_Qtable_{my_env.total_squares}_{EPISODES}"
 
 epsilon = 0.9
-# epsilon = 0.5 
-# epsilon = 0.0  
+# epsilon = 0.5
+# epsilon = 0.0
 
 start = time.time()
 for i in range(EPISODES):
@@ -71,7 +73,7 @@ for i in range(EPISODES):
     episode_actions = 0
     episode_reward = 0
 
-    current_state = agent.game_env.frames_mask  # the state is always the frames_mask
+    current_state = agent.game_env.frames_mask  # state is always the frame types mask
     current_action = agent.game_env.total_squares // 2 # CAMBIO IMPORTANTE
     # current_action = 0 # the first action is always 0 
     # current_action = random.randint(0, agent.num_actions-1)
@@ -126,7 +128,7 @@ print(f"***** Total training time: {int(minutes)} minutes and {seconds:.2f} seco
 
 """**********************************************************"""
 
-np.savetxt(f"results/{path_to_save}.txt", agent.q_table) # Save Q-table
+np.savetxt(f"results/{path_to_save}.txt", agent.q_table)
 
 # always saves in "results" folder
 plot_results(rewards, actions_done, areas_scratched,
