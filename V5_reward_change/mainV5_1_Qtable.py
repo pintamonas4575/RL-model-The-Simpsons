@@ -43,7 +43,7 @@ class RL_Agent_51():
         # print("possible next actions:")
         # print(next_possible_actions)
         next_possible_actions = next_state
-        self.q_table[current_action, action] += self.alpha * (reward + self.gamma * np.max(self.q_table[next_possible_actions, :]) - self.q_table[current_state, action])
+        self.q_table[current_action, action] += self.alpha * (reward + self.gamma * np.max(self.q_table[next_possible_actions, :]) - self.q_table[current_action, action])
 
     def finish_game(self) -> None:
         QTimer.singleShot(0, self.game_env.close_button.click)
@@ -85,7 +85,7 @@ for i in range(EPISODES):
         episode_actions += 1
 
         action_index = agent.choose_action(current_action, current_state, epsilon)
-        next_state, reward, done = my_env.env_step(action_index)
+        next_state, reward, done = agent.game_env.env_step(action_index)
         agent.update_q_table(current_action, action_index, reward, next_state)
 
         episode_reward += reward
