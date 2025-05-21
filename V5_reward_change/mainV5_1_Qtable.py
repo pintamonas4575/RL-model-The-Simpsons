@@ -5,42 +5,8 @@ import numpy as np
 from PyQt5.QtCore import QTimer
 
 from environmentV5 import Scratch_Game_Environment5
+from agentV5_1_Qtable import RL_Agent_51
 from utils.functionalities import plot_results
-
-"""**********************************************************"""
-
-class RL_Agent_51():
-    """Reinforcement Learning Agent."""
-
-    def __init__(self, game_env: Scratch_Game_Environment5):
-        self.alpha = 0.1  # Learning rate
-        self.gamma = 0.9  # Discount factor
-
-        self.game_env = game_env
-        self.num_states = self.game_env.total_squares # total cells; ej:585
-        self.num_actions = self.num_states
-        self.q_table = np.zeros(shape=(self.num_actions, self.num_actions)) # ej: 585x585
-        np.fill_diagonal(self.q_table, -np.inf) # fill diagonal with -inf to avoid self-loop
-
-    def choose_action(self, current_action: int, state: list[int], epsilon: float) -> int:
-        """Choose the next action based on epsilon-greedy policy."""
-
-        possible_actions = [i for i, val in enumerate(state) if val == -1]
-        if random.random() < epsilon:
-            action_index = random.choice(possible_actions)
-        else:
-            q_values = self.q_table[current_action, possible_actions]
-            action_index = possible_actions[np.argmax(q_values)]
-
-        return action_index
-
-    def update_q_table(self, current_action: int, action: int, reward: int, next_state: list[int]) -> None:
-        """Update q-table value based on Bellman´s equation."""
-
-        self.q_table[current_action, action] += self.alpha * (reward + self.gamma * np.max(self.q_table[next_state, :]) - self.q_table[current_action, action])
-
-    def finish_game(self) -> None:
-        QTimer.singleShot(0, self.game_env.close_button.click)
 
 """**********************************************************"""
 my_env = Scratch_Game_Environment5(frame_size=50, scratching_area=(110,98,770,300))
@@ -52,7 +18,7 @@ rewards, max_rewards = [], []
 actions_done, min_actions_done = [], []
 areas_scratched, min_areas_scratched = [], []
 max_reward, min_actions, min_area_scratched = -99999, 99999, 999
-path_to_save = f"V5_version/V5_1_Qtable_{my_env.total_squares}_{EPISODES}"
+path_to_save = f"V5_version/V5_1_Qtable_{agent.game_env.total_squares}_{EPISODES}"
 
 epsilon = 0.9
 # epsilon = 0.5
@@ -68,12 +34,11 @@ for i in range(EPISODES):
     episode_reward = 0
 
     current_state = agent.game_env.frames_mask  # state is always the frame types mask
-    current_action = agent.game_env.total_squares // 2 # CAMBIO IMPORTANTE
+    current_action = agent.game_env.total_squares // 2
     # current_action = 0 # the first action is always 0 
     # current_action = random.randint(0, agent.num_actions-1)
 
-    # Update epsilon at the beginning of the episode using exponential decay.
-    epsilon *= np.exp(-0.001 * i)
+    epsilon *= np.exp(-0.001 * i) # exponential decay
 
     while not done:
         episode_actions += 1
