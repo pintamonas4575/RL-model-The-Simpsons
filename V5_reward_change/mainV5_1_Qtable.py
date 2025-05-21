@@ -29,7 +29,7 @@ class RL_Agent_51():
         if random.random() < epsilon:
             action_index = random.choice(possible_actions)
         else:
-            q_values = agent.q_table[current_action, possible_actions]
+            q_values = self.q_table[current_action, possible_actions]
             action_index = possible_actions[np.argmax(q_values)]
 
         return action_index
@@ -37,13 +37,7 @@ class RL_Agent_51():
     def update_q_table(self, current_action: int, action: int, reward: int, next_state: list[int]) -> None:
         """Update q-table value based on Bellman´s equation."""
 
-        # TODO: check if next_state is a valid way to look in the q_table
-
-        # next_possible_actions = [i for i, val in enumerate(next_state) if val == -1]
-        # print("possible next actions:")
-        # print(next_possible_actions)
-        next_possible_actions = next_state
-        self.q_table[current_action, action] += self.alpha * (reward + self.gamma * np.max(self.q_table[next_possible_actions, :]) - self.q_table[current_action, action])
+        self.q_table[current_action, action] += self.alpha * (reward + self.gamma * np.max(self.q_table[next_state, :]) - self.q_table[current_action, action])
 
     def finish_game(self) -> None:
         QTimer.singleShot(0, self.game_env.close_button.click)

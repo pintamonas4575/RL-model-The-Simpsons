@@ -156,7 +156,7 @@ class Scratch_Game_Environment5():
         if frame in self.good_frames:
             self.good_frames.remove(frame)
             self.frames_mask[frame_index] = 1
-            game_done = not self.good_frames # true if good_frames is empty
+            game_done = self.good_frames == []
         else:
             self.frames_mask[frame_index] = 0
 
