@@ -32,6 +32,3 @@ class RL_Agent_51():
         """Update q-table value based on Bellman´s equation."""
 
         self.q_table[current_action, action] += self.alpha * (reward + self.gamma * np.max(self.q_table[next_state, :]) - self.q_table[current_action, action])
-
-    def finish_game(self) -> None:
-        QTimer.singleShot(0, self.game_env.close_button.click)
