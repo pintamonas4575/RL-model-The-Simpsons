@@ -1,6 +1,6 @@
 import streamlit as st
-from environmentV5_st import Scratch_Game_Environment5_Streamlit
 import time
+from environmentV5_app import Scratch_Game_Environment5_Streamlit
 
 # Inicialización del entorno en session_state
 if 'env' not in st.session_state:
@@ -12,12 +12,12 @@ if 'env' not in st.session_state:
 env = st.session_state.env
 
 image_placeholder = st.empty()
-image_placeholder.image(env.get_window_image_and_save(), caption='Imagen inicial')
-for i in range(3):
-    time.sleep(2)
+image_placeholder.image(env.get_window_image(), caption='Imagen inicial')
+for i in range(50):
     env.scratch_frame(i)
-    image_placeholder.image(env.get_window_image_and_save(), caption=f'Después de quitar el cuadrado {i}')
+    image_placeholder.image(env.get_window_image(), caption=f'Después de quitar el cuadrado {i}')
+    time.sleep(0.3)
 
-time.sleep(2)
+time.sleep(0.5)
 env.env_reset()
-image_placeholder.image(env.get_window_image_and_save(), caption='Imagen después de reiniciar el entorno')
+image_placeholder.image(env.get_window_image(), caption='Imagen después de reiniciar el entorno')
