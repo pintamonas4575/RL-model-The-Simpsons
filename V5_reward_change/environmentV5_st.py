@@ -17,8 +17,14 @@ class Scratch_Game_Environment5_Streamlit:
         # self.emoji_paths = ["emojis/axe.png", "emojis/axe.png", "emojis/axe.png"]
         self.emoji_paths = ["../emojis/axe.png", "../emojis/axe.png", "../emojis/axe.png"]
         self.emoji_images = [Image.open(path) for path in self.emoji_paths]
+
         self.background_path = background_path
         self.background_image = Image.open(self.background_path).resize((self.rect_width, self.rect_height))
+        self.game_image = Image.new("RGBA", (self.rect_width, self.rect_height), (255, 255, 255, 255))
+
+        self.good_frames_idx = set()
+        self.squares_images = []
+
         self._setup_environment_and_contours()
 
     def _setup_environment_and_contours(self):
@@ -44,8 +50,9 @@ class Scratch_Game_Environment5_Streamlit:
         contour_mask = Image.fromarray(numpy_contours).convert("L")
         contour_mask = np.array(contour_mask)
 
-        self.good_frames_idx = set()
-        self.squares_images = []  # ¡Un cuadrado por frame!
+        for (x1, y1, x2, y2), emoji_img in zip(self.emoji_bboxes, self.emoji_images):
+            self.background_image.paste(emoji_img, (x1, y1), emoji_img.convert("RGBA"))
+
         idx = 0
         for row in range(self.number_of_rows):
             for col in range(self.number_of_columns):
@@ -59,27 +66,52 @@ class Scratch_Game_Environment5_Streamlit:
                     color = (0, 0, 255, 255)  # azul si es malo
                 square = Image.new("RGBA", (self.FRAME_SIZE, self.FRAME_SIZE), color)
                 self.squares_images.append({"img": square, "coords": (x0, y0), "visible": True})
+                self.game_image.paste(square, (x0, y0), square.convert("RGBA")) # la imagen que mostraré
                 idx += 1
 
-    def get_window_image_and_save(self, with_grid=True):
-        base = self.background_image.copy().convert("RGBA")
-        for (x1, y1, x2, y2), emoji_img in zip(self.emoji_bboxes, self.emoji_images):
-            base.paste(emoji_img, (x1, y1), emoji_img.convert("RGBA"))
-        if with_grid:
-            for frame in self.squares_images:
-                if frame["visible"]:
-                    base.paste(frame["img"], frame["coords"], frame["img"])
-        return base
+    # def get_window_image_and_save(self, with_grid=True):
+    #     base = self.background_image.copy().convert("RGBA")
+    #     for (x1, y1, x2, y2), emoji_img in zip(self.emoji_bboxes, self.emoji_images):
+    #         base.paste(emoji_img, (x1, y1), emoji_img.convert("RGBA"))
+    #     if with_grid:
+    #         for frame in self.squares_images:
+    #             if frame["visible"]:
+    #                 base.paste(frame["img"], frame["coords"], frame["img"])
+    #     return base
+    
+    def get_window_image_and_save(self) -> Image:
+        return self.game_image
+    
+    def set_bg_image_with_emojis(self) -> None:
+        pass
 
-    def scratch_frame(self, idx):
-        if self.frames_mask[idx] != -1:
-            return 0, False  # Ya rascado
-        # Oculta el cuadrado visual
-        self.squares_images[idx]["visible"] = False
+    # def scratch_frame(self, idx):
+    #     self.squares_images[idx]["visible"] = False
+    #     if idx in self.good_frames_idx:
+    #         self.frames_mask[idx] = 1
+    #     else:
+    #         self.frames_mask[idx] = 0
+    #     self.scratched_count += 1
+    #     game_done = self.good_frames_idx == ()
+    #     numero_de_0s = self.frames_mask.count(0)
+    #     numero_de_1s = self.frames_mask.count(1)
+    #     recompensa_por_0s = -2 * numero_de_0s
+    #     recompensa_por_1s = 3 * numero_de_1s
+    #     recompensa_total = recompensa_por_0s + recompensa_por_1s
+    #     return recompensa_total, game_done
+    
+    def scratch_frame(self, idx: int) -> tuple[int, bool]:
+        # Replace the frame area in game_image with the corresponding area from background_image
+        x0, y0 = self.squares_images[idx]["coords"]
+        area = (x0, y0, x0 + self.FRAME_SIZE, y0 + self.FRAME_SIZE)
+        frame_patch = self.background_image.crop(area)
+        self.game_image.paste(frame_patch, (x0, y0))
+        
         if idx in self.good_frames_idx:
             self.frames_mask[idx] = 1
         else:
             self.frames_mask[idx] = 0
+
         self.scratched_count += 1
         game_done = self.good_frames_idx == ()
         numero_de_0s = self.frames_mask.count(0)
@@ -88,6 +120,9 @@ class Scratch_Game_Environment5_Streamlit:
         recompensa_por_1s = 3 * numero_de_1s
         recompensa_total = recompensa_por_0s + recompensa_por_1s
         return recompensa_total, game_done
+    
+    def env_reset(self):
+        self.__init__(self.FRAME_SIZE, (self.rect_x, self.rect_y, self.rect_width, self.rect_height), self.background_path)
 
 # env = Scratch_Game_Environment5_Streamlit(frame_size=40, scratching_area=(0, 0, 700, 350), background_path="utils/space.jpg")
 # for i in range(5):
