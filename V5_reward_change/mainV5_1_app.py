@@ -70,42 +70,80 @@ with cols[1]:
     image_placeholder = st.empty()
     image_placeholder.image(env.get_window_image(), caption=f'Imagen inicial', width=700, use_container_width=True)
 
+EPISODES = 2
+trace = 1
+rewards, max_rewards = [], []
+actions_done, min_actions_done = [], []
+areas_scratched, min_areas_scratched = [], []
+max_reward, min_actions, min_area_scratched = -99999, 99999, 999
+path_to_save = f"V5_version/V5_1_Qtable_{env.total_squares}_{EPISODES}_app"
+
 epsilon = 0.9
-env.env_reset()
 
-done = False
-episode_actions = 0
-episode_reward = 0
+start = time.time()
+for i in range(EPISODES):
 
-current_state = env.frames_mask
-current_action = env.total_squares // 2
+    env.env_reset()
 
-print(f"Estado inicial: {current_state}")
+    done = False
+    episode_actions = 0
+    episode_reward = 0
 
-# simular un episodio entero
-while not done:
-    episode_actions += 1
+    current_state = env.frames_mask
+    current_action = env.total_squares // 2
 
-    action_index = agent.choose_action(current_action, current_state, epsilon)
-    next_state, reward, done = env.env_step(action_index)
-    agent.update_q_table(current_action, action_index, reward, next_state)
+    print(f"Estado inicial: {current_state}")
 
-    image_placeholder.image(env.get_window_image(), caption=f'Paso {episode_actions+1}')
-    time.sleep(0.1)
+    # simular un episodio entero
+    while not done:
+        episode_actions += 1
 
-    episode_reward += reward
-    current_state = next_state
+        action_index = agent.choose_action(current_action, current_state, epsilon)
+        next_state, reward, done = env.env_step(action_index)
+        agent.update_q_table(current_action, action_index, reward, next_state)
 
-    if done:
-        st.success("¡Juego terminado!")
-        break
+        image_placeholder.image(env.get_window_image(), caption=f'Paso {episode_actions+1}')
+        time.sleep(0.1)
 
-episode_percentage = (env.scratched_count / env.total_squares) * 100
+        episode_reward += reward
+        current_state = next_state
 
-st.write(f"Nº cuadrados entorno: {env.total_squares}")
-st.write(f"Acciones realizadas: {episode_actions}")
-st.write(f"Recompensa total: {episode_reward}")
-st.write(f"Porcentaje de área rascada: {episode_percentage:.2f}%")
+    st.success("¡Juego terminado!")
+
+    episode_percentage = (env.scratched_count / env.total_squares) * 100
+
+    max_reward = episode_reward if episode_reward > max_reward else max_reward
+    min_actions = episode_actions if episode_actions < min_actions else min_actions
+    min_area_scratched = episode_percentage if episode_percentage < min_area_scratched else min_area_scratched
+
+    if i % trace == 0 or i == EPISODES-1:
+        st.write(f"-----------------EPISODE {i}---------------------")
+        st.write(f"Nº cuadrados entorno: {env.total_squares}")
+        st.write(f"Acciones realizadas: {episode_actions}")
+        st.write(f"Recompensa total: {episode_reward}")
+        st.write(f"Porcentaje de área rascada: {episode_percentage:.2f}%")
+
+        # TODO: adapt env method to optionally save the image
+        # env.get_window_image(True, f"episodes/V5_1_episode_{i}.png")
+    
+    # ---------------data for graphics----------------
+    rewards.append(episode_reward)
+    actions_done.append(episode_actions)
+    areas_scratched.append(episode_percentage)
+    max_rewards.append(max_reward)
+    min_actions_done.append(min_actions)
+    min_areas_scratched.append(min_area_scratched)
+    # ---------------data for graphics----------------
+
+
+
+st.write("*" * 50)
+st.write(f"Max reward: {max_reward}")
+st.write(f"Min actions done: {min_actions}")
+st.write(f"Min scratched area: {min_area_scratched:.2f}%")
+
+minutes, seconds = divmod(time.time()-start, 60)
+st.write(f"***** Total training time: {int(minutes)} minutes and {seconds:.2f} seconds *****")
 
 
 """***********************************************************"""
