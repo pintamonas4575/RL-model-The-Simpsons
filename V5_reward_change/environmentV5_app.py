@@ -3,6 +3,7 @@ import math
 import time
 import cv2
 from PIL import Image
+from typing import Any
 
 class Scratch_Game_Environment5_Streamlit:
     def __init__(self, frame_size: int, scratching_area: tuple[int, int, int, int], background_path: str = "utils/space.jpg"):
@@ -23,7 +24,7 @@ class Scratch_Game_Environment5_Streamlit:
         self.game_image = Image.new("RGBA", (self.rect_width, self.rect_height), (255, 255, 255, 255))
 
         self.good_frames_idx = set()
-        self.squares_images = []
+        self.squares_images: list[dict[str, Any]] = []
 
         self._setup_environment_and_contours()
 
@@ -82,17 +83,29 @@ class Scratch_Game_Environment5_Streamlit:
         
         if idx in self.good_frames_idx:
             self.frames_mask[idx] = 1
+            self.good_frames_idx.remove(idx)
         else:
             self.frames_mask[idx] = 0
 
         self.scratched_count += 1
-        game_done = self.good_frames_idx == ()
+        game_done = not self.good_frames_idx # true if it's empty
         numero_de_0s = self.frames_mask.count(0)
         numero_de_1s = self.frames_mask.count(1)
         recompensa_por_0s = -2 * numero_de_0s
         recompensa_por_1s = 3 * numero_de_1s
         recompensa_total = recompensa_por_0s + recompensa_por_1s
         return recompensa_total, game_done
+    
+    # --------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------------
+    """Functions for agents to interact with the environment"""
+    # --------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------------
+
+    def env_step(self, action_index: int) -> tuple[list[int], int, bool]:
+        reward, game_done = self.scratch_frame(action_index) # self.frames_mask is updated here
+        next_state = self.frames_mask
+        return next_state, reward, game_done
     
     def env_reset(self):
         self.__init__(self.FRAME_SIZE, (self.rect_x, self.rect_y, self.rect_width, self.rect_height), self.background_path)

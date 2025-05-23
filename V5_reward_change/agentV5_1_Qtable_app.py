@@ -16,6 +16,8 @@ class RL_Agent_51_Streamlit():
         """Choose the next action based on epsilon-greedy policy. See the possible actions in the current state."""
 
         possible_actions = [i for i, val in enumerate(current_state) if val == -1]
+        print("Number_of_possible_actions", len(possible_actions))
+        # breakpoint()
         if random.random() < epsilon:
             action_index = random.choice(possible_actions)
         else:
