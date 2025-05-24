@@ -102,11 +102,13 @@ class Scratch_Game_Environment5_Streamlit:
     # --------------------------------------------------------------------------------
 
     def env_step(self, action_index: int) -> tuple[list[int], int, bool]:
+        """Removed the frame selected and return the next state, reward, and game status."""
         reward, game_done = self.scratch_frame(action_index) # self.frames_mask is updated here
         next_state = self.frames_mask
         return next_state, reward, game_done
     
     def env_reset(self):
+        """Reset the environment to its initial state for a new episode."""
         self.__init__(self.FRAME_SIZE, (self.rect_x, self.rect_y, self.rect_width, self.rect_height), self.background_path)
 
 # env = Scratch_Game_Environment5_Streamlit(frame_size=40, scratching_area=(0, 0, 700, 350), background_path="utils/space.jpg")
