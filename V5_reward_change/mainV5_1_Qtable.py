@@ -1,8 +1,6 @@
-import random
-import time
 import gc
+import time
 import numpy as np
-from PyQt5.QtCore import QTimer
 
 from environmentV5 import Scratch_Game_Environment5
 from agentV5_1_Qtable import RL_Agent_51
@@ -74,7 +72,6 @@ for i in range(EPISODES):
     min_areas_scratched.append(min_area_scratched)
     # ---------------data for graphics----------------
 
-    agent.finish_game() # "app.quit" and "del app"
     gc.collect()  # Explicitly run garbage collection to free resources
 
 print("*" * 50)
