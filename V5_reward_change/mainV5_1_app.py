@@ -311,7 +311,7 @@ with rewards_cols[1]:
               </div>
             </div>
             <div class="stat-circle circle-avg" style="margin-top: 40px;">
-                {avg_val:.1f}💶
+                {avg_val:.0f}💶
                 <div class="stat-label">Mean</div>
             </div>
           </div>
@@ -404,7 +404,7 @@ with actions_cols[1]:
           </div>
         </div>
         <div class="stat-triangle triangle-avg" style="margin-top: 40px;">
-            <div class="stat-value">{avg_val}</div>
+            <div class="stat-value">{avg_val:.0f}</div>
             <div class="stat-label">Mean</div>
         </div>
       </div>
