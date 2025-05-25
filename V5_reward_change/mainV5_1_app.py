@@ -36,6 +36,21 @@ def get_gradient_color(p):
 if st.button("🔄 Refrescar todo"):
     st.rerun()
 
+# app bg image
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1350&q=80');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=130, scratching_area=(0, 0, 700, 350), background_path="../utils/space.jpg")
 st.session_state.agent = RL_Agent_51_Streamlit(num_actions=st.session_state.env.total_squares)
 env = st.session_state.env
@@ -92,12 +107,13 @@ rainbow_html = """
 
 game_cols = st.columns([0.3, 0.5, 0.3], border=True)
 with game_cols[0]:
-    st.markdown("<h3 style='text-align: center;'>Parámetros del entorno</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center;'>🧩 Env parameters 🧩</h3>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align: center;'>Total squares: <strong>{env.total_squares}</strong></p>", unsafe_allow_html=True)
 with game_cols[1]:
     image_placeholder = st.empty()
     image_placeholder.image(env.get_window_image(), caption=f'Imagen inicial', use_container_width=True)
 with game_cols[2]:
-    st.markdown("<h3 style='text-align: center;'>🤖 Parámetros del agente 🤖</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center;'>🤖 Agent parameters 🤖</h3>", unsafe_allow_html=True)
     pass
 
 # train progressbar
@@ -126,7 +142,7 @@ with rewards_cols[0]:
         "</div>",
         unsafe_allow_html=True
     )
-    reward_placeholder = st.empty()
+    rewards_placeholder = st.empty()
     rewards_df = pd.DataFrame(columns=['Episode', 'Reward', 'Max Reward'])
 with actions_cols[0]:
     st.markdown(
@@ -135,7 +151,7 @@ with actions_cols[0]:
         "</div>",
         unsafe_allow_html=True
     )
-    action_placeholder = st.empty()
+    actions_placeholder = st.empty()
     actions_df = pd.DataFrame(columns=['Episode', 'Actions Done', 'Min Actions'])
 with areas_cols[0]:
     st.markdown(
@@ -198,41 +214,41 @@ for i in range(EPISODES):
         ['Reward', 'Max Reward'], as_=['Serie', 'Valor']
     ).mark_line(point=True).encode(
         x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(tickMinStep=1, labelAngle=0, labelFontSize=18, titleFontSize=22, grid=False)),
-        y=alt.Y('Valor:Q', title='Reward', axis=alt.Axis(labelFontSize=18, titleFontSize=22, grid=False)),
+        y=alt.Y('Valor:Q', title='Reward', axis=alt.Axis(labelFontSize=18, titleFontSize=22, grid=False), scale=alt.Scale(zero=False)),
         color=alt.Color(
             'Serie:N',
             legend=alt.Legend(title=""),
             scale=alt.Scale(domain=['Reward', 'Max Reward'], range=["#06e7f7", "#15f10e"])
         )
-    ).properties(width=1200, height=400).configure_view(strokeWidth=0).configure_axis(grid=False).interactive()
-    reward_placeholder.altair_chart(rewards_chart, use_container_width=False)
+    ).properties(width=1200, height=400, padding={"top": 20}).configure_view(strokeWidth=0).configure_axis(grid=False).interactive()
+    rewards_placeholder.altair_chart(rewards_chart, use_container_width=False)
     # ---------------ACTIONS EVOLUTION----------------
     actions_df.loc[len(actions_df)] = [i + 1, episode_actions, min_actions]
     actions_chart = alt.Chart(actions_df).transform_fold(
         ['Actions Done', 'Min Actions'], as_=['Serie', 'Valor']
     ).mark_line(point=True).encode(
         x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(tickMinStep=1, labelAngle=0, labelFontSize=18, titleFontSize=22, grid=False)),
-        y=alt.Y('Valor:Q', title='Actions Done', axis=alt.Axis(labelFontSize=18, titleFontSize=22, grid=False)),
+        y=alt.Y('Valor:Q', title='Actions Done', axis=alt.Axis(labelFontSize=18, titleFontSize=22, grid=False), scale=alt.Scale(zero=False)),
         color=alt.Color(
             'Serie:N',
             legend=alt.Legend(title=""),
             scale=alt.Scale(domain=['Actions Done', 'Min Actions'], range=["#06e7f7", "#15f10e"])
         )
-    ).properties(width=1200, height=400).configure_view(strokeWidth=0).configure_axis(grid=False).interactive()
-    action_placeholder.altair_chart(actions_chart, use_container_width=False)
+    ).properties(width=1200, height=400, padding={"top": 20}).configure_view(strokeWidth=0).configure_axis(grid=False).interactive()
+    actions_placeholder.altair_chart(actions_chart, use_container_width=False)
     # ---------------AREAS EVOLUTION----------------
     areas_df.loc[len(areas_df)] = [i + 1, episode_percentage, min_area_scratched]
     areas_chart = alt.Chart(areas_df).transform_fold(
         ['Area Scratched', 'Min Area Scratched'], as_=['Serie', 'Valor']
     ).mark_line(point=True).encode(
         x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(tickMinStep=1, labelAngle=0, labelFontSize=18, titleFontSize=22, grid=False)),
-        y=alt.Y('Valor:Q', title='Area Scratched (%)', axis=alt.Axis(labelFontSize=18, titleFontSize=22, grid=False)),
+        y=alt.Y('Valor:Q', title='Area Scratched (%)', axis=alt.Axis(labelFontSize=18, titleFontSize=22, grid=False), scale=alt.Scale(zero=False)),
         color=alt.Color(
             'Serie:N',
             legend=alt.Legend(title=""),
             scale=alt.Scale(domain=['Area Scratched', 'Min Area Scratched'], range=["#06e7f7", "#15f10e"])
         )
-    ).properties(width=1200, height=400).configure_view(strokeWidth=0).configure_axis(grid=False).interactive()
+    ).properties(width=1200, height=400, padding={"top": 20}).configure_view(strokeWidth=0).configure_axis(grid=False).interactive()
     areas_placeholder.altair_chart(areas_chart, use_container_width=False)
     # -------------------------------------------------------------------------------------------------------------
     percent = int(100 * (i + 1) / EPISODES) 
@@ -344,8 +360,6 @@ with rewards_cols[1]:
         </div>
     """
     st.markdown(rewards_resume_html, unsafe_allow_html=True)
-
-
 with actions_cols[1]:
     min_val = actions_df['Actions Done'].min()
     max_val = actions_df['Actions Done'].max()
