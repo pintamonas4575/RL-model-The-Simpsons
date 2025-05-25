@@ -111,7 +111,7 @@ with game_cols[0]:
     st.markdown(f"<p style='text-align: center;'>Total squares: <strong>{env.total_squares}</strong></p>", unsafe_allow_html=True)
 with game_cols[1]:
     image_placeholder = st.empty()
-    image_placeholder.image(env.get_window_image(), caption=f'Imagen inicial', use_container_width=True)
+    image_placeholder.image(env.get_window_image(), use_container_width=True)
 with game_cols[2]:
     st.markdown("<h3 style='text-align: center;'>🤖 Agent parameters 🤖</h3>", unsafe_allow_html=True)
     pass
@@ -126,10 +126,9 @@ areas_cols = st.columns([0.7, 0.3])
 
 EPISODES = 25
 trace = 1
-actions_done, min_actions_done = [], []
-areas_scratched, min_areas_scratched = [], []
-max_reward, min_actions, min_area_scratched = -99999, 99999, 999
-path_to_save = f"V5_version/V5_1_Qtable_{env.total_squares}_{EPISODES}_app"
+max_reward, min_actions, min_area_scratched = -99999, 99999, 999 # best
+min_reward, max_actions, max_area_scratched = 99999, 0, 0        # worst
+# path_to_save = f"V5_version/V5_1_Qtable_{env.total_squares}_{EPISODES}_app"
 
 epsilon = 0.9
 
@@ -143,7 +142,7 @@ with rewards_cols[0]:
         unsafe_allow_html=True
     )
     rewards_placeholder = st.empty()
-    rewards_df = pd.DataFrame(columns=['Episode', 'Reward', 'Max Reward'])
+    rewards_df = pd.DataFrame(columns=['Episode', 'Reward', 'Min Reward', 'Max Reward'])
 with actions_cols[0]:
     st.markdown(
         "<div style='text-align: center;'>"
@@ -152,7 +151,7 @@ with actions_cols[0]:
         unsafe_allow_html=True
     )
     actions_placeholder = st.empty()
-    actions_df = pd.DataFrame(columns=['Episode', 'Actions Done', 'Min Actions'])
+    actions_df = pd.DataFrame(columns=['Episode', 'Actions Done', 'Min Actions', 'Max Actions'])
 with areas_cols[0]:
     st.markdown(
         "<div style='text-align: center;'>"
@@ -161,7 +160,7 @@ with areas_cols[0]:
         unsafe_allow_html=True
     )
     areas_placeholder = st.empty()
-    areas_df = pd.DataFrame(columns=['Episode', 'Area Scratched', 'Min Area Scratched'])
+    areas_df = pd.DataFrame(columns=['Episode', 'Area Scratched', 'Min Area Scratched', 'Max Area Scratched'])
 
 # """******************************BEGINNING OF TRAINING******************************"""
 
@@ -189,27 +188,22 @@ for i in range(EPISODES):
         episode_reward += reward
         current_state = next_state
 
-    episode_percentage = (env.scratched_count / env.total_squares) * 100
+    episode_area = (env.scratched_count / env.total_squares) * 100
 
-    max_reward = episode_reward if episode_reward > max_reward else max_reward
+    min_reward = episode_reward if episode_reward < min_reward else min_reward
     min_actions = episode_actions if episode_actions < min_actions else min_actions
-    min_area_scratched = episode_percentage if episode_percentage < min_area_scratched else min_area_scratched
+    min_area_scratched = episode_area if episode_area < min_area_scratched else min_area_scratched
+    max_reward = episode_reward if episode_reward > max_reward else max_reward
+    max_actions = episode_actions if episode_actions > max_actions else max_actions
+    max_area_scratched = episode_area if episode_area > max_area_scratched else max_area_scratched
 
     if i % trace == 0 or i == EPISODES-1:
         pass
         # TODO: adapt env method to optionally save the image
         # env.get_window_image(True, f"episodes/V5_1_episode_{i}.png")
     
-    # ---------------data for graphics----------------
-    actions_done.append(episode_actions)
-    areas_scratched.append(episode_percentage)
-    min_actions_done.append(min_actions)
-    min_areas_scratched.append(min_area_scratched)
-    # ---------------data for graphics----------------
     # ---------------REWARDS EVOLUTION----------------
-    # add row to DataFrame
-    rewards_df.loc[len(rewards_df)] = [i + 1, episode_reward, max_reward] 
-
+    rewards_df.loc[len(rewards_df)] = [i + 1, episode_reward, min(episode_reward, min_reward), max(episode_reward, max_reward)] 
     rewards_chart = alt.Chart(rewards_df).transform_fold(
         ['Reward', 'Max Reward'], as_=['Serie', 'Valor']
     ).mark_line(point=True).encode(
@@ -223,7 +217,7 @@ for i in range(EPISODES):
     ).properties(width=1200, height=400, padding={"top": 20}).configure_view(strokeWidth=0).configure_axis(grid=False).interactive()
     rewards_placeholder.altair_chart(rewards_chart, use_container_width=False)
     # ---------------ACTIONS EVOLUTION----------------
-    actions_df.loc[len(actions_df)] = [i + 1, episode_actions, min_actions]
+    actions_df.loc[len(actions_df)] = [i + 1, episode_actions, min(episode_actions, min_actions), max(episode_actions, max_actions)]
     actions_chart = alt.Chart(actions_df).transform_fold(
         ['Actions Done', 'Min Actions'], as_=['Serie', 'Valor']
     ).mark_line(point=True).encode(
@@ -237,7 +231,7 @@ for i in range(EPISODES):
     ).properties(width=1200, height=400, padding={"top": 20}).configure_view(strokeWidth=0).configure_axis(grid=False).interactive()
     actions_placeholder.altair_chart(actions_chart, use_container_width=False)
     # ---------------AREAS EVOLUTION----------------
-    areas_df.loc[len(areas_df)] = [i + 1, episode_percentage, min_area_scratched]
+    areas_df.loc[len(areas_df)] = [i + 1, episode_area, min(episode_area, min_area_scratched), max(episode_area, max_area_scratched)]
     areas_chart = alt.Chart(areas_df).transform_fold(
         ['Area Scratched', 'Min Area Scratched'], as_=['Serie', 'Valor']
     ).mark_line(point=True).encode(
