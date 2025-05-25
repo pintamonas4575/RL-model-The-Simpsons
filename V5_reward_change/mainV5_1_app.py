@@ -261,25 +261,34 @@ with rewards_cols[1]:
             justify-content: center;
             align-items: center;
             height: 100%;
-            min-height: 500px; /* Puedes ajustar según el layout */
+            min-height: 500px;
         }}
         .triangle-container {{
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            gap: 0px;
         }}
         .triangle-row {{
             display: flex;
             justify-content: center;
-            gap: 80px;  /* Más separación */
-            margin-bottom: 30px;
+            align-items: flex-end;
+            gap: 80px;
+            margin-bottom: 0px;
+        }}
+        .triangle-bottom {{
+            display: flex;
+            justify-content: center;
+            margin-top: 28px;
         }}
         .stat-circle {{
             width: 175px; height: 175px; border-radius: 88px;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            color: white; font-size: 40px; font-weight: bold; 
+            color: white; font-size: 40px; font-weight: bold;
             box-shadow: 2px 2px 16px #88888866;
             margin: 0 8px;
+            position: relative;
         }}
         .circle-min {{
             background: linear-gradient(135deg, #d32f2f 60%, #ff8a65 100%);
@@ -293,122 +302,141 @@ with rewards_cols[1]:
             background: linear-gradient(135deg, #ff9800 60%, #ffd54f 100%);
             border: 6px solid #ff9800;
         }}
+        .stat-number {{
+            font-size: 40px;
+            font-weight: bold;
+            margin-bottom: 10px;   /* Ajusta este valor para subir/bajar el número */
+            margin-top: -12px;     /* Puedes ajustar este valor para subirlo más o menos */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }}
         .stat-label {{
-            font-size: 19px; font-weight: normal; margin-top: 7px; color: #f0f0f0;
+            font-size: 19px;
+            font-weight: normal;
+            margin-top: 4px;
+            color: #f0f0f0;
             letter-spacing: 0.5px;
+            text-align: center;
+            width: 100%;
         }}
         </style>
         <div class="wrapper-center">
-          <div class="triangle-container">
+        <div class="triangle-container">
             <div class="triangle-row">
-              <div class="stat-circle circle-min">
-                  {min_val}💶
-                  <div class="stat-label">Min</div>
-              </div>
-              <div class="stat-circle circle-max">
-                  {max_val}💶
-                  <div class="stat-label">Max</div>
-              </div>
+            <div class="stat-circle circle-min">
+                <div class="stat-number">{min_val}💶</div>
+                <div class="stat-label">Min</div>
             </div>
-            <div class="stat-circle circle-avg" style="margin-top: 40px;">
-                {avg_val:.0f}💶
+            <div class="stat-circle circle-max">
+                <div class="stat-number">{max_val}💶</div>
+                <div class="stat-label">Max</div>
+            </div>
+            </div>
+            <div class="triangle-bottom">
+            <div class="stat-circle circle-avg">
+                <div class="stat-number">{avg_val:.0f}💶</div>
                 <div class="stat-label">Mean</div>
             </div>
-          </div>
+            </div>
+        </div>
         </div>
     """
     st.markdown(rewards_resume_html, unsafe_allow_html=True)
+
+
 with actions_cols[1]:
     min_val = actions_df['Actions Done'].min()
     max_val = actions_df['Actions Done'].max()
     avg_val = actions_df['Actions Done'].mean()
     actions_resume_html = f"""
-    <style>
-    .wrapper-center {{
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-        min-height: 500px;
-    }}
-    .triangle-container {{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }}
-    .triangle-row {{
-        display: flex;
-        justify-content: center;
-        gap: 80px;
-        margin-bottom: 30px;
-    }}
-    .stat-triangle {{
-        width: 175px;
-        height: 175px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: white;
-        font-size: 40px;
-        font-weight: bold;
-        box-shadow: 2px 2px 16px #88888866;
-        margin: 0 8px;
-        position: relative;
-        /* Triángulo equilátero apuntando hacia arriba */
-        clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    }}
-    .triangle-min {{
-        background: linear-gradient(135deg, #d32f2f 60%, #ff8a65 100%);
-        border: 6px solid #d32f2f;
-    }}
-    .triangle-max {{
-        background: linear-gradient(135deg, #388e3c 60%, #66bb6a 100%);
-        border: 6px solid #388e3c;
-    }}
-    .triangle-avg {{
-        background: linear-gradient(135deg, #ff9800 60%, #ffd54f 100%);
-        border: 6px solid #ff9800;
-    }}
-    .stat-label {{
-        font-size: 19px;
-        font-weight: normal;
-        margin-top: 7px;
-        color: #f0f0f0;
-        letter-spacing: 0.5px;
-        position: absolute;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: max-content;
-    }}
-    .stat-value {{
-        position: absolute;
-        top: 50px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1;
-    }}
-    </style>
-    <div class="wrapper-center">
-      <div class="triangle-container">
-        <div class="triangle-row">
-          <div class="stat-triangle triangle-min">
-              <div class="stat-value">{min_val}</div>
-              <div class="stat-label">Min</div>
-          </div>
-          <div class="stat-triangle triangle-max">
-              <div class="stat-value">{max_val}</div>
-              <div class="stat-label">Max</div>
-          </div>
+        <style>
+        .wrapper-center {{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            min-height: 500px;
+        }}
+        .triangle-container {{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }}
+        .triangle-row {{
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+            margin-bottom: 30px;
+        }}
+        .stat-triangle {{
+            width: 175px;
+            height: 175px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            box-shadow: 2px 2px 16px #88888866;
+            margin: 0 8px;
+            position: relative;
+            /* Triángulo equilátero apuntando hacia arriba */
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }}
+        .triangle-min {{
+            background: linear-gradient(135deg, #d32f2f 60%, #ff8a65 100%);
+            border: 6px solid #d32f2f;
+        }}
+        .triangle-max {{
+            background: linear-gradient(135deg, #388e3c 60%, #66bb6a 100%);
+            border: 6px solid #388e3c;
+        }}
+        .triangle-avg {{
+            background: linear-gradient(135deg, #ff9800 60%, #ffd54f 100%);
+            border: 6px solid #ff9800;
+        }}
+        .stat-label {{
+            font-size: 19px;
+            font-weight: normal;
+            margin-top: 7px;
+            color: #f0f0f0;
+            letter-spacing: 0.5px;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: max-content;
+        }}
+        .stat-value {{
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }}
+        </style>
+        <div class="wrapper-center">
+        <div class="triangle-container">
+            <div class="triangle-row">
+            <div class="stat-triangle triangle-min">
+                <div class="stat-value">{min_val}</div>
+                <div class="stat-label">Min</div>
+            </div>
+            <div class="stat-triangle triangle-max">
+                <div class="stat-value">{max_val}</div>
+                <div class="stat-label">Max</div>
+            </div>
+            </div>
+            <div class="stat-triangle triangle-avg" style="margin-top: 40px;">
+                <div class="stat-value">{avg_val:.0f}</div>
+                <div class="stat-label">Mean</div>
+            </div>
         </div>
-        <div class="stat-triangle triangle-avg" style="margin-top: 40px;">
-            <div class="stat-value">{avg_val:.0f}</div>
-            <div class="stat-label">Mean</div>
         </div>
-      </div>
-    </div>
     """
     st.markdown(actions_resume_html, unsafe_allow_html=True)
 with areas_cols[1]:
@@ -416,80 +444,101 @@ with areas_cols[1]:
     max_val = areas_df['Area Scratched'].max()
     avg_val = areas_df['Area Scratched'].mean()
     areas_resume_html = f"""
-    <style>
-    .wrapper-center {{
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-        min-height: 500px;
-    }}
-    .square-container {{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }}
-    .square-row {{
-        display: flex;
-        justify-content: center;
-        gap: 80px;
-        margin-bottom: 30px;
-    }}
-    .stat-square {{
-        width: 175px;
-        height: 175px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: white;
-        font-size: 40px;
-        font-weight: bold;
-        box-shadow: 2px 2px 16px #88888866;
-        margin: 0 8px;
-        border-radius: 12px; /* Opcional: bordes ligeramente redondeados */
-    }}
-    .square-min {{
-        background: linear-gradient(135deg, #d32f2f 60%, #ff8a65 100%);
-        border: 6px solid #d32f2f;
-    }}
-    .square-max {{
-        background: linear-gradient(135deg, #388e3c 60%, #66bb6a 100%);
-        border: 6px solid #388e3c;
-    }}
-    .square-avg {{
-        background: linear-gradient(135deg, #ff9800 60%, #ffd54f 100%);
-        border: 6px solid #ff9800;
-    }}
-    .stat-label {{
-        font-size: 19px;
-        font-weight: normal;
-        margin-top: 7px;
-        color: #f0f0f0;
-        letter-spacing: 0.5px;
-    }}
-    </style>
-    <div class="wrapper-center">
-      <div class="square-container">
-        <div class="square-row">
-          <div class="stat-square square-min">
-              {min_val:.1f}%
-              <div class="stat-label">Min</div>
-          </div>
-          <div class="stat-square square-max">
-              {max_val:.1f}%
-              <div class="stat-label">Max</div>
-          </div>
+        <style>
+        .wrapper-center {{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            min-height: 500px;
+        }}
+        .square-container {{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }}
+        .square-row {{
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+            margin-bottom: 0px;
+        }}
+        .square-bottom {{
+            display: flex;
+            justify-content: center;
+            margin-top: 28px;
+        }}
+        .stat-square {{
+            width: 175px;
+            height: 175px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            box-shadow: 2px 2px 16px #88888866;
+            margin: 0 8px;
+            border-radius: 12px;
+            position: relative;
+        }}
+        .square-min {{
+            background: linear-gradient(135deg, #d32f2f 60%, #ff8a65 100%);
+            border: 6px solid #d32f2f;
+        }}
+        .square-max {{
+            background: linear-gradient(135deg, #388e3c 60%, #66bb6a 100%);
+            border: 6px solid #388e3c;
+        }}
+        .square-avg {{
+            background: linear-gradient(135deg, #ff9800 60%, #ffd54f 100%);
+            border: 6px solid #ff9800;
+        }}
+        .stat-number {{
+            font-size: 40px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            margin-top: -12px;   /* Ajusta este valor si quieres subirlo más o menos */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }}
+        .stat-label {{
+            font-size: 19px;
+            font-weight: normal;
+            margin-top: 4px;
+            color: #f0f0f0;
+            letter-spacing: 0.5px;
+            text-align: center;
+            width: 100%;
+        }}
+        </style>
+        <div class="wrapper-center">
+        <div class="square-container">
+            <div class="square-row">
+            <div class="stat-square square-min">
+                <div class="stat-number">{min_val:.1f}%</div>
+                <div class="stat-label">Min</div>
+            </div>
+            <div class="stat-square square-max">
+                <div class="stat-number">{max_val:.1f}%</div>
+                <div class="stat-label">Max</div>
+            </div>
+            </div>
+            <div class="square-bottom">
+            <div class="stat-square square-avg">
+                <div class="stat-number">{avg_val:.1f}%</div>
+                <div class="stat-label">Mean</div>
+            </div>
+            </div>
         </div>
-        <div class="stat-square square-avg" style="margin-top: 40px;">
-            {avg_val:.1f}%
-            <div class="stat-label">Mean</div>
         </div>
-      </div>
-    </div>
     """
     st.markdown(areas_resume_html, unsafe_allow_html=True)
+
 
 
 minutes, seconds = divmod(time.time()-start, 60)
