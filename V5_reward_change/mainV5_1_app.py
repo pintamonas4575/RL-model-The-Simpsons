@@ -205,42 +205,42 @@ for i in range(EPISODES):
     # ---------------REWARDS EVOLUTION----------------
     rewards_df.loc[len(rewards_df)] = [i + 1, episode_reward, min(episode_reward, min_reward), max(episode_reward, max_reward)] 
     rewards_chart = alt.Chart(rewards_df).transform_fold(
-        ['Reward', 'Max Reward'], as_=['Serie', 'Valor']
+        ['Reward', 'Min Reward', 'Max Reward'], as_=['Serie', 'Valor']
     ).mark_line(point=True).encode(
         x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(tickMinStep=1, labelAngle=0, labelFontSize=18, titleFontSize=22, grid=False)),
         y=alt.Y('Valor:Q', title='Reward', axis=alt.Axis(labelFontSize=18, titleFontSize=22, grid=False), scale=alt.Scale(zero=False)),
         color=alt.Color(
             'Serie:N',
             legend=alt.Legend(title=""),
-            scale=alt.Scale(domain=['Reward', 'Max Reward'], range=["#06e7f7", "#15f10e"])
+            scale=alt.Scale(domain=['Reward', 'Min Reward', 'Max Reward'], range=["#06e7f7", "#ff0000", "#15f10e"])
         )
     ).properties(width=1200, height=400, padding={"top": 20}).configure_view(strokeWidth=0).configure_axis(grid=False).interactive()
     rewards_placeholder.altair_chart(rewards_chart, use_container_width=False)
     # ---------------ACTIONS EVOLUTION----------------
     actions_df.loc[len(actions_df)] = [i + 1, episode_actions, min(episode_actions, min_actions), max(episode_actions, max_actions)]
     actions_chart = alt.Chart(actions_df).transform_fold(
-        ['Actions Done', 'Min Actions'], as_=['Serie', 'Valor']
+        ['Actions Done', 'Min Actions', 'Max Actions'], as_=['Serie', 'Valor']
     ).mark_line(point=True).encode(
         x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(tickMinStep=1, labelAngle=0, labelFontSize=18, titleFontSize=22, grid=False)),
         y=alt.Y('Valor:Q', title='Actions Done', axis=alt.Axis(labelFontSize=18, titleFontSize=22, grid=False), scale=alt.Scale(zero=False)),
         color=alt.Color(
             'Serie:N',
             legend=alt.Legend(title=""),
-            scale=alt.Scale(domain=['Actions Done', 'Min Actions'], range=["#06e7f7", "#15f10e"])
+            scale=alt.Scale(domain=['Actions Done', 'Min Actions', 'Max Actions'], range=["#06e7f7", "#ff0000", "#15f10e"])
         )
     ).properties(width=1200, height=400, padding={"top": 20}).configure_view(strokeWidth=0).configure_axis(grid=False).interactive()
     actions_placeholder.altair_chart(actions_chart, use_container_width=False)
     # ---------------AREAS EVOLUTION----------------
     areas_df.loc[len(areas_df)] = [i + 1, episode_area, min(episode_area, min_area_scratched), max(episode_area, max_area_scratched)]
     areas_chart = alt.Chart(areas_df).transform_fold(
-        ['Area Scratched', 'Min Area Scratched'], as_=['Serie', 'Valor']
+        ['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], as_=['Serie', 'Valor']
     ).mark_line(point=True).encode(
         x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(tickMinStep=1, labelAngle=0, labelFontSize=18, titleFontSize=22, grid=False)),
         y=alt.Y('Valor:Q', title='Area Scratched (%)', axis=alt.Axis(labelFontSize=18, titleFontSize=22, grid=False), scale=alt.Scale(zero=False)),
         color=alt.Color(
             'Serie:N',
             legend=alt.Legend(title=""),
-            scale=alt.Scale(domain=['Area Scratched', 'Min Area Scratched'], range=["#06e7f7", "#15f10e"])
+            scale=alt.Scale(domain=['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], range=["#06e7f7", "#ff0000", "#15f10e"])
         )
     ).properties(width=1200, height=400, padding={"top": 20}).configure_view(strokeWidth=0).configure_axis(grid=False).interactive()
     areas_placeholder.altair_chart(areas_chart, use_container_width=False)
@@ -317,6 +317,7 @@ with rewards_cols[1]:
             font-weight: bold;
             margin-bottom: 10px;   /* Ajusta este valor para subir/bajar el número */
             margin-top: -12px;     /* Puedes ajustar este valor para subirlo más o menos */
+            color: black;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -326,7 +327,7 @@ with rewards_cols[1]:
             font-size: 19px;
             font-weight: normal;
             margin-top: 4px;
-            color: #f0f0f0;
+            color: #000000;
             letter-spacing: 0.5px;
             text-align: center;
             width: 100%;
@@ -425,6 +426,7 @@ with actions_cols[1]:
             left: 50%;
             transform: translateX(-50%);
             z-index: 1;
+            color: black;
         }}
         </style>
         <div class="wrapper-center">
@@ -508,11 +510,12 @@ with areas_cols[1]:
             font-size: 40px;
             font-weight: bold;
             margin-bottom: 10px;
-            margin-top: -12px;   /* Ajusta este valor si quieres subirlo más o menos */
+            margin-top: -12px;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
+            color: black;
         }}
         .stat-label {{
             font-size: 19px;
