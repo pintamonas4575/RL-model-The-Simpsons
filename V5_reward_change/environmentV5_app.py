@@ -14,7 +14,6 @@ class Scratch_Game_Environment5_Streamlit:
         self.number_of_columns = math.ceil(self.rect_width / self.FRAME_SIZE)
         self.total_squares = self.number_of_rows * self.number_of_columns
         self.frames_mask = [-1] * self.total_squares  # -1 no rascado, 0 malo, 1 bueno
-        # self.emoji_paths = ["emojis/axe.png", "emojis/axe.png", "emojis/axe.png"] # for executing the own file
         self.emoji_paths = ["../emojis/axe.png", "../emojis/axe.png", "../emojis/axe.png"]
         self.emoji_images = [Image.open(path) for path in self.emoji_paths]
 

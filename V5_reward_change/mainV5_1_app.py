@@ -33,12 +33,13 @@ def get_gradient_color(p):
 
 """***********************************************************"""
 
+st.markdown("<h1 style='text-align: center;'>Entrenamiento de un Agente de Aprendizaje por Refuerzo con Scratch Game</h1>", unsafe_allow_html=True)
+
 if st.button("🔄 Refrescar todo"):
     st.rerun()
 
 # app bg image
-st.markdown(
-    """
+bg_image_html = """
     <style>
     .stApp {
         background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1350&q=80');
@@ -47,24 +48,14 @@ st.markdown(
         background-attachment: fixed;
     }
     </style>
-    """,
-    unsafe_allow_html=True
-)
+"""
+# st.markdown(bg_image_html, unsafe_allow_html=True)
 
-st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=130, scratching_area=(0, 0, 700, 350), background_path="../utils/space.jpg")
+st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=50, scratching_area=(0, 0, 700, 350), background_path="../utils/space.jpg")
 st.session_state.agent = RL_Agent_51_Streamlit(num_actions=st.session_state.env.total_squares)
 env = st.session_state.env
 agent = st.session_state.agent
 
-# st.markdown("<h1 style='white-space: nowrap;'>Entrenamiento RL Agent con Scratch Game</h1>", unsafe_allow_html=True)
-
-# st.markdown("<h1 style='font-size:150px; text-align:center;'>🤖</h1>", unsafe_allow_html=True)
-# custom_width = 150
-# st.markdown(
-#     f"<img src='https://raw.githubusercontent.com/pintamonas4575/pintamonas4575/main/assets/winking-face.gif' "
-#     f"width='{custom_width}' height='{custom_width}' alt='Winking Face GIF'>",
-#     unsafe_allow_html=True
-# )
 
 rainbow_html = """
     <style>
@@ -107,8 +98,58 @@ rainbow_html = """
 
 game_cols = st.columns([0.3, 0.5, 0.3], border=True)
 with game_cols[0]:
-    st.markdown("<h3 style='text-align: center;'>🧩 Env parameters 🧩</h3>", unsafe_allow_html=True)
-    st.markdown(f"<p style='text-align: center;'>Total squares: <strong>{env.total_squares}</strong></p>", unsafe_allow_html=True)
+    st.markdown(f"""
+        <div class="custom-col">
+            <h3 style='text-align: center; color: #fff; margin-bottom: 40px;'>🧩 Env parameters 🧩</h3>
+            <div class="params-list">
+                <div class="param-item">
+                    <span class="param-emoji">🖼️</span>
+                    <span class="param-text">Frame size: <strong>{env.FRAME_SIZE}</strong></span>
+                </div>
+                <div class="param-item">
+                    <span class="param-emoji">🔢</span>
+                    <span class="param-text">Total squares: <strong>{env.total_squares}</strong></span>
+                </div>
+            </div>
+        </div>
+        <style>
+        .custom-col {{
+            background: #232f4b;
+            border-radius: 18px;
+            padding: 24px 12px;
+            min-height: 350px;
+            box-shadow: 0 2px 16px #0002;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }}
+        .params-list {{
+            display: flex;
+            flex-direction: column;
+            align-items: left;
+            gap: 20px;
+        }}
+        .param-item {{
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 20px;
+            color: #fff;
+            margin-left: 100px;
+        }}
+        .param-emoji {{
+            font-size: 24px;
+        }}
+        .param-text {{
+            font-size: 18px;
+        }}
+        </style>
+    """, unsafe_allow_html=True)
+
+# with game_cols[0]:
+#     st.markdown("<h3 style='text-align: center;'>🧩 Env parameters 🧩</h3>", unsafe_allow_html=True)
+#     st.markdown(f"<p style='text-align: center;'>Total squares: <strong>{env.total_squares}</strong></p>", unsafe_allow_html=True)
 with game_cols[1]:
     image_placeholder = st.empty()
     image_placeholder.image(env.get_window_image(), use_container_width=True)
@@ -116,24 +157,32 @@ with game_cols[2]:
     st.markdown("<h3 style='text-align: center;'>🤖 Agent parameters 🤖</h3>", unsafe_allow_html=True)
     pass
 
+center_button_col = st.columns([1, 1, 1])[1]
+with center_button_col:
+    train_button = st.button("🚀 Start Training", use_container_width=True)
+    # if st.button("Train Model", use_container_width=True):
+        # st.write("Dummy button pressed!")
+
 # train progressbar
 percent_placeholder = st.empty()
 progress_placeholder = st.empty()
+percent_placeholder.markdown("<div style='text-align:center; font-size: 2rem; font-weight:bold; color: #d32f2f; transition: color 0.5s;'>0%</div>", unsafe_allow_html=True)
+progress_placeholder.progress(0)
 
 rewards_cols = st.columns([0.7, 0.3])
 actions_cols = st.columns([0.7, 0.3])
 areas_cols = st.columns([0.7, 0.3])
 
-EPISODES = 25
+EPISODES = 20
 trace = 1
 max_reward, min_actions, min_area_scratched = -99999, 99999, 999 # best
 min_reward, max_actions, max_area_scratched = 99999, 0, 0        # worst
 # path_to_save = f"V5_version/V5_1_Qtable_{env.total_squares}_{EPISODES}_app"
 
-epsilon = 0.9
+EPSILON = 0.9
 
-start = time.time()
 # if st.button('Comenzar entrenamiento', type='primary'):
+start = time.time()
 with rewards_cols[0]:
     st.markdown(
         "<div style='text-align: center;'>"
@@ -172,13 +221,15 @@ for i in range(EPISODES):
     episode_actions = 0
     episode_reward = 0
 
+    EPSILON *= np.exp(-0.001 * i)
+
     current_state = env.frames_mask
     current_action = env.total_squares // 2
 
     while not done:
         episode_actions += 1
 
-        action_index = agent.choose_action(current_action, current_state, epsilon)
+        action_index = agent.choose_action(current_action, current_state, EPSILON)
         next_state, reward, done = env.env_step(action_index)
         agent.update_q_table(current_action, action_index, reward, next_state)
 
@@ -226,7 +277,7 @@ for i in range(EPISODES):
         color=alt.Color(
             'Serie:N',
             legend=alt.Legend(title=""),
-            scale=alt.Scale(domain=['Actions Done', 'Min Actions', 'Max Actions'], range=["#06e7f7", "#ff0000", "#15f10e"])
+            scale=alt.Scale(domain=['Actions Done', 'Min Actions', 'Max Actions'], range=["#06e7f7", "#15f10e", "#ff0000"])
         )
     ).properties(width=1200, height=400, padding={"top": 20}).configure_view(strokeWidth=0).configure_axis(grid=False).interactive()
     actions_placeholder.altair_chart(actions_chart, use_container_width=False)
@@ -240,14 +291,30 @@ for i in range(EPISODES):
         color=alt.Color(
             'Serie:N',
             legend=alt.Legend(title=""),
-            scale=alt.Scale(domain=['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], range=["#06e7f7", "#ff0000", "#15f10e"])
+            scale=alt.Scale(domain=['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], range=["#06e7f7", "#15f10e", "#ff0000"])
         )
     ).properties(width=1200, height=400, padding={"top": 20}).configure_view(strokeWidth=0).configure_axis(grid=False).interactive()
     areas_placeholder.altair_chart(areas_chart, use_container_width=False)
-    # -------------------------------------------------------------------------------------------------------------
+    # ---------------UPDATE PROGRESS BAR----------------
     percent = int(100 * (i + 1) / EPISODES) 
     color = get_gradient_color(percent)
-    percent_html = f"<div style='text-align:center; font-size: 2rem; font-weight:bold; color: {color}; transition: color 0.5s;'>{percent}%</div>"
+    percent_html = f"""
+        <div style='
+            text-align: center; 
+            font-size: 2rem; 
+            font-weight: bold; 
+            color: {color}; 
+            transition: color 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        '>
+            {percent}% 
+            <img src='https://em-content.zobj.net/source/animated-noto-color-emoji/356/rocket_1f680.gif' 
+                style='width: 30px; height: 30px; vertical-align: middle;'>
+        </div>
+    """
     percent_placeholder.markdown(percent_html, unsafe_allow_html=True)
     progress_placeholder.progress(percent)
 
@@ -255,8 +322,12 @@ for i in range(EPISODES):
 
 # """******************************END OF TRAINING******************************"""
 
-aux_html = "<div style='text-align:center; font-size: 2rem; font-weight:bold; color: #43a047;'>¡Finished!</div>"
-percent_placeholder.markdown(aux_html, unsafe_allow_html=True)
+finish_html = f"""
+<div style='text-align: center;font-size: 2rem;font-weight: bold;color: #43a047;display: flex;align-items: center;justify-content: center;gap: 10px;'>¡Finished!
+    <img src='https://em-content.zobj.net/source/animated-noto-color-emoji/356/hundred-points_1f4af.gif' style='width: 30px; height: 30px; vertical-align: middle;'>
+</div>
+"""
+percent_placeholder.markdown(finish_html, unsafe_allow_html=True)
 progress_placeholder.progress(100)
 
 with rewards_cols[1]:
