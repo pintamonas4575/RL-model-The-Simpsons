@@ -9,6 +9,7 @@ from io import BytesIO
 import pandas as pd
 import altair as alt
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 from environmentV5_app import Scratch_Game_Environment5_Streamlit
 from agentV5_1_Qtable_app import RL_Agent_51_Streamlit
@@ -33,30 +34,7 @@ def get_gradient_color(p):
 
 """***********************************************************"""
 
-st.markdown("<h1 style='text-align: center;'>Entrenamiento de un Agente de Aprendizaje por Refuerzo con Scratch Game</h1>", unsafe_allow_html=True)
-
-if st.button("🔄 Refrescar todo"):
-    st.rerun()
-
-# app bg image
-bg_image_html = """
-    <style>
-    .stApp {
-        background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1350&q=80');
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }
-    </style>
-"""
-# st.markdown(bg_image_html, unsafe_allow_html=True)
-
-st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=50, scratching_area=(0, 0, 700, 350), background_path="../utils/space.jpg")
-st.session_state.agent = RL_Agent_51_Streamlit(num_actions=st.session_state.env.total_squares)
-env = st.session_state.env
-agent = st.session_state.agent
-
-
+st.markdown("<h1 style='text-align: center;'>Aplicación de aprendizaje por refuerzo en un entorno personalizado y dinámico</h1>", unsafe_allow_html=True)
 rainbow_html = """
     <style>
     @keyframes rotateColors {
@@ -96,60 +74,100 @@ rainbow_html = """
 # st.markdown(rainbow_html, unsafe_allow_html=True)
 
 
+if st.button("🔄 Refrescar todo"):
+    st.rerun()
+
+# app bg image
+bg_image_html = """
+    <style>
+    .stApp {
+        background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1350&q=80');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+    </style>
+"""
+# st.markdown(bg_image_html, unsafe_allow_html=True)
+
+st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=50, scratching_area=(0, 0, 700, 350), background_path="../utils/space.jpg")
+st.session_state.agent = RL_Agent_51_Streamlit(num_actions=st.session_state.env.total_squares)
+env = st.session_state.env
+agent = st.session_state.agent
+
+
 game_cols = st.columns([0.3, 0.5, 0.3], border=True)
+
+
 with game_cols[0]:
     st.markdown(f"""
-        <div class="custom-col">
-            <h3 style='text-align: center; color: #fff; margin-bottom: 40px;'>🧩 Env parameters 🧩</h3>
-            <div class="params-list">
-                <div class="param-item">
-                    <span class="param-emoji">🖼️</span>
-                    <span class="param-text">Frame size: <strong>{env.FRAME_SIZE}</strong></span>
-                </div>
-                <div class="param-item">
-                    <span class="param-emoji">🔢</span>
-                    <span class="param-text">Total squares: <strong>{env.total_squares}</strong></span>
-                </div>
-            </div>
-        </div>
-        <style>
-        .custom-col {{
-            background: #232f4b;
-            border-radius: 18px;
-            padding: 24px 12px;
-            min-height: 350px;
-            box-shadow: 0 2px 16px #0002;
+    <style>
+        .full-bg-container {{
+            position: relative;
             width: 100%;
+            min-height: 340px;
+            height: 100%;
+            background: #f44611;
+            border-radius: 20px;
             display: flex;
             flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            padding: 36px 32px 36px 32px;
+            margin-bottom: 18px;
+        }}
+        .env-title {{
+            text-align: center;
+            font-size: 28px;
+            color: #222;
+            font-weight: bold;
+            margin-bottom: 22px;
+            margin-top: 0px;
+            letter-spacing: 1.2px;
+        }}
+        .arrow-container {{
+            display: flex;
             justify-content: center;
+            align-items: center;
+            margin: 18px 0 18px 0;
+            height: 44px;
         }}
-        .params-list {{
-            display: flex;
-            flex-direction: column;
-            align-items: left;
-            gap: 20px;
+        @keyframes bounce {{
+            0%, 100% {{ transform: translateY(0); }}
+            50% {{ transform: translateY(12px); }}
         }}
-        .param-item {{
+        .arrow-svg {{
+            width: 38px; height: 38px; display: block;
+            animation: bounce 1.2s infinite;
+        }}
+        .squares-row {{
             display: flex;
             align-items: center;
-            gap: 15px;
-            font-size: 20px;
-            color: #fff;
-            margin-left: 100px;
+            gap: 10px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #222;
+            margin-top: 10px;
+            justify-content: center;
         }}
-        .param-emoji {{
-            font-size: 24px;
-        }}
-        .param-text {{
-            font-size: 18px;
-        }}
-        </style>
+    </style>
+    <div class="full-bg-container">
+        <div class='env-title'>🧩 Env parameters 🧩</div>
+        <div class='env-title' style="font-size:23px; margin-bottom:0;">🖼️ Frame size: <strong>50</strong></div>
+        <div class="arrow-container">
+            <svg class="arrow-svg" viewBox="0 0 38 38">
+                <polyline points="8,15 19,28 30,15"
+                    style="fill:none;stroke:#222;stroke-width:5;stroke-linecap:round;stroke-linejoin:round" />
+            </svg>
+        </div>
+        <div class="squares-row">
+            <span>🔢 Total squares: <strong>75</strong></span>
+        </div>
+    </div>
     """, unsafe_allow_html=True)
 
-# with game_cols[0]:
-#     st.markdown("<h3 style='text-align: center;'>🧩 Env parameters 🧩</h3>", unsafe_allow_html=True)
-#     st.markdown(f"<p style='text-align: center;'>Total squares: <strong>{env.total_squares}</strong></p>", unsafe_allow_html=True)
+
+
 with game_cols[1]:
     image_placeholder = st.empty()
     image_placeholder.image(env.get_window_image(), use_container_width=True)
