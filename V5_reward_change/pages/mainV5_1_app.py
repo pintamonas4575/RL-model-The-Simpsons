@@ -14,10 +14,9 @@ import os
 import matplotlib.pyplot as plt
 from environmentV5_app import Scratch_Game_Environment5_Streamlit
 from agentV5_1_Qtable_app import RL_Agent_51_Streamlit
-from utils.functionalities import plot_results
 
 # ************************************* PAGE CONFIG *************************************
-st.set_page_config(page_title="RL_Scratch_Game", page_icon="💵", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="💵 RL_Scratch_Game 💵", page_icon="🦈", layout="wide", initial_sidebar_state="collapsed")
 st.markdown("""<style>.stApp {background-color: #000000;}.main .block-container {background-color: #000000;}</style>""", unsafe_allow_html=True)
 
 def get_gradient_color(p: int) -> str:
@@ -37,33 +36,32 @@ def get_gradient_color(p: int) -> str:
 
 st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=50, scratching_area=(0, 0, 700, 350), background_path="../utils/space.jpg")
 st.session_state.agent = RL_Agent_51_Streamlit(num_actions=st.session_state.env.total_squares)
+st.session_state.gallery_images = []
 env = st.session_state.env
 agent = st.session_state.agent
+gallery_images: list[tuple[Image.Image, int]] = st.session_state.gallery_images
 
 # ************************************* SIDEBAR MENU *************************************
 st.sidebar.markdown("""<span style='font-size:24px; font-weight:bold; color:#ffb300; letter-spacing:1px;'>🌟 Menú de navegación</span>""", unsafe_allow_html=True)
 page = st.sidebar.radio(
-    "",
+    " ",
     [
         "🏠  Inicio",
         "🖼️  Galería de episodios",
         "📈  Estadísticas",
-        "⚙️  Ajustes"
     ],
     captions=[
         "Ir a la página principal",
         "Ver la galería de imágenes de episodios",
         "Visualiza los datos y métricas",
-        "Configura la aplicación"
     ]
 )
-# CSS para mejorar el menú lateral
-# background: linear-gradient(180deg, #23272f 60%, #f44611 100%);
-st.markdown("""
+
+side_bar_html = """
     <style>
         /* Fondo y bordes del sidebar */
         [data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #23272f 60%, #f44611 100%);
+            background: linear-gradient(180deg, #000000 60%, #f44611 100%);
             border-radius: 0 20px 20px 0;
             box-shadow: 2px 0 18px #0002;
         }
@@ -104,7 +102,8 @@ st.markdown("""
             border: 2px solid #fff !important;
         }
     </style>
-    """, unsafe_allow_html=True)
+"""
+st.markdown(side_bar_html, unsafe_allow_html=True)
 
 
 if page == "Galería de episodios":
@@ -350,8 +349,8 @@ with game_cols[2]:
     </div>
     """, unsafe_allow_html=True)
 
-center_button_col = st.columns([1, 1, 1])[1]
-with center_button_col:
+train_button_col = st.columns([1, 1, 1])[1]
+with train_button_col:
     train_button = st.button("🚀 Start Training", use_container_width=True)
     # if st.button("Train Model", use_container_width=True):
         # st.write("Dummy button pressed!")
@@ -508,6 +507,10 @@ for i in range(EPISODES):
     """
     percent_placeholder.markdown(percent_html, unsafe_allow_html=True)
     progress_placeholder.progress(percent)
+    # ---------------SAVE IMAGE TO GALLERY----------------
+    if i % TRACE == 0 or i == EPISODES-1:
+        img: Image.Image = env.get_window_image()
+        gallery_images.append((img, i + 1))
 
     time.sleep(0.08)
 
@@ -816,10 +819,83 @@ with areas_cols[1]:
     st.markdown(areas_resume_html, unsafe_allow_html=True)
 
 minutes, seconds = divmod(time.time()-start, 60)
-st.write(f"***** Total training time: {int(minutes)} minutes and {seconds:.2f} seconds *****")
+time_cols = st.columns([0.6, 0.4])
+with time_cols[0]:
+    time_taken_html = f"""
+        <style>
+            .time-container {{
+                background: linear-gradient(135deg, #2c3e50, #34495e);
+                border-radius: 15px;
+                padding: 20px;
+                margin: 30px auto;
+                max-width: 600px;
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+                border: 2px solid #3498db;
+            }}
+            
+            .time-container::before {{
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                animation: slide-shine 2s infinite;
+            }}
+            
+            @keyframes slide-shine {{
+                0% {{ left: -100%; }}
+                100% {{ left: 100%; }}
+            }}
+            
+            .time-text {{
+                font-size: 24px;
+                font-weight: bold;
+                color: #ecf0f1;
+                text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+                position: relative;
+                z-index: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }}
+            
+            .time-icon {{
+                font-size: 28px;
+                animation: pulse 2s infinite;
+            }}
+            
+            @keyframes pulse {{
+                0%, 100% {{ transform: scale(1); }}
+                50% {{ transform: scale(1.3); }}
+            }}
+        </style>
+        <div class="time-container">
+            <div class="time-text">
+                <span class="time-icon">⏱️</span> Total training time: {int(minutes)} minutes and {seconds:.2f} seconds
+            </div>
+        </div>
+    """
+    st.markdown(time_taken_html, unsafe_allow_html=True)
+
+with time_cols[1]:  
+    st.markdown(
+        "<div style='text-align: center; font-size: 24px; font-weight: bold; margin-top: 20px;'>"
+            "View training episodes gallery"
+        "</div>",
+        unsafe_allow_html=True
+    )
+    if st.button("🖼️ Go to Gallery", use_container_width=True):
+        st.session_state.page = "🖼️  Galería de episodios"
+        st.rerun()
 
 # ************************************* AUTHOR CREDITS *************************************
-st.markdown("""
+author_html = """
     <style>
         .author-social-row {
             display: flex;
@@ -895,6 +971,28 @@ st.markdown("""
                 <img src="https://static.licdn.com/sc/h/8s162nmbcnfkg7a0k8nq9wwqo" alt="LinkedIn">
         </div>
     </div>
-""", unsafe_allow_html=True)
+"""
+st.markdown(author_html, unsafe_allow_html=True)
 
+# Footer with rights disclaimer
+footer_html = """
+    <style>
+        .footer {
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #888888;
+            text-align: center;
+            padding: 20px 0;  /* Change this value to move footer down (increased from 10px) */
+            font-size: 0.8em;
+            border-top: 1px solid #333;
+            margin-top: 60px;  /* Change this value to add more space above footer */
+        }
+    </style>
+    <div class="footer">
+        © 2024 Alejandro Mendoza all rights reserved. This website and its content are protected by copyright law. 
+    </div>
+"""
+st.markdown(footer_html, unsafe_allow_html=True)
 
