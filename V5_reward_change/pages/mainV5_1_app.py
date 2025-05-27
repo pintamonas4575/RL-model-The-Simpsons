@@ -122,6 +122,7 @@ if st.button("🔄 Refresh"):
 
 st.markdown("""<style>hr:first-of-type {display: none;}</style>""", unsafe_allow_html=True) # hide first horizontal divider
 st.markdown("<h1 style='text-align: center;'>Reinforcement Learning applied to custom dynamic environment </h1>", unsafe_allow_html=True)
+
 rainbow_html = """
     <style>
     @keyframes rotateColors {
@@ -173,7 +174,7 @@ with config_cols[1]:
 
 game_cols = st.columns([0.3, 0.5, 0.3])
 with game_cols[0]:
-    st.markdown(f"""
+    env_params_html = f"""
     <style>
         .full-bg-container {{
             position: relative;
@@ -189,10 +190,10 @@ with game_cols[0]:
             padding: 36px 32px 36px 32px;
             margin-bottom: 18px;
         }}
-        .env-title {{
+        .env-title-1 {{
             text-align: center;
             font-size: 28px;
-            color: #222;
+            color: #000;
             font-weight: bold;
             margin-bottom: 22px;
             margin-top: 0px;
@@ -232,15 +233,23 @@ with game_cols[0]:
             margin-top: 10px;
             justify-content: center;
         }}
+        .number-highlight {{
+            color: #000;
+            background: #FFD700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }}
     </style>
     <div class="full-bg-container">
-        <div class='env-title'>
+        <div class='env-title-1'>
             <img src="https://em-content.zobj.net/source/animated-noto-color-emoji/356/globe-showing-europe-africa_1f30d.gif" alt="Globe" style="height:36px;vertical-align:middle;margin-right:8px;">
             Env parameters
             <img src="https://em-content.zobj.net/source/animated-noto-color-emoji/356/globe-showing-europe-africa_1f30d.gif" alt="Globe" style="height:36px;vertical-align:middle;margin-left:8px;">
         </div>
-        <div class='env-title' style="font-size:23px; margin-bottom:0;">
-            Frame size: <strong>{env.FRAME_SIZE}</strong>
+        <div class='env-title-1' style="font-size:23px; margin-bottom:0;">
+            Frame size: <span class="number-highlight">{env.FRAME_SIZE}</span>
         </div>
         <div class="arrow-container">
             <svg class="arrow-svg-pro" viewBox="0 0 70 70" fill="none">
@@ -255,16 +264,17 @@ with game_cols[0]:
                     fill="none" stroke="url(#arrow-gradient)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </div>
-        <div class='env-title' style="font-size:23px; margin-bottom:0;">
-            Total squares: <strong>{env.total_squares}</strong>
+        <div class='env-title-1' style="font-size:23px; margin-bottom:0;">
+            Total squares: <span class="number-highlight">{env.total_squares}</span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    st.markdown(env_params_html, unsafe_allow_html=True)
 with game_cols[1]:
     image_placeholder = st.empty()
     image_placeholder.image(env.get_window_image(), use_container_width=True)
 with game_cols[2]:
-    st.markdown(f"""
+    agent_params_html = f"""
     <style>
         .full-bg-container {{
             position: relative;
@@ -281,10 +291,10 @@ with game_cols[2]:
             margin-bottom: 18px;
             box-shadow: 0 4px 32px #0002;
         }}
-        .env-title {{
+        .env-title-2 {{
             text-align: center;
             font-size: 28px;
-            color: #222;
+            color: #000;
             font-weight: bold;
             margin-bottom: 28px;
             margin-top: 0px;
@@ -306,7 +316,7 @@ with game_cols[2]:
         }}
         .custom-list li {{
             font-size: 20px;
-            color: #222;
+            color: #000;
             line-height: 1.5;
             position: relative;
             padding-left: 44px;
@@ -334,20 +344,30 @@ with game_cols[2]:
             0% {{ box-shadow: 0 0 10px 3px #ffe07a88; }}
             100% {{ box-shadow: 0 0 22px 8px #ffe07a; }}
         }}
+        .number-highlight {{
+            color: #000;
+            # background: linear-gradient(45deg, #d99118, #ffe07a);
+            background: #FFD700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }}
     </style>
     <div class="full-bg-container">
-        <div class='env-title'>
+        <div class='env-title-2'>
             <img src="https://em-content.zobj.net/thumbs/120/animated-noto-color-emoji/356/robot_1f916.gif" alt="Robot" style="height:36px;vertical-align:middle;margin-right:8px;">
             Agent parameters
             <img src="https://em-content.zobj.net/thumbs/120/animated-noto-color-emoji/356/robot_1f916.gif" alt="Robot" style="height:36px;vertical-align:middle;margin-left:8px;">
         </div>
         <ul class="custom-list">
-            <li>Learning rate: <strong>{agent.alpha}</strong></li>
-            <li>Discount factor: <strong>{agent.gamma}</strong></li>
-            <li>Qtable: <strong>{env.total_squares} × {env.total_squares}</strong></li>
+            <li>Learning rate: <span class="number-highlight">{agent.alpha}</span></li>
+            <li>Discount factor: <span class="number-highlight">{agent.gamma}</span></li>
+            <li>Qtable: <span class="number-highlight">{env.total_squares}</span> × <span class="number-highlight">{env.total_squares}</span></li>
         </ul>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    st.markdown(agent_params_html, unsafe_allow_html=True)
 
 train_button_col = st.columns([1, 1, 1])[1]
 with train_button_col:
@@ -510,7 +530,7 @@ for i in range(EPISODES):
     # ---------------SAVE IMAGE TO GALLERY----------------
     if i % TRACE == 0 or i == EPISODES-1:
         img: Image.Image = env.get_window_image()
-        gallery_images.append((img, i + 1))
+        gallery_images.append((img, i))
 
     time.sleep(0.08)
 
@@ -844,7 +864,7 @@ with time_cols[0]:
                 width: 100%;
                 height: 100%;
                 background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-                animation: slide-shine 2s infinite;
+                animation: slide-shine 3s infinite;
             }}
             
             @keyframes slide-shine {{
@@ -882,17 +902,34 @@ with time_cols[0]:
         </div>
     """
     st.markdown(time_taken_html, unsafe_allow_html=True)
-
 with time_cols[1]:  
-    st.markdown(
-        "<div style='text-align: center; font-size: 24px; font-weight: bold; margin-top: 20px;'>"
-            "View training episodes gallery"
-        "</div>",
-        unsafe_allow_html=True
-    )
-    if st.button("🖼️ Go to Gallery", use_container_width=True):
-        st.session_state.page = "🖼️  Galería de episodios"
-        st.rerun()
+    button_html = """
+        <style>
+            .gallery-button {
+                display: inline-block;
+                background: linear-gradient(90deg, #ff9800 0%, #f44336 100%);
+                color: black !important;
+                font-size: 1.6em;
+                font-weight: bold;
+                border-radius: 2em;
+                padding: 0.75em 2.5em;
+                border: none;
+                text-decoration: none !important;
+                cursor: pointer;
+                user-select: none;
+                box-shadow: 0 0 16px 6px #ff980088;
+            }
+            .gallery-button:hover {
+                box-shadow: 0 0 32px 12px #ff5722aa;
+                transform: scale(1.05);
+                transition: all 0.3s ease;
+            }
+        </style>
+        <div style="display:flex; justify-content:center; margin-top:2em;">
+            <a class="gallery-button" href="http://localhost:8501/gallery_app" target="_self">🖼️ Go to Gallery</a>
+        </div>
+    """
+    st.markdown(button_html, unsafe_allow_html=True)
 
 # ************************************* AUTHOR CREDITS *************************************
 author_html = """
@@ -974,7 +1011,6 @@ author_html = """
 """
 st.markdown(author_html, unsafe_allow_html=True)
 
-# Footer with rights disclaimer
 footer_html = """
     <style>
         .footer {
@@ -991,7 +1027,7 @@ footer_html = """
         }
     </style>
     <div class="footer">
-        © 2024 Alejandro Mendoza all rights reserved. This website and its content are protected by copyright law. 
+        © 2025 Alejandro Mendoza all rights reserved. Made for all the people willing to try their models and visualize their results. 
     </div>
 """
 st.markdown(footer_html, unsafe_allow_html=True)
