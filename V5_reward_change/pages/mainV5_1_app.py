@@ -117,32 +117,29 @@ if page == "Galería de episodios":
             st.image(os.path.join(IMAGES_FOLDER, img), use_column_width=True, caption=f"Episodio {idx+1}")
 
 # ************************************* MAIN APP *************************************
-refresh_button_html = """
-    <style>
+col1, col2 = st.columns([3, 1], border=True)
+with col2:
+    st.markdown("""
+        <style>
         .stButton > button {
             background: linear-gradient(90deg, #27ae60, #f39c12);
             color: black;
             font-weight: bold;
             border: none;
             border-radius: 50px;
-            padding: 12px 24px;
+            padding: 10px 24px;
             font-size: 22px;
-            # cursor: pointer;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
             transition: 0.5s;
             float: right;
-            margin-bottom: 0.5em;
         }
         .stButton > button:hover {
             transform: scale(1.11);
         }
-    </style>
-"""
-st.markdown(refresh_button_html, unsafe_allow_html=True)
-if st.button("Refresh"):
-    st.rerun()
+        </style>
+    """, unsafe_allow_html=True)
+    if st.button("Refresh"):
+        st.rerun()
 
-st.markdown("""<style>hr:first-of-type {display: none;}</style>""", unsafe_allow_html=True) # hide first horizontal divider
 st.markdown("<h1 style='text-align: center;'>Reinforcement Learning applied to custom dynamic environment </h1>", unsafe_allow_html=True)
 
 config_cols = st.columns([1, 0.6, 1])
@@ -1006,11 +1003,11 @@ with time_cols[1]:
                 cursor: pointer;
                 user-select: none;
                 box-shadow: 0 0 16px 6px #ff980088;
+                transition: all 0.3s ease;
             }
             .gallery-button:hover {
                 box-shadow: 0 0 32px 12px #ff5722aa;
                 transform: scale(1.05);
-                transition: all 0.3s ease;
             }
         </style>
         <div style="display:flex; justify-content:center; margin-top:2em;">
@@ -1086,7 +1083,7 @@ author_html = """
     <div class="author-social-row">
         <div class="author-card">
             <span class="author-title">Author:</span>
-            <span class="author-name">Alejandro Mendoza</span>
+            <span class="author-name">Alejandro Mendoza Medina</span>
         </div>
         <div class="social-links">
             <a href="https://github.com/pintamonas4575/RL-model-The-Simpsons" target="_blank">
