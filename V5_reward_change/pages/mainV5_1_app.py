@@ -855,15 +855,50 @@ with time_cols[0]:
                 box-shadow: 0 8px 32px rgba(0,0,0,0.3);
                 border: 2px solid #27ae60;
             }}
+            /* Haz de luz exhuberante */
             .time-container::before {{
                 content: '';
                 position: absolute;
                 top: 0;
-                left: -100%;
+                left: -120%;
+                width: 80px;
+                height: 100%;
+                background: linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0) 100%);
+                filter: blur(2px);
+                opacity: 0.85;
+                animation: slide-shine 3s cubic-bezier(.6,0,.4,1) infinite;
+                z-index: 2;
+            }}
+            /* Chispa animada */
+            .sparkle {{
+                position: absolute;
+                top: 50%;
+                right: -18px;
+                transform: translateY(-50%) scale(0.6);
+                width: 36px;
+                height: 36px;
+                pointer-events: none;
+                opacity: 0;
+                z-index: 3;
+                animation: sparkle-pop 3s cubic-bezier(.6,0,.4,1) infinite;
+            }}
+            /* SVG de chispa */
+            .sparkle svg {{
+                display: block;
                 width: 100%;
                 height: 100%;
-                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-                animation: slide-shine 3s infinite;
+            }}
+            @keyframes slide-shine {{
+                0%   {{ left: -120%; opacity: 0.6; }}
+                80%  {{ left: 100%; opacity: 0.8; }}
+                100% {{ left: 100%; opacity: 0; }}
+            }}
+            @keyframes sparkle-pop {{
+                0%, 84% {{ opacity: 0; transform: translateY(-50%) scale(0.3) rotate(0deg); }}
+                85%     {{ opacity: 1; transform: translateY(-50%) scale(1.1) rotate(5deg); }}
+                88%     {{ opacity: 1; transform: translateY(-50%) scale(1.3) rotate(-8deg); }}
+                91%     {{ opacity: 1; transform: translateY(-50%) scale(1) rotate(0deg); }}
+                100%    {{ opacity: 0; transform: translateY(-50%) scale(0.3) rotate(0deg); }}
             }}
             .time-text {{
                 font-size: 24px;
@@ -883,10 +918,6 @@ with time_cols[0]:
             .time-value {{
                 font-weight: bold;
             }}
-            @keyframes slide-shine {{
-                0% {{ left: -100%; }}
-                100% {{ left: 100%; }}
-            }}
             @keyframes pulse {{
                 0%, 100% {{ transform: scale(1); }}
                 50% {{ transform: scale(1.3); }}
@@ -894,13 +925,29 @@ with time_cols[0]:
         </style>
         <div class="time-container">
             <div class="time-text">
-                <span class="time-icon">⏱️</span> Total training time: <span class="time-value">{int(minutes)} minutes {seconds:.2f} seconds</span>
+                <span class="time-icon">⏱️</span> Total training time: <span class="time-value">{int(minutes)} min {seconds:.2f} sec</span>
             </div>
+            <span class="sparkle">
+                <svg viewBox="0 0 36 36" fill="none">
+                    <g filter="url(#glow)">
+                        <circle cx="18" cy="18" r="8" fill="#fff176" fill-opacity="0.9"/>
+                        <ellipse cx="18" cy="18" rx="3" ry="10" fill="#fffde7" fill-opacity="0.7" transform="rotate(30 18 18)"/>
+                        <ellipse cx="18" cy="18" rx="3" ry="10" fill="#fffde7" fill-opacity="0.7" transform="rotate(-30 18 18)"/>
+                    </g>
+                    <defs>
+                        <filter id="glow" x="0" y="0" width="36" height="36" filterUnits="userSpaceOnUse">
+                            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                </svg>
+            </span>
         </div>
     """
     st.markdown(time_taken_html, unsafe_allow_html=True)
-
-
 with time_cols[1]:  
     button_html = """
         <style>
