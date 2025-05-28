@@ -10,31 +10,24 @@ images: list[tuple[Image.Image, int]] = st.session_state.get("gallery_images", [
 col1, col2, col3 = st.columns([1, 2, 1], border=True)
 with col2:
     rainbow_html = """
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
     <style>
-    @keyframes rainbowText {
-        0%   { color: #ff5f6d; }
-        16%  { color: #ffc371; }
-        32%  { color: #47cf73; }
-        48%  { color: #1fa2ff; }
-        64%  { color: #a259c9; }
-        80%  { color: #ff6a00; }
-        100% { color: #ff5f6d; }
-    }
     .rainbow-text {
-        font-size: 2.2rem;
-        font-weight: 600;
-        font-family: 'Robot', 'Arial', sans-serif;
-        letter-spacing: 0.02em;
+        font-size: 2.5rem;
+        font-family: 'Montserrat', 'Robot', Arial, sans-serif;
+        font-weight: 700;
+        letter-spacing: 0.03em;
         word-spacing: 0.12em;
         text-align: center;
-        background: linear-gradient(90deg,#ff5f6d,#ffc371,#47cf73,#1fa2ff,#a259c9,#ff6a00,#ff5f6d);
+        background: linear-gradient(90deg,#00f2fe,#4facfe,#00f2fe,#43e97b,#38f9d7,#fa8bff,#00f2fe);
         background-size: 300% 300%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         animation: rainbowBG 8s linear infinite;
-        transition: all 0.3s;
-        filter: drop-shadow(0 2px 8px rgba(0,0,0,0.08));
+        filter: drop-shadow(0 2px 12px rgba(0,0,0,0.10));
         margin-bottom: 0.5em;
+        margin-top: 0.2em;
+        transition: all 0.3s;
     }
     @keyframes rainbowBG {
         0% { background-position: 0% 50%; }
