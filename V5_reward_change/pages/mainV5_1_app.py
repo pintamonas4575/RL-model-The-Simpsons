@@ -16,7 +16,7 @@ from environmentV5_app import Scratch_Game_Environment5_Streamlit
 from agentV5_1_Qtable_app import RL_Agent_51_Streamlit
 
 # ************************************* PAGE CONFIG *************************************
-st.set_page_config(page_title="💵 RL_Scratch_Game 💵", page_icon="🦈", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Main Hall", page_icon="🖥️", layout="wide", initial_sidebar_state="collapsed")
 st.markdown("""<style>.stApp {background-color: #000000;}.main .block-container {background-color: #000000;}</style>""", unsafe_allow_html=True)
 
 def get_gradient_color(p: int) -> str:

@@ -1,7 +1,7 @@
 import streamlit as st
 from PIL import Image
 
-st.set_page_config(page_title="Episode Gallery", page_icon="🦈", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Episode Gallery", page_icon="🖼️", layout="wide", initial_sidebar_state="collapsed")
 st.markdown("""<style>.stApp {background-color: #000000;}.main .block-container {background-color: #000000;}</style>""", unsafe_allow_html=True)
 
 images: list[tuple[Image.Image, int]] = st.session_state.get("gallery_images", [])
