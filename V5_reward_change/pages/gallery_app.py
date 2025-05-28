@@ -59,7 +59,7 @@ st.markdown(side_bar_html, unsafe_allow_html=True)
 
 st.sidebar.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 st.sidebar.page_link("home_app.py", icon="🏠", label="Home")
-st.sidebar.page_link("pages/mainV5_1_app.py", icon="🖥️", label="Main Hall")
+st.sidebar.page_link("pages/main_hall_app.py", icon="🖥️", label="Main Hall")
 st.sidebar.page_link("pages/gallery_app.py", icon="🖼️", label="Episode Gallery")
 
 # ************************************* MAIN BODY *************************************
@@ -128,7 +128,7 @@ with gallery_title_cols[2]:
             }
         </style>
         <div class="gallery-button-container">
-            <a class="gallery-button" href="http://localhost:8501/mainV5_1_app" target="_self">← Back to Main Hall</a>
+            <a class="gallery-button" href="http://localhost:8501/main_hall_app" target="_self">← Back to Main Hall</a>
         </div>
     """
     st.markdown(button_html, unsafe_allow_html=True)

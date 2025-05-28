@@ -56,7 +56,7 @@ st.markdown(side_bar_html, unsafe_allow_html=True)
 
 st.sidebar.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 st.sidebar.page_link("home_app.py", icon="🏠", label="Home")
-st.sidebar.page_link("pages/mainV5_1_app.py", icon="🖥️", label="Main Hall")
+st.sidebar.page_link("pages/main_hall_app.py", icon="🖥️", label="Main Hall")
 st.sidebar.page_link("pages/gallery_app.py", icon="🖼️", label="Episode Gallery")
 
 # ************************************* MAIN BODY *************************************
@@ -174,7 +174,7 @@ button_html = """
         }
     </style>
     <div style="display:flex; justify-content:center; margin-top:2em;">
-        <a class="fake-button" href="http://localhost:8501/mainV5_1_app" target="_self">GO TO GLORIOUS HALL</a>
+        <a class="fake-button" href="http://localhost:8501/main_hall_app" target="_self">GO TO GLORIOUS HALL</a>
     </div>
 """
 st.markdown(button_html, unsafe_allow_html=True)
