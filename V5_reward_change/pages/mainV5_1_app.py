@@ -42,20 +42,7 @@ agent = st.session_state.agent
 gallery_images: list[tuple[Image.Image, int]] = st.session_state.gallery_images
 
 # ************************************* SIDEBAR MENU *************************************
-st.sidebar.markdown("""<span style='font-size:24px; font-weight:bold; color:#ffb300; letter-spacing:1px;'>🌟 Menú de navegación</span>""", unsafe_allow_html=True)
-page = st.sidebar.radio(
-    " ",
-    [
-        "🏠  Inicio",
-        "🖼️  Galería de episodios",
-        "📈  Estadísticas",
-    ],
-    captions=[
-        "Ir a la página principal",
-        "Ver la galería de imágenes de episodios",
-        "Visualiza los datos y métricas",
-    ]
-)
+st.sidebar.markdown("""<div style='text-align:center;'><span style='font-size:24px; font-weight:bold; color:#ffb300; letter-spacing:1px;'>🌟 MENU 🌟</span></div>""", unsafe_allow_html=True)
 
 side_bar_html = """
     <style>
@@ -105,16 +92,10 @@ side_bar_html = """
 """
 st.markdown(side_bar_html, unsafe_allow_html=True)
 
-# TODO: fix sidemenu sections and links
-if page == "Galería de episodios":
-    IMAGES_FOLDER = "../episodes"  # Cambia a tu ruta real
-    image_files = [f for f in os.listdir(IMAGES_FOLDER) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))]
-    st.title("Galería de episodios")
-    # Muestra las imágenes en filas de 3 columnas
-    cols = st.columns(3)
-    for idx, img in enumerate(image_files):
-        with cols[idx % 3]:
-            st.image(os.path.join(IMAGES_FOLDER, img), use_column_width=True, caption=f"Episodio {idx+1}")
+st.sidebar.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+st.sidebar.page_link("home_app.py", icon="🏠", label="Home")
+st.sidebar.page_link("pages/mainV5_1_app.py", icon="🖥️", label="Main Hall")
+st.sidebar.page_link("pages/gallery_app.py", icon="🖼️", label="Episode Gallery")
 
 # ************************************* MAIN APP *************************************
 refresh_button_cols = st.columns([3, 1], border=False)
@@ -139,6 +120,7 @@ with refresh_button_cols[1]:
     """, unsafe_allow_html=True)
     if st.button("Refresh"):
         st.rerun()
+
 st.markdown("<h1 style='text-align: center;'>Reinforcement Learning applied to custom dynamic environment </h1>", unsafe_allow_html=True)
 
 config_cols = st.columns([1, 0.6, 1])

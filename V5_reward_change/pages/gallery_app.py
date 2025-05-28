@@ -6,7 +6,63 @@ st.markdown("""<style>.stApp {background-color: #000000;}.main .block-container 
 
 images: list[tuple[Image.Image, int]] = st.session_state.get("gallery_images", [])
 
-# ----------------------------------------MAIN BODY----------------------------------------
+# ************************************* SIDEBAR MENU *************************************
+st.sidebar.markdown("""<div style='text-align:center;'><span style='font-size:24px; font-weight:bold; color:#ffb300; letter-spacing:1px;'>🌟 MENU 🌟</span></div>""", unsafe_allow_html=True)
+
+side_bar_html = """
+    <style>
+        /* Fondo y bordes del sidebar */
+        [data-testid="stSidebar"] {
+            background: linear-gradient(180deg, #000000 60%, #f44611 100%);
+            border-radius: 0 20px 20px 0;
+            box-shadow: 2px 0 18px #0002;
+        }
+        /* Radio button */
+        [data-testid="stSidebar"] .stRadio [role="radiogroup"] > div {
+            background: rgba(255,255,255,0.10);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            transition: background 0.2s;
+            box-shadow: 0 1px 6px #0001;
+            padding: 10px 16px;
+        }
+        [data-testid="stSidebar"] .stRadio [role="radiogroup"] > div:hover {
+            background: rgba(255,255,255,0.18);
+        }
+        /* Texto de opciones */
+        [data-testid="stSidebar"] .stRadio [role="radio"] p {
+            color: #fff !important;
+            font-weight: 600;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+        }
+        /* Captions */
+        [data-testid="stSidebar"] .stRadio [data-testid="stCaption"] {
+            color: #ffe07a !important;
+            font-size: 13px !important;
+            margin-top: 2px;
+            margin-left: 6px;
+            font-style: italic;
+        }
+        /* Círculo de selección */
+        [data-testid="stSidebar"] .stRadio [role="radio"] span[aria-checked] {
+            border: 2px solid #ffe07a !important;
+            box-shadow: 0 0 8px #ffe07a44;
+        }
+        [data-testid="stSidebar"] .stRadio [role="radio"][aria-checked="true"] span[aria-checked] {
+            background: #ffe07a !important;
+            border: 2px solid #fff !important;
+        }
+    </style>
+"""
+st.markdown(side_bar_html, unsafe_allow_html=True)
+
+st.sidebar.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+st.sidebar.page_link("home_app.py", icon="🏠", label="Home")
+st.sidebar.page_link("pages/mainV5_1_app.py", icon="🖥️", label="Main Hall")
+st.sidebar.page_link("pages/gallery_app.py", icon="🖼️", label="Episode Gallery")
+
+# ************************************* MAIN BODY *************************************
 gallery_title_cols = st.columns([1, 2, 1], border=False)
 with gallery_title_cols[1]:
     rainbow_html = """
