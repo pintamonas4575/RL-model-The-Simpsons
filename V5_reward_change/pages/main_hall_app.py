@@ -34,13 +34,6 @@ def get_gradient_color(p: int) -> str:
         b = int(47 + (71 - 47) * ((p - 50) / 50))
     return f"rgb({r},{g},{b})"
 
-st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=50, scratching_area=(0, 0, 700, 350), background_path="../utils/space.jpg")
-st.session_state.agent = RL_Agent_51_Streamlit(num_actions=st.session_state.env.total_squares)
-st.session_state.gallery_images = []
-env = st.session_state.env
-agent = st.session_state.agent
-gallery_images: list[tuple[Image.Image, int]] = st.session_state.gallery_images
-
 # ************************************* SIDEBAR MENU *************************************
 st.sidebar.markdown("""<div style='text-align:center;'><span style='font-size:24px; font-weight:bold; color:#ffb300; letter-spacing:1px;'>🌟 MENU 🌟</span></div>""", unsafe_allow_html=True)
 
@@ -123,7 +116,7 @@ with refresh_button_cols[1]:
 
 st.markdown("<h1 style='text-align: center;'>Reinforcement Learning applied to custom dynamic environment </h1>", unsafe_allow_html=True)
 
-config_cols = st.columns([1, 0.6, 1])
+config_cols = st.columns([1, 0.6, 1], border=True)
 with config_cols[1]:
     col1, col2 = st.columns(2)
     with col1:
@@ -132,6 +125,16 @@ with config_cols[1]:
     with col2:
         st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Trace Interval</p>", unsafe_allow_html=True)
         TRACE = st.number_input(" ", min_value=1, max_value=50, value=1, step=1, label_visibility="collapsed")
+
+# TODO ("CONFIG_COLS"): Add buttons to select parameters and then pass them to the environment and agent
+# TODO 1: frame_size,
+# TODO 2: alpha, gamma, epsilon
+st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=50, scratching_area=(0, 0, 700, 350), background_path="../utils/space.jpg")
+env = st.session_state.env
+st.session_state.agent = RL_Agent_51_Streamlit(num_actions=env.total_squares, alpha=0.1, gamma=0.9, epsilon=0.9)
+agent = st.session_state.agent
+st.session_state.gallery_images = []
+gallery_images: list[tuple[Image.Image, int]] = st.session_state.gallery_images
 
 game_cols = st.columns([0.3, 0.5, 0.3])
 with game_cols[0]:
@@ -416,7 +419,8 @@ areas_cols = st.columns([0.7, 0.3])
 
 max_reward, min_actions, min_area_scratched = -99999, 99999, 999 # best
 min_reward, max_actions, max_area_scratched = 99999, 0, 0        # worst
-EPSILON = 0.9
+
+agent.epsilon = 0.9
 
 # """******************************BEGINNING OF TRAINING******************************"""
 # if st.button('Comenzar entrenamiento', type='primary'):
@@ -457,7 +461,7 @@ for i in range(EPISODES):
     episode_actions = 0
     episode_reward = 0
 
-    EPSILON *= np.exp(-0.001 * i)
+    agent.epsilon *= np.exp(-0.001 * i)
 
     current_state = env.frames_mask
     current_action = env.total_squares // 2
@@ -465,7 +469,7 @@ for i in range(EPISODES):
     while not done:
         episode_actions += 1
 
-        action_index = agent.choose_action(current_action, current_state, EPSILON)
+        action_index = agent.choose_action(current_action, current_state)
         next_state, reward, done = env.env_step(action_index)
         agent.update_q_table(current_action, action_index, reward, next_state)
 
