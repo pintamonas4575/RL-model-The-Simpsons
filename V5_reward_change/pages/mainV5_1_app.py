@@ -105,7 +105,7 @@ side_bar_html = """
 """
 st.markdown(side_bar_html, unsafe_allow_html=True)
 
-
+# TODO: fix sidemenu sections and links
 if page == "Galería de episodios":
     IMAGES_FOLDER = "../episodes"  # Cambia a tu ruta real
     image_files = [f for f in os.listdir(IMAGES_FOLDER) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))]
@@ -117,6 +117,40 @@ if page == "Galería de episodios":
             st.image(os.path.join(IMAGES_FOLDER, img), use_column_width=True, caption=f"Episodio {idx+1}")
 
 # ************************************* MAIN APP *************************************
+st.markdown("""
+    <style>
+    .refresh-btn-container {
+        position: fixed;
+        top: 30px;
+        right: 30px;
+        z-index: 9999;
+    }
+    .refresh-btn {
+        background: linear-gradient(90deg, #27ae60, #f39c12);
+        color: white;
+        font-weight: bold;
+        border: none;
+        border-radius: 50px;
+        padding: 12px 24px;
+        font-size: 22px;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+        transition: 0.2s;
+    }
+    .refresh-btn:hover {
+        background: linear-gradient(90deg, #f39c12, #27ae60);
+        transform: scale(1.08);
+    }
+    </style>
+    <div class="refresh-btn-container">
+        <form action="" method="post">
+            <button class="refresh-btn" type="submit">🔄 Refresh</button>
+        </form>
+    </div>
+""", unsafe_allow_html=True)
+
+refresh = st.session_state.get("refresh", False)
+# if st.form_submit_button("🔄 Refresh", key="refresh_form_button"):
 if st.button("🔄 Refresh"):
     st.rerun()
 
@@ -369,11 +403,79 @@ with game_cols[2]:
     """
     st.markdown(agent_params_html, unsafe_allow_html=True)
 
-train_button_col = st.columns([1, 1, 1])[1]
-with train_button_col:
-    train_button = st.button("🚀 Start Training", use_container_width=True)
-    # if st.button("Train Model", use_container_width=True):
-        # st.write("Dummy button pressed!")
+train_button_cols = st.columns([1, 1, 1])
+with train_button_cols[1]:
+    start_button_html = """
+        <style>
+            .train-button-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin: 20px 0;
+            }
+            .train-button {
+                background: linear-gradient(45deg, #ff6b35, #f7931e, #ff6b35);
+                background-size: 300% 300%;
+                color: white;
+                font-size: 1.8em;
+                font-weight: bold;
+                padding: 16px 40px;
+                border: none;
+                border-radius: 50px;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 12px;
+                box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+                animation: gradient-shift 3s ease infinite;
+            }
+            .train-button:hover {
+                transform: translateY(-3px) scale(1.05);
+                box-shadow: 0 12px 35px rgba(255, 107, 53, 0.6);
+                background-size: 100% 100%;
+            }
+            .train-button:active {
+                transform: translateY(-1px) scale(1.02);
+            }
+            .train-button::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+                transition: left 0.5s;
+            }
+            .train-button:hover::before {
+                left: 100%;
+            }
+            @keyframes gradient-shift {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+            }
+            .rocket-icon {
+                font-size: 1.2em;
+                animation: rocket-bounce 2s infinite;
+            }
+            @keyframes rocket-bounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-4px); }
+            }
+        </style>
+        <div class="train-button-container">
+            <button class="train-button" onclick="this.style.display='none'">
+                <span class="rocket-icon">🚀</span>
+                Start Training
+            </button>
+        </div>
+    """
+    st.markdown(start_button_html, unsafe_allow_html=True)
 
 # train progressbar
 percent_placeholder = st.empty()
@@ -385,14 +487,11 @@ rewards_cols = st.columns([0.7, 0.3])
 actions_cols = st.columns([0.7, 0.3])
 areas_cols = st.columns([0.7, 0.3])
 
-# EPISODES = 20
-# trace = 1
 max_reward, min_actions, min_area_scratched = -99999, 99999, 999 # best
 min_reward, max_actions, max_area_scratched = 99999, 0, 0        # worst
-# path_to_save = f"V5_version/V5_1_Qtable_{env.total_squares}_{EPISODES}_app"
-
 EPSILON = 0.9
 
+# """******************************BEGINNING OF TRAINING******************************"""
 # if st.button('Comenzar entrenamiento', type='primary'):
 start = time.time()
 with rewards_cols[0]:
@@ -423,7 +522,6 @@ with areas_cols[0]:
     areas_placeholder = st.empty()
     areas_df = pd.DataFrame(columns=['Episode', 'Area Scratched', 'Min Area Scratched', 'Max Area Scratched'])
 
-# """******************************BEGINNING OF TRAINING******************************"""
 for i in range(EPISODES):
 
     env.env_reset()
@@ -458,11 +556,6 @@ for i in range(EPISODES):
     max_reward = episode_reward if episode_reward > max_reward else max_reward
     max_actions = episode_actions if episode_actions > max_actions else max_actions
     max_area_scratched = episode_area if episode_area > max_area_scratched else max_area_scratched
-
-    if i % TRACE == 0 or i == EPISODES-1:
-        dummy_image: Image.Image = env.get_window_image()
-        dummy_image.save(f"dummy_image_episode.png")
-    
     # ---------------REWARDS EVOLUTION----------------
     rewards_df.loc[len(rewards_df)] = [i + 1, episode_reward, min(episode_reward, min_reward), max(episode_reward, max_reward)] 
     rewards_chart = alt.Chart(rewards_df).transform_fold(
