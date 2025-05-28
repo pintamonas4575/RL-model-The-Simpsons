@@ -685,12 +685,12 @@ with actions_cols[1]:
             clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
         }}
         .triangle-min {{
-            background: linear-gradient(135deg, #d32f2f 60%, #ff8a65 100%);
-            border: 6px solid #d32f2f;
-        }}
-        .triangle-max {{
             background: linear-gradient(135deg, #388e3c 60%, #66bb6a 100%);
             border: 6px solid #388e3c;
+        }}
+        .triangle-max {{
+            background: linear-gradient(135deg, #d32f2f 60%, #ff8a65 100%);
+            border: 6px solid #d32f2f;
         }}
         .triangle-avg {{
             background: linear-gradient(135deg, #ff9800 60%, #ffd54f 100%);
@@ -783,12 +783,12 @@ with areas_cols[1]:
             position: relative;
         }}
         .square-min {{
-            background: linear-gradient(135deg, #d32f2f 60%, #ff8a65 100%);
-            border: 6px solid #d32f2f;
-        }}
-        .square-max {{
             background: linear-gradient(135deg, #388e3c 60%, #66bb6a 100%);
             border: 6px solid #388e3c;
+        }}
+        .square-max {{
+            background: linear-gradient(135deg, #d32f2f 60%, #ff8a65 100%);
+            border: 6px solid #d32f2f;
         }}
         .square-avg {{
             background: linear-gradient(135deg, #ff9800 60%, #ffd54f 100%);
@@ -844,7 +844,7 @@ with time_cols[0]:
     time_taken_html = f"""
         <style>
             .time-container {{
-                background: linear-gradient(135deg, #2c3e50, #34495e);
+                background: linear-gradient(135deg, #27ae60, #1e8449);
                 border-radius: 15px;
                 padding: 20px;
                 margin: 30px auto;
@@ -853,9 +853,8 @@ with time_cols[0]:
                 position: relative;
                 overflow: hidden;
                 box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-                border: 2px solid #3498db;
+                border: 2px solid #27ae60;
             }}
-            
             .time-container::before {{
                 content: '';
                 position: absolute;
@@ -866,16 +865,9 @@ with time_cols[0]:
                 background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
                 animation: slide-shine 3s infinite;
             }}
-            
-            @keyframes slide-shine {{
-                0% {{ left: -100%; }}
-                100% {{ left: 100%; }}
-            }}
-            
             .time-text {{
                 font-size: 24px;
-                font-weight: bold;
-                color: #ecf0f1;
+                color: #ffffff;
                 text-shadow: 0 2px 4px rgba(0,0,0,0.5);
                 position: relative;
                 z-index: 1;
@@ -884,12 +876,17 @@ with time_cols[0]:
                 justify-content: center;
                 gap: 10px;
             }}
-            
             .time-icon {{
                 font-size: 28px;
                 animation: pulse 2s infinite;
             }}
-            
+            .time-value {{
+                font-weight: bold;
+            }}
+            @keyframes slide-shine {{
+                0% {{ left: -100%; }}
+                100% {{ left: 100%; }}
+            }}
             @keyframes pulse {{
                 0%, 100% {{ transform: scale(1); }}
                 50% {{ transform: scale(1.3); }}
@@ -897,11 +894,13 @@ with time_cols[0]:
         </style>
         <div class="time-container">
             <div class="time-text">
-                <span class="time-icon">⏱️</span> Total training time: {int(minutes)} minutes and {seconds:.2f} seconds
+                <span class="time-icon">⏱️</span> Total training time: <span class="time-value">{int(minutes)} minutes {seconds:.2f} seconds</span>
             </div>
         </div>
     """
     st.markdown(time_taken_html, unsafe_allow_html=True)
+
+
 with time_cols[1]:  
     button_html = """
         <style>
@@ -926,7 +925,7 @@ with time_cols[1]:
             }
         </style>
         <div style="display:flex; justify-content:center; margin-top:2em;">
-            <a class="gallery-button" href="http://localhost:8501/gallery_app" target="_self">🖼️ Go to Gallery</a>
+            <a class="gallery-button" href="http://localhost:8501/gallery_app" target="_self">Go to Episode Gallery</a>
         </div>
     """
     st.markdown(button_html, unsafe_allow_html=True)
