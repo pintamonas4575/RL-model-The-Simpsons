@@ -9,7 +9,44 @@ images: list[tuple[Image.Image, int]] = st.session_state.get("gallery_images", [
 # ----------------------------------------MAIN BODY----------------------------------------
 col1, col2, col3 = st.columns([1, 2, 1], border=True)
 with col2:
-    st.markdown("<h1 style='text-align: center;'>Episode Gallery</h1>", unsafe_allow_html=True)
+    rainbow_html = """
+    <style>
+    @keyframes rainbowText {
+        0%   { color: #ff5f6d; }
+        16%  { color: #ffc371; }
+        32%  { color: #47cf73; }
+        48%  { color: #1fa2ff; }
+        64%  { color: #a259c9; }
+        80%  { color: #ff6a00; }
+        100% { color: #ff5f6d; }
+    }
+    .rainbow-text {
+        font-size: 2.2rem;
+        font-weight: 600;
+        font-family: 'Robot', 'Arial', sans-serif;
+        letter-spacing: 0.02em;
+        word-spacing: 0.12em;
+        text-align: center;
+        background: linear-gradient(90deg,#ff5f6d,#ffc371,#47cf73,#1fa2ff,#a259c9,#ff6a00,#ff5f6d);
+        background-size: 300% 300%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: rainbowBG 8s linear infinite;
+        transition: all 0.3s;
+        filter: drop-shadow(0 2px 8px rgba(0,0,0,0.08));
+        margin-bottom: 0.5em;
+    }
+    @keyframes rainbowBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    </style>
+    <div class="rainbow-text">
+        Episode Art Gallery Collection
+    </div>
+    """
+    st.markdown(rainbow_html, unsafe_allow_html=True)
 with col3:
     button_html = """
         <style>

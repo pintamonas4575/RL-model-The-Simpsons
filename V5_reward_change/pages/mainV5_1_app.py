@@ -117,84 +117,33 @@ if page == "Galería de episodios":
             st.image(os.path.join(IMAGES_FOLDER, img), use_column_width=True, caption=f"Episodio {idx+1}")
 
 # ************************************* MAIN APP *************************************
-st.markdown("""
+refresh_button_html = """
     <style>
-    .refresh-btn-container {
-        position: fixed;
-        top: 30px;
-        right: 30px;
-        z-index: 9999;
-    }
-    .refresh-btn {
-        background: linear-gradient(90deg, #27ae60, #f39c12);
-        color: white;
-        font-weight: bold;
-        border: none;
-        border-radius: 50px;
-        padding: 12px 24px;
-        font-size: 22px;
-        cursor: pointer;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-        transition: 0.2s;
-    }
-    .refresh-btn:hover {
-        background: linear-gradient(90deg, #f39c12, #27ae60);
-        transform: scale(1.08);
-    }
+        .stButton > button {
+            background: linear-gradient(90deg, #27ae60, #f39c12);
+            color: black;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 24px;
+            font-size: 22px;
+            # cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+            transition: 0.5s;
+            float: right;
+            margin-bottom: 0.5em;
+        }
+        .stButton > button:hover {
+            transform: scale(1.11);
+        }
     </style>
-    <div class="refresh-btn-container">
-        <form action="" method="post">
-            <button class="refresh-btn" type="submit">🔄 Refresh</button>
-        </form>
-    </div>
-""", unsafe_allow_html=True)
-
-refresh = st.session_state.get("refresh", False)
-# if st.form_submit_button("🔄 Refresh", key="refresh_form_button"):
-if st.button("🔄 Refresh"):
+"""
+st.markdown(refresh_button_html, unsafe_allow_html=True)
+if st.button("Refresh"):
     st.rerun()
 
 st.markdown("""<style>hr:first-of-type {display: none;}</style>""", unsafe_allow_html=True) # hide first horizontal divider
 st.markdown("<h1 style='text-align: center;'>Reinforcement Learning applied to custom dynamic environment </h1>", unsafe_allow_html=True)
-
-rainbow_html = """
-    <style>
-    @keyframes rotateColors {
-        0% { color: red; }
-        14% { color: orange; }
-        28% { color: yellow; }
-        42% { color: green; }
-        57% { color: blue; }
-        71% { color: indigo; }
-        85% { color: violet; }
-        100% { color: red; }
-    }
-
-    .rainbow span {
-        font-size: 30px;
-        font-weight: bold;
-        animation: rotateColors 7s infinite linear;
-    }
-
-    .rainbow span:nth-child(1) { animation-delay: -5s; }
-    .rainbow span:nth-child(2) { animation-delay: -4s; }
-    .rainbow span:nth-child(3) { animation-delay: -3s; }
-    .rainbow span:nth-child(4) { animation-delay: -2s; }
-    .rainbow span:nth-child(5) { animation-delay: -1s; }
-    .rainbow span:nth-child(6) { animation-delay: 0s; }
-    </style>
-
-    <div class="rainbow">
-        <span>Streamlit</span>
-        <span>can</span>
-        <span>write</span>
-        <span>text</span>
-        <span>in</span>
-        <span>colors!</span>
-    </div>
-"""
-# st.markdown(rainbow_html, unsafe_allow_html=True)
-
 
 config_cols = st.columns([1, 0.6, 1])
 with config_cols[1]:
