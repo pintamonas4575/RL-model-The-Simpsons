@@ -117,8 +117,8 @@ if page == "Galería de episodios":
             st.image(os.path.join(IMAGES_FOLDER, img), use_column_width=True, caption=f"Episodio {idx+1}")
 
 # ************************************* MAIN APP *************************************
-col1, col2 = st.columns([3, 1], border=True)
-with col2:
+refresh_button_cols = st.columns([3, 1], border=False)
+with refresh_button_cols[1]:
     st.markdown("""
         <style>
         .stButton > button {
@@ -127,7 +127,7 @@ with col2:
             font-weight: bold;
             border: none;
             border-radius: 50px;
-            padding: 10px 24px;
+            padding: 6px 24px;
             font-size: 22px;
             transition: 0.5s;
             float: right;
@@ -139,7 +139,6 @@ with col2:
     """, unsafe_allow_html=True)
     if st.button("Refresh"):
         st.rerun()
-
 st.markdown("<h1 style='text-align: center;'>Reinforcement Learning applied to custom dynamic environment </h1>", unsafe_allow_html=True)
 
 config_cols = st.columns([1, 0.6, 1])
