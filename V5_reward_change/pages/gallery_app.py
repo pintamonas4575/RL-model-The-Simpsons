@@ -7,8 +7,8 @@ st.markdown("""<style>.stApp {background-color: #000000;}.main .block-container 
 images: list[tuple[Image.Image, int]] = st.session_state.get("gallery_images", [])
 
 # ----------------------------------------MAIN BODY----------------------------------------
-col1, col2, col3 = st.columns([1, 2, 1], border=True)
-with col2:
+gallery_title_cols = st.columns([1, 2, 1], border=False)
+with gallery_title_cols[1]:
     rainbow_html = """
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
     <style>
@@ -40,9 +40,17 @@ with col2:
     </div>
     """
     st.markdown(rainbow_html, unsafe_allow_html=True)
-with col3:
+with gallery_title_cols[2]:
     button_html = """
         <style>
+            .gallery-button-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100px; /* Ajusta este valor según la altura de la columna */
+                min-height: 100px;
+                width: 100%;
+            }
             .gallery-button {
                 display: inline-block;
                 background: linear-gradient(90deg, #ff9800 0%, #f44336 100%);
@@ -56,15 +64,15 @@ with col3:
                 cursor: pointer;
                 user-select: none;
                 box-shadow: 0 0 16px 6px #ff980088;
+                transition: all 0.3s ease;
             }
             .gallery-button:hover {
                 box-shadow: 0 0 32px 12px #ff5722aa;
                 transform: scale(1.05);
-                transition: all 0.3s ease;
             }
         </style>
-        <div style="display:flex; justify-content:center; margin-top:2em;">
-            <a class="gallery-button" href="http://localhost:8501/mainV5_1_app" target="_self">← Back to Main</a>
+        <div class="gallery-button-container">
+            <a class="gallery-button" href="http://localhost:8501/mainV5_1_app" target="_self">← Back to Main Hall</a>
         </div>
     """
     st.markdown(button_html, unsafe_allow_html=True)
