@@ -14,7 +14,8 @@ class Scratch_Game_Environment5_Streamlit:
         self.number_of_columns = math.ceil(self.rect_width / self.FRAME_SIZE)
         self.total_squares = self.number_of_rows * self.number_of_columns
         self.frames_mask = [-1] * self.total_squares  # -1 no rascado, 0 malo, 1 bueno
-        self.emoji_paths = ["../emojis/axe.png", "../emojis/axe.png", "../emojis/axe.png"]
+        # self.emoji_paths = ["../emojis/axe.png", "../emojis/axe.png", "../emojis/axe.png"]
+        self.emoji_paths = ["emojis/axe.png", "emojis/axe.png", "emojis/axe.png"]
         self.emoji_images = [Image.open(path) for path in self.emoji_paths]
 
         self.background_path = background_path
@@ -27,6 +28,7 @@ class Scratch_Game_Environment5_Streamlit:
         self._setup_environment_and_contours()
 
     def _setup_environment_and_contours(self):
+        """Set up the environment by identifying contours and placing the frames."""
         aux_img = Image.new("RGBA", (self.rect_width, self.rect_height), (255,255,255,255))
         emoji_width, emoji_height = self.emoji_images[0].size
         gap = 40
@@ -61,19 +63,20 @@ class Scratch_Game_Environment5_Streamlit:
                 frame_area = contour_mask[y0:y0+self.FRAME_SIZE, x0:x0+self.FRAME_SIZE]
                 if np.sum(frame_area == 0) > 10:
                     self.good_frames_idx.add(idx)
-                    color = (255, 0, 0, 255)  # rojo si es bueno
+                    color = (255, 0, 0, 255)  # red if it's good
                 else:
-                    color = (0, 0, 255, 255)  # azul si es malo
+                    color = (0, 0, 255, 255)  # blue if it's bad
                 square = Image.new("RGBA", (self.FRAME_SIZE, self.FRAME_SIZE), color)
                 self.squares_images.append({"img": square, "coords": (x0, y0), "visible": True})
-                self.game_image.paste(square, (x0, y0), square.convert("RGBA")) # la imagen que mostraré
+                self.game_image.paste(square, (x0, y0), square.convert("RGBA")) # the image I will show
                 idx += 1
 
     def get_window_image(self) -> Image:
+        """Return the current game image status for displaying purposes."""
         return self.game_image
     
     def scratch_frame(self, idx: int) -> tuple[int, bool]:
-        # Replace the frame area in game_image with the corresponding area from background_image
+        """Replace the frame area in game_image with the corresponding area from background_image"""
         x0, y0 = self.squares_images[idx]["coords"]
         area = (x0, y0, x0 + self.FRAME_SIZE, y0 + self.FRAME_SIZE)
         frame_patch = self.background_image.crop(area)
@@ -86,13 +89,11 @@ class Scratch_Game_Environment5_Streamlit:
             self.frames_mask[idx] = 0
 
         self.scratched_count += 1
-        game_done = not self.good_frames_idx # true if it's empty
-        numero_de_0s = self.frames_mask.count(0)
-        numero_de_1s = self.frames_mask.count(1)
-        recompensa_por_0s = -2 * numero_de_0s
-        recompensa_por_1s = 3 * numero_de_1s
-        recompensa_total = recompensa_por_0s + recompensa_por_1s
-        return recompensa_total, game_done
+        game_done = not self.good_frames_idx # true if "good_frames_idx" it's empty
+        reward_for_0s = -2 * self.frames_mask.count(0)
+        reward_for_1s = 3 * self.frames_mask.count(1)
+        total_reward = reward_for_0s + reward_for_1s
+        return total_reward, game_done
     
     # --------------------------------------------------------------------------------
     # --------------------------------------------------------------------------------
