@@ -15,10 +15,7 @@ import matplotlib.pyplot as plt
 from environmentV5_app import Scratch_Game_Environment5_Streamlit
 from agentV5_1_Qtable_app import RL_Agent_51_Streamlit
 
-# ************************************* PAGE CONFIG *************************************
-st.set_page_config(page_title="Main Hall", page_icon="🖥️", layout="wide", initial_sidebar_state="collapsed")
-st.markdown("""<style>.stApp {background-color: #000000;}.main .block-container {background-color: #000000;}</style>""", unsafe_allow_html=True)
-
+# ************************************* UTILS FUNCTIONS *************************************
 def get_gradient_color(p: int) -> str:
     """De 0% a 100%, devuelve un color hexadecimal de rojo a verde."""
     # Rojo (#d32f2f) → Amarillo (#ffd600) → Verde (#43a047)
@@ -33,6 +30,10 @@ def get_gradient_color(p: int) -> str:
         g = int(214 + (160 - 214) * ((p - 50) / 50))
         b = int(47 + (71 - 47) * ((p - 50) / 50))
     return f"rgb({r},{g},{b})"
+
+# ************************************* PAGE CONFIG *************************************
+st.set_page_config(page_title="Main Hall", page_icon="🖥️", layout="wide", initial_sidebar_state="collapsed")
+st.markdown("""<style>.stApp {background-color: #000000;}.main .block-container {background-color: #000000;}</style>""", unsafe_allow_html=True)
 
 # ************************************* SIDEBAR MENU *************************************
 st.sidebar.markdown("""<div style='text-align:center;'><span style='font-size:24px; font-weight:bold; color:#ffb300; letter-spacing:1px;'>🌟 MENU 🌟</span></div>""", unsafe_allow_html=True)
@@ -91,24 +92,24 @@ st.sidebar.page_link("pages/main_hall_app.py", icon="🖥️", label="Main Hall"
 st.sidebar.page_link("pages/gallery_app.py", icon="🖼️", label="Episode Gallery")
 
 # ************************************* MAIN APP *************************************
-refresh_button_cols = st.columns([3, 1], border=False)
+refresh_button_cols = st.columns([3, 1])
 with refresh_button_cols[1]:
     st.markdown("""
         <style>
-        .stButton > button {
-            background: linear-gradient(90deg, #27ae60, #f39c12);
-            color: black;
-            font-weight: bold;
-            border: none;
-            border-radius: 50px;
-            padding: 6px 24px;
-            font-size: 22px;
-            transition: 0.5s;
-            float: right;
-        }
-        .stButton > button:hover {
-            transform: scale(1.11);
-        }
+            .stButton > button {
+                background: linear-gradient(90deg, #27ae60, #f39c12);
+                color: black;
+                font-weight: bold;
+                border: none;
+                border-radius: 50px;
+                padding: 6px 24px;
+                font-size: 22px;
+                transition: 0.5s;
+                float: right;
+            }
+            .stButton > button:hover {
+                transform: scale(1.11);
+            }
         </style>
     """, unsafe_allow_html=True)
     if st.button("Refresh"):
@@ -116,22 +117,122 @@ with refresh_button_cols[1]:
 
 st.markdown("<h1 style='text-align: center;'>Reinforcement Learning applied to custom dynamic environment </h1>", unsafe_allow_html=True)
 
-config_cols = st.columns([1, 0.6, 1], border=True)
+config_cols = st.columns([1, 0.6, 1])
+with config_cols[0]:
+    st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Env Config</p>", unsafe_allow_html=True)
+    env_config_cols = st.columns(2, border=True)
+    with env_config_cols[0] as random_emojis_col:
+        st.markdown("<p style='font-size: 16px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Random Emojis</p>", unsafe_allow_html=True)
+        toggle_button_html = """
+        <style>
+            .cool-toggle-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin: 0px 0 8px 0;
+            }
+            .cool-switch {
+                position: relative;
+                width: 85px;
+                height: 40px;
+                display: inline-block;
+            }
+            .cool-switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+            .cool-slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: linear-gradient(90deg, #ffb300 0%, #f44611 100%);
+                border-radius: 40px;
+                box-shadow: 0 2px 16px #f4461144;
+                transition: background 0.4s;
+            }
+            .cool-slider:before {
+                content: "";
+                position: absolute;
+                height: 34px;
+                width: 34px;
+                left: 3px;
+                top: 3px;
+                background: #fff;
+                border-radius: 50%;
+                box-shadow: 0 2px 8px #0002;
+                transition: transform 0.4s cubic-bezier(.68,-0.55,.27,1.55), background 0.3s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            /* ON/OFF text inside the switch */
+            .cool-slider:after {
+                content: "OFF";
+                color: #fff;
+                position: absolute;
+                right: 16px;
+                top: 8px;
+                font-size: 16px;
+                font-weight: bold;
+                letter-spacing: 1px;
+                transition: content 0.4s, color 0.4s;
+            }
+            input:checked + .cool-slider {
+                background: linear-gradient(90deg, #00e676 0%, #00bfae 100%);
+                box-shadow: 0 2px 24px #00e67666;
+            }
+            input:checked + .cool-slider:before {
+                transform: translateX(45px) scale(1.08) rotate(20deg);
+                background: #00e676;
+            }
+            input:checked + .cool-slider:after {
+                content: "ON";
+                color: #222;
+                left: 16px;
+                right: auto;
+            }
+        </style>
+        <div class="cool-toggle-container">
+            <label class="cool-switch">
+            <input type="checkbox" id="myCoolToggle" onchange="document.getElementById('coolStatus').textContent = this.checked ? 'ON' : 'OFF'">
+            <span class="cool-slider"></span>
+            </label>
+        </div>
+        """
+        st.markdown(toggle_button_html, unsafe_allow_html=True)
+    with env_config_cols[1] as frame_size_col:
+        st.markdown("<p style='font-size: 16px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Frame Size</p>", unsafe_allow_html=True)
+        FRAME_SIZE = st.number_input(" ", value=50, label_visibility="collapsed")
+
 with config_cols[1]:
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Episodes</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Train Config</p>", unsafe_allow_html=True)
+    train_config_cols = st.columns(2)
+    with train_config_cols[0] as episodes_col:
+        st.markdown("<p style='font-size: 16px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Episodes</p>", unsafe_allow_html=True)
         EPISODES = st.number_input(" ", min_value=1, max_value=1000, value=10, step=1, label_visibility="collapsed")
-    with col2:
-        st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Trace Interval</p>", unsafe_allow_html=True)
+    with train_config_cols[1] as trace_col:
+        st.markdown("<p style='font-size: 16px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Trace Interval</p>", unsafe_allow_html=True)
         TRACE = st.number_input(" ", min_value=1, max_value=50, value=1, step=1, label_visibility="collapsed")
+with config_cols[2]:
+    st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Agent Config</p>", unsafe_allow_html=True)
+    agent_params_cols = st.columns(3)
+    with agent_params_cols[0] as learning_rate_col:
+        st.markdown("<p style='font-size: 16px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Learning rate</p>", unsafe_allow_html=True)
+        ALPHA = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.1, step=0.01, key="alpha", label_visibility="collapsed")
+    with agent_params_cols[1] as discount_factor_col:
+        st.markdown("<p style='font-size: 16px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Discount factor</p>", unsafe_allow_html=True)
+        GAMMA = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="gamma", label_visibility="collapsed")
+    with agent_params_cols[2] as epsilon_col:
+        st.markdown("<p style='font-size: 16px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Epsilon</p>", unsafe_allow_html=True)
+        EPSILON = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="epsilon", label_visibility="collapsed")
 
 # TODO ("CONFIG_COLS"): Add buttons to select parameters and then pass them to the environment and agent
 # TODO 1: frame_size,
 # TODO 2: alpha, gamma, epsilon
-st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=50, scratching_area=(0, 0, 700, 350), background_path="../utils/space.jpg")
+st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=FRAME_SIZE, scratching_area=(0, 0, 700, 350), background_path="../utils/space.jpg")
 env = st.session_state.env
-st.session_state.agent = RL_Agent_51_Streamlit(num_actions=env.total_squares, alpha=0.1, gamma=0.9, epsilon=0.9)
+st.session_state.agent = RL_Agent_51_Streamlit(num_actions=env.total_squares, alpha=ALPHA, gamma=GAMMA, epsilon=EPSILON)
 agent = st.session_state.agent
 st.session_state.gallery_images = []
 gallery_images: list[tuple[Image.Image, int]] = st.session_state.gallery_images
