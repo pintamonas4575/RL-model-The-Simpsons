@@ -178,3 +178,104 @@ button_html = """
     </div>
 """
 st.markdown(button_html, unsafe_allow_html=True)
+
+# ************************************* AUTHOR CREDITS *************************************
+author_html = """
+    <style>
+        .author-social-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin: 150px 0 30px 0;
+            width: 100%;
+        }
+        .author-card {
+            background: #f44611;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+            padding: 14px 28px;
+            min-width: 0;
+            width: fit-content;
+            text-align: left;
+            margin-right: 0;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 18px;
+        }
+        .author-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.18);
+            letter-spacing: 1px;
+            margin-bottom: 0;
+            margin-right: 8px;
+        }
+        .author-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 14px rgba(255,255,255,0.18);
+            margin-bottom: 0;
+        }
+        .social-links {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 18px;
+            margin-left: 24px; /* Separar los iconos del fondo */
+        }
+        .social-links a img {
+            width: 40px; height: 40px; border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .social-links a img:hover {
+            transform: scale(1.13);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+        @media (max-width: 700px) {
+            .author-social-row { flex-direction: column; align-items: center; }
+            .author-card { margin-right: 0; margin-bottom: 18px; text-align: center; justify-content: center; }
+            .social-links { margin-left: 0; margin-top: 12px; }
+        }
+    </style>
+    <div class="author-social-row">
+        <div class="author-card">
+            <span class="author-title">Author:</span>
+            <span class="author-name">Alejandro Mendoza Medina</span>
+        </div>
+        <div class="social-links">
+            <a href="https://github.com/pintamonas4575/RL-model-The-Simpsons" target="_blank">
+                <img src="https://github.githubassets.com/favicons/favicon.svg" alt="GitHub">
+            </a>
+            <a href="https://www.linkedin.com/in/alejandro-mendoza-medina-56b7872a5/" target="_blank">
+                <img src="https://static.licdn.com/sc/h/8s162nmbcnfkg7a0k8nq9wwqo" alt="LinkedIn">
+        </div>
+    </div>
+"""
+st.markdown(author_html, unsafe_allow_html=True)
+
+footer_html = """
+    <style>
+        .footer {
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #888888;
+            text-align: center;
+            padding: 20px 0;  /* Change this value to move footer down (increased from 10px) */
+            font-size: 0.8em;
+            border-top: 1px solid #333;
+            margin-top: 20px;  /* Change this value to add more space above footer */
+        }
+    </style>
+    <div class="footer">
+        © 2025 Alejandro Mendoza all rights reserved. Made for all the people willing to try their models and visualize their results. 
+    </div>
+"""
+st.markdown(footer_html, unsafe_allow_html=True)

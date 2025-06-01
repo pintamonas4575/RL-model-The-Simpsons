@@ -14,7 +14,7 @@ import os
 import matplotlib.pyplot as plt
 from environmentV5_app import Scratch_Game_Environment5_Streamlit
 from agentV5_1_Qtable_app import RL_Agent_51_Streamlit
-from utils.gallery_cache import cache_gallery_list
+from utils.gallery_cache import cache_gallery_list, get_cached_gallery
 
 # ************************************* UTILS FUNCTIONS *************************************
 def get_gradient_color(p: int) -> str:
@@ -93,30 +93,113 @@ st.sidebar.page_link("pages/main_hall_app.py", icon="🖥️", label="Main Hall"
 st.sidebar.page_link("pages/gallery_app.py", icon="🖼️", label="Episode Gallery")
 
 # ************************************* MAIN APP *************************************
-refresh_button_cols = st.columns([3, 1])
-with refresh_button_cols[1]:
-    st.markdown("""
-        <style>
-            .stButton > button {
-                background: linear-gradient(90deg, #27ae60, #f39c12);
-                color: black;
-                font-weight: bold;
-                border: none;
-                border-radius: 50px;
-                padding: 6px 24px;
-                font-size: 22px;
-                transition: 0.5s;
-                float: right;
+title_html = """
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap" rel="stylesheet">
+    <style>
+        .enhanced-title {
+            font-family: 'Orbitron', 'Courier New', monospace;
+            font-size: 3.2rem;
+            font-weight: 900;
+            text-align: center;
+            margin: 30px 0 40px 0;
+            padding: 20px;
+            background: linear-gradient(45deg, #000000, #1a1a1a, #000000);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(244, 70, 17, 0.3);
+        }
+        .title-text {
+            background: linear-gradient(90deg, 
+                #ff6b35 0%, 
+                #f7931e 15%, 
+                #ffeb3b 30%, 
+                #4caf50 45%, 
+                #2196f3 60%, 
+                #9c27b0 75%, 
+                #e91e63 90%, 
+                #ff6b35 100%);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: rainbow-flow 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.6));
+            position: relative;
+            z-index: 2;
+            letter-spacing: 2px;
+            line-height: 1.2;
+        }
+        .enhanced-title::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent);
+            animation: shine-sweep 3s infinite;
+            z-index: 1;
+        }
+        .enhanced-title::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                #ff6b35, #f7931e, #ffeb3b, #4caf50, 
+                #2196f3, #9c27b0, #e91e63, #ff6b35);
+            background-size: 400% 400%;
+            border-radius: 17px;
+            z-index: -1;
+            animation: border-glow 3s ease-in-out infinite;
+        }
+        @keyframes rainbow-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes shine-sweep {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        @keyframes border-glow {
+            0%, 100% { 
+                background-position: 0% 50%;
+                filter: blur(4px) brightness(1);
             }
-            .stButton > button:hover {
-                transform: scale(1.11);
+            50% { 
+                background-position: 100% 50%;
+                filter: blur(6px) brightness(1.3);
             }
-        </style>
-    """, unsafe_allow_html=True)
-    if st.button("Refresh"):
-        st.rerun()
-
-st.markdown("<h1 style='text-align: center;'>Reinforcement Learning applied to custom dynamic environment </h1>", unsafe_allow_html=True)
+        }
+        .highlight-word {
+            display: inline-block;
+            animation: pulse-glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes pulse-glow {
+            0% { 
+                transform: scale(1);
+                filter: drop-shadow(0 0 5px rgba(255, 107, 53, 0.4));
+            }
+            100% { 
+                transform: scale(1.05);
+                filter: drop-shadow(0 0 15px rgba(255, 107, 53, 0.8));
+            }
+        }
+    </style>
+    <div class="enhanced-title">
+        <div class="title-text">
+            Reinforcement Learning applied to custom dynamic environment
+        </div>
+    </div>
+"""
+st.markdown(title_html, unsafe_allow_html=True)
 
 config_cols = st.columns([1, 0.6, 1])
 with config_cols[0]:
@@ -142,10 +225,10 @@ with config_cols[2]:
     agent_params_cols = st.columns(3)
     with agent_params_cols[0] as learning_rate_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Learning rate</p>", unsafe_allow_html=True)
-        ALPHA = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.1, step=0.01, key="alpha", label_visibility="collapsed")
+        ALPHA = st.number_input(" ", min_value=0.01, max_value=10.0, value=0.1, step=0.1, key="alpha", format="%.1f", label_visibility="collapsed")
     with agent_params_cols[1] as discount_factor_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Discount factor</p>", unsafe_allow_html=True)
-        GAMMA = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="gamma", label_visibility="collapsed")
+        GAMMA = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="gamma", format="%.1f", label_visibility="collapsed")
     with agent_params_cols[2] as epsilon_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Epsilon</p>", unsafe_allow_html=True)
         EPSILON = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="epsilon", format="%.1f", label_visibility="collapsed")
@@ -354,80 +437,6 @@ with game_cols[2]:
     """
     st.markdown(agent_params_html, unsafe_allow_html=True)
 
-train_button_cols = st.columns([1, 1, 1])
-with train_button_cols[1]:
-    start_button_html = """
-        <style>
-            .train-button-container {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                margin: 20px 0;
-            }
-            .train-button {
-                background: linear-gradient(45deg, #ff6b35, #f7931e, #ff6b35);
-                background-size: 300% 300%;
-                color: white;
-                font-size: 1.8em;
-                font-weight: bold;
-                padding: 16px 40px;
-                border: none;
-                border-radius: 50px;
-                cursor: pointer;
-                text-decoration: none;
-                display: inline-flex;
-                align-items: center;
-                gap: 12px;
-                box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
-                transition: all 0.3s ease;
-                position: relative;
-                overflow: hidden;
-                animation: gradient-shift 3s ease infinite;
-            }
-            .train-button:hover {
-                transform: translateY(-3px) scale(1.05);
-                box-shadow: 0 12px 35px rgba(255, 107, 53, 0.6);
-                background-size: 100% 100%;
-            }
-            .train-button:active {
-                transform: translateY(-1px) scale(1.02);
-            }
-            .train-button::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: -100%;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-                transition: left 0.5s;
-            }
-            .train-button:hover::before {
-                left: 100%;
-            }
-            @keyframes gradient-shift {
-                0% { background-position: 0% 50%; }
-                50% { background-position: 100% 50%; }
-                100% { background-position: 0% 50%; }
-            }
-            .rocket-icon {
-                font-size: 1.2em;
-                animation: rocket-bounce 2s infinite;
-            }
-            @keyframes rocket-bounce {
-                0%, 100% { transform: translateY(0); }
-                50% { transform: translateY(-4px); }
-            }
-        </style>
-        <div class="train-button-container">
-            <button class="train-button" onclick="this.style.display='none'">
-                <span class="rocket-icon">🚀</span>
-                Start Training
-            </button>
-        </div>
-    """
-    st.markdown(start_button_html, unsafe_allow_html=True)
-
 # train progressbar
 percent_placeholder = st.empty()
 progress_placeholder = st.empty()
@@ -441,10 +450,7 @@ areas_cols = st.columns([0.7, 0.3])
 max_reward, min_actions, min_area_scratched = -99999, 99999, 999 # best
 min_reward, max_actions, max_area_scratched = 99999, 0, 0        # worst
 
-agent.epsilon = 0.9
-
 # """******************************BEGINNING OF TRAINING******************************"""
-# TODO: if st.button('Comenzar entrenamiento', type='primary'):
 start = time.time()
 with rewards_cols[0]:
     st.markdown(
@@ -590,7 +596,7 @@ percent_placeholder.markdown(finish_html, unsafe_allow_html=True)
 progress_placeholder.progress(100)
 
 # final image
-# image_placeholder.image(env.get_window_image(), use_container_width=True)
+image_placeholder.image(env.get_window_image(), use_container_width=True)
 
 # """******************************STATS GRAPHICS******************************"""
 with rewards_cols[1]:
@@ -885,7 +891,7 @@ with areas_cols[1]:
     st.markdown(areas_resume_html, unsafe_allow_html=True)
 
 minutes, seconds = divmod(time.time()-start, 60)
-time_cols = st.columns([0.6, 0.4])
+time_cols = st.columns(1)
 with time_cols[0]:
     time_taken_html = f"""
         <style>
@@ -994,34 +1000,79 @@ with time_cols[0]:
         </div>
     """
     st.markdown(time_taken_html, unsafe_allow_html=True)
-with time_cols[1]:  
-    button_html = """
-        <style>
-            .gallery-button {
-                display: inline-block;
-                background: linear-gradient(90deg, #ff9800 0%, #f44336 100%);
-                color: black !important;
-                font-size: 1.6em;
-                font-weight: bold;
-                border-radius: 2em;
-                padding: 0.75em 2.5em;
-                border: none;
-                text-decoration: none !important;
-                cursor: pointer;
-                user-select: none;
-                box-shadow: 0 0 16px 6px #ff980088;
-                transition: all 0.3s ease;
+# ************************************* SECTION SEPARATOR *************************************
+separator_html = """
+    <style>
+        .smooth-separator {
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #f44611, #ff9800, #f44611, transparent);
+            border: none;
+            border-radius: 2px;
+            margin: 40px 0;
+            box-shadow: 0 2px 8px rgba(244, 70, 17, 0.3);
+            animation: separator-glow 3s ease-in-out infinite alternate;
+        }
+        @keyframes separator-glow {
+            0% { 
+                box-shadow: 0 2px 8px rgba(244, 70, 17, 0.3);
+                opacity: 0.8;
             }
-            .gallery-button:hover {
-                box-shadow: 0 0 32px 12px #ff5722aa;
-                transform: scale(1.05);
+            100% { 
+                box-shadow: 0 4px 16px rgba(244, 70, 17, 0.6);
+                opacity: 1;
             }
-        </style>
-        <div style="display:flex; justify-content:center; margin-top:2em;">
-            <a class="gallery-button" href="http://localhost:8501/gallery_app" target="_self">Go to Episode Gallery</a>
-        </div>
+        }
+    </style>
+    <div class="smooth-separator"></div>
+"""
+st.markdown(separator_html, unsafe_allow_html=True)
+
+# ************************************* EPSIODE GALLERY *************************************
+gallery_title_cols = st.columns([1, 2, 1], border=False)
+with gallery_title_cols[1]:
+    rainbow_html = """
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <style>
+    .rainbow-text {
+        font-size: 2.7rem;
+        font-family: 'Montserrat', 'Robot', Arial, sans-serif;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        word-spacing: 0.12em;
+        text-align: center;
+        background: linear-gradient(90deg,#00f2fe,#4facfe,#00f2fe,#43e97b,#38f9d7,#fa8bff,#00f2fe);
+        background-size: 300% 300%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: rainbowBG 8s linear infinite;
+        filter: drop-shadow(0 2px 12px rgba(0,0,0,0.10));
+        margin-bottom: 0.5em;
+        margin-top: 0.2em;
+        transition: all 0.3s;
+    }
+    @keyframes rainbowBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    </style>
+    <div class="rainbow-text">
+        Episode Art Gallery Collection
+    </div>
     """
-    st.markdown(button_html, unsafe_allow_html=True)
+    st.markdown(rainbow_html, unsafe_allow_html=True)
+
+gallery_images = get_cached_gallery()
+if not gallery_images:
+    st.info("No images in caché. Train a model before")
+else:
+    cols = st.columns(3) # 3 column rows
+    for img, i in gallery_images:
+        with cols[i % 3]:
+            st.image(img, caption=f"Episode {i}", use_container_width=True)
+        if (i + 1) % 3 == 0 and (i + 1) < len(gallery_images):
+            cols = st.columns(3)
 
 # ************************************* AUTHOR CREDITS *************************************
 author_html = """
@@ -1115,7 +1166,7 @@ footer_html = """
             padding: 20px 0;  /* Change this value to move footer down (increased from 10px) */
             font-size: 0.8em;
             border-top: 1px solid #333;
-            margin-top: 60px;  /* Change this value to add more space above footer */
+            margin-top: 20px;  /* Change this value to add more space above footer */
         }
     </style>
     <div class="footer">

@@ -1,30 +1,23 @@
 import streamlit as st
-from typing import Any, List
+from typing import Any
 
 @st.cache_resource
 def _get_storage() -> dict:
     """
-    Devuelve siempre el mismo diccionario cacheado.
-    La primera vez se crea {"my_list": []}, y luego se reusa idéntico en toda la sesión.
+    Always returns the same cached dictionary.
+    The first time it creates {"my_list": []}, then reuses the same one throughout the session.
     """
     return {"my_list": []}
 
-def cache_gallery_list(lst: List[Any]) -> None:
+def cache_gallery_list(lst: list[Any]) -> None:
     """
-    Sobrescribe la lista entera almacenada en el diccionario cacheado.
+    Overwrites the entire list stored in the cached dictionary.
     """
     storage = _get_storage()
     storage["my_list"] = lst
 
-def append_to_list(item: Any) -> None:
+def get_cached_gallery() -> list[Any]:
     """
-    Añade un ítem al final de la lista cacheada.
-    """
-    storage = _get_storage()
-    storage["my_list"].append(item)
-
-def get_gallery_list() -> List[Any]:
-    """
-    Devuelve la lista completa guardada en caché (o [] si está vacía).
+    Returns the complete list saved in cache (or [] if empty).
     """
     return _get_storage()["my_list"]
