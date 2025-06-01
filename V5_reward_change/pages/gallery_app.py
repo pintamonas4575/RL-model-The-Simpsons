@@ -2,7 +2,7 @@ import io
 import streamlit as st
 from PIL import Image
 
-from utils.gallery_cache import get_gallery_list
+from utils.gallery_cache import get_cached_gallery
 
 # ************************************** GALLERY CONFIG *************************************
 st.set_page_config(page_title="Episode Gallery", page_icon="🖼️", layout="wide", initial_sidebar_state="collapsed")
@@ -135,7 +135,7 @@ with gallery_title_cols[2]:
     """
     st.markdown(button_html, unsafe_allow_html=True)
 
-gallery_images = get_gallery_list()
+gallery_images = get_cached_gallery()
 if not gallery_images:
     st.info("No images in caché. Train a model before")
 else:
