@@ -14,6 +14,7 @@ import os
 import matplotlib.pyplot as plt
 from environmentV5_app import Scratch_Game_Environment5_Streamlit
 from agentV5_1_Qtable_app import RL_Agent_51_Streamlit
+from utils.gallery_cache import cache_gallery_list
 
 # ************************************* UTILS FUNCTIONS *************************************
 def get_gradient_color(p: int) -> str:
@@ -228,14 +229,11 @@ with config_cols[2]:
         EPSILON = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="epsilon", label_visibility="collapsed")
 
 # TODO ("CONFIG_COLS"): Add buttons to select parameters and then pass them to the environment and agent
-# TODO 1: frame_size,
-# TODO 2: alpha, gamma, epsilon
 st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=FRAME_SIZE, scratching_area=(0, 0, 700, 350), background_path="../utils/space.jpg")
 env = st.session_state.env
 st.session_state.agent = RL_Agent_51_Streamlit(num_actions=env.total_squares, alpha=ALPHA, gamma=GAMMA, epsilon=EPSILON)
 agent = st.session_state.agent
-st.session_state.gallery_images = []
-gallery_images: list[tuple[Image.Image, int]] = st.session_state.gallery_images
+gallery_images = []
 
 game_cols = st.columns([0.3, 0.5, 0.3])
 with game_cols[0]:
@@ -524,7 +522,7 @@ min_reward, max_actions, max_area_scratched = 99999, 0, 0        # worst
 agent.epsilon = 0.9
 
 # """******************************BEGINNING OF TRAINING******************************"""
-# if st.button('Comenzar entrenamiento', type='primary'):
+# TODO: if st.button('Comenzar entrenamiento', type='primary'):
 start = time.time()
 with rewards_cols[0]:
     st.markdown(
@@ -644,8 +642,7 @@ for i in range(EPISODES):
             align-items: center;
             justify-content: center;
             gap: 10px;
-        '>
-            {percent}% 
+            '>{percent}% 
             <img src='https://em-content.zobj.net/source/animated-noto-color-emoji/356/rocket_1f680.gif' 
                 style='width: 30px; height: 30px; vertical-align: middle;'>
         </div>
@@ -655,9 +652,11 @@ for i in range(EPISODES):
     # ---------------SAVE IMAGE TO GALLERY----------------
     if i % TRACE == 0 or i == EPISODES-1:
         img: Image.Image = env.get_window_image()
-        gallery_images.append((img, i))
-
+        gallery_images.append((img, i)) 
+        
     time.sleep(0.08)
+
+cache_gallery_list(gallery_images) # save the gallery images to cache 
 
 # """******************************END OF TRAINING******************************"""
 finish_html = f"""
@@ -669,7 +668,7 @@ percent_placeholder.markdown(finish_html, unsafe_allow_html=True)
 progress_placeholder.progress(100)
 
 # final image
-image_placeholder.image(env.get_window_image(), use_container_width=True)
+# image_placeholder.image(env.get_window_image(), use_container_width=True)
 
 # """******************************STATS GRAPHICS******************************"""
 with rewards_cols[1]:

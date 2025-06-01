@@ -1,10 +1,12 @@
+import io
 import streamlit as st
 from PIL import Image
 
+from utils.gallery_cache import get_gallery_list
+
+# ************************************** GALLERY CONFIG *************************************
 st.set_page_config(page_title="Episode Gallery", page_icon="🖼️", layout="wide", initial_sidebar_state="collapsed")
 st.markdown("""<style>.stApp {background-color: #000000;}.main .block-container {background-color: #000000;}</style>""", unsafe_allow_html=True)
-
-images: list[tuple[Image.Image, int]] = st.session_state.get("gallery_images", [])
 
 # ************************************* SIDEBAR MENU *************************************
 st.sidebar.markdown("""<div style='text-align:center;'><span style='font-size:24px; font-weight:bold; color:#ffb300; letter-spacing:1px;'>🌟 MENU 🌟</span></div>""", unsafe_allow_html=True)
@@ -133,14 +135,13 @@ with gallery_title_cols[2]:
     """
     st.markdown(button_html, unsafe_allow_html=True)
 
-if not images:
-    st.info("No images in gallery. Train a model before")
+gallery_images = get_gallery_list()
+if not gallery_images:
+    st.info("No images in caché. Train a model before")
 else:
-    num_images = len(images)
-    cols_per_row = min(3, num_images)
-    cols = st.columns(cols_per_row)
-    for i, (img, episode_num) in enumerate(images):
-        with cols[i % cols_per_row]:
-            st.image(img, use_container_width=True, caption=f"Episode {episode_num}")
-        if (i+1) % cols_per_row == 0 and i+1 < num_images:
-            cols = st.columns(cols_per_row)
+    cols = st.columns(3) # 3 column rows
+    for img, i in gallery_images:
+        with cols[i % 3]:
+            st.image(img, caption=f"Episode {i}", use_container_width=True)
+        if (i + 1) % 3 == 0 and (i + 1) < len(gallery_images):
+            cols = st.columns(3)
