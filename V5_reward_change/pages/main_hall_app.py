@@ -120,116 +120,37 @@ st.markdown("<h1 style='text-align: center;'>Reinforcement Learning applied to c
 
 config_cols = st.columns([1, 0.6, 1])
 with config_cols[0]:
-    st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Env Config</p>", unsafe_allow_html=True)
-    env_config_cols = st.columns(2, border=True)
+    st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Env Config ⚙️</p>", unsafe_allow_html=True)
+    env_config_cols = st.columns(2)
     with env_config_cols[0] as random_emojis_col:
-        st.markdown("<p style='font-size: 16px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Random Emojis</p>", unsafe_allow_html=True)
-        toggle_button_html = """
-        <style>
-            .cool-toggle-container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                margin: 0px 0 8px 0;
-            }
-            .cool-switch {
-                position: relative;
-                width: 85px;
-                height: 40px;
-                display: inline-block;
-            }
-            .cool-switch input {
-                opacity: 0;
-                width: 0;
-                height: 0;
-            }
-            .cool-slider {
-                position: absolute;
-                cursor: pointer;
-                top: 0; left: 0; right: 0; bottom: 0;
-                background: linear-gradient(90deg, #ffb300 0%, #f44611 100%);
-                border-radius: 40px;
-                box-shadow: 0 2px 16px #f4461144;
-                transition: background 0.4s;
-            }
-            .cool-slider:before {
-                content: "";
-                position: absolute;
-                height: 34px;
-                width: 34px;
-                left: 3px;
-                top: 3px;
-                background: #fff;
-                border-radius: 50%;
-                box-shadow: 0 2px 8px #0002;
-                transition: transform 0.4s cubic-bezier(.68,-0.55,.27,1.55), background 0.3s;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            /* ON/OFF text inside the switch */
-            .cool-slider:after {
-                content: "OFF";
-                color: #fff;
-                position: absolute;
-                right: 16px;
-                top: 8px;
-                font-size: 16px;
-                font-weight: bold;
-                letter-spacing: 1px;
-                transition: content 0.4s, color 0.4s;
-            }
-            input:checked + .cool-slider {
-                background: linear-gradient(90deg, #00e676 0%, #00bfae 100%);
-                box-shadow: 0 2px 24px #00e67666;
-            }
-            input:checked + .cool-slider:before {
-                transform: translateX(45px) scale(1.08) rotate(20deg);
-                background: #00e676;
-            }
-            input:checked + .cool-slider:after {
-                content: "ON";
-                color: #222;
-                left: 16px;
-                right: auto;
-            }
-        </style>
-        <div class="cool-toggle-container">
-            <label class="cool-switch">
-            <input type="checkbox" id="myCoolToggle" onchange="document.getElementById('coolStatus').textContent = this.checked ? 'ON' : 'OFF'">
-            <span class="cool-slider"></span>
-            </label>
-        </div>
-        """
-        st.markdown(toggle_button_html, unsafe_allow_html=True)
+        st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Random Emojis</p>", unsafe_allow_html=True)
+        RANDOM_EMOJIS = st.selectbox(" ", options=[True, False], index=1, label_visibility="collapsed")
     with env_config_cols[1] as frame_size_col:
-        st.markdown("<p style='font-size: 16px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Frame Size</p>", unsafe_allow_html=True)
+        st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Frame Size</p>", unsafe_allow_html=True)
         FRAME_SIZE = st.number_input(" ", value=50, label_visibility="collapsed")
-
 with config_cols[1]:
-    st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Train Config</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Train Config ⚙️</p>", unsafe_allow_html=True)
     train_config_cols = st.columns(2)
     with train_config_cols[0] as episodes_col:
-        st.markdown("<p style='font-size: 16px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Episodes</p>", unsafe_allow_html=True)
+        st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Episodes</p>", unsafe_allow_html=True)
         EPISODES = st.number_input(" ", min_value=1, max_value=1000, value=10, step=1, label_visibility="collapsed")
     with train_config_cols[1] as trace_col:
-        st.markdown("<p style='font-size: 16px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Trace Interval</p>", unsafe_allow_html=True)
+        st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Trace Interval</p>", unsafe_allow_html=True)
         TRACE = st.number_input(" ", min_value=1, max_value=50, value=1, step=1, label_visibility="collapsed")
 with config_cols[2]:
-    st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Agent Config</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Agent Config ⚙️</p>", unsafe_allow_html=True)
     agent_params_cols = st.columns(3)
     with agent_params_cols[0] as learning_rate_col:
-        st.markdown("<p style='font-size: 16px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Learning rate</p>", unsafe_allow_html=True)
+        st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Learning rate</p>", unsafe_allow_html=True)
         ALPHA = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.1, step=0.01, key="alpha", label_visibility="collapsed")
     with agent_params_cols[1] as discount_factor_col:
-        st.markdown("<p style='font-size: 16px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Discount factor</p>", unsafe_allow_html=True)
+        st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Discount factor</p>", unsafe_allow_html=True)
         GAMMA = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="gamma", label_visibility="collapsed")
     with agent_params_cols[2] as epsilon_col:
-        st.markdown("<p style='font-size: 16px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Epsilon</p>", unsafe_allow_html=True)
-        EPSILON = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="epsilon", label_visibility="collapsed")
+        st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Epsilon</p>", unsafe_allow_html=True)
+        EPSILON = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="epsilon", format="%.1f", label_visibility="collapsed")
 
-# TODO ("CONFIG_COLS"): Add buttons to select parameters and then pass them to the environment and agent
-st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=FRAME_SIZE, scratching_area=(0, 0, 700, 350), background_path="../utils/space.jpg")
+st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=FRAME_SIZE, scratching_area=(0, 0, 700, 350), background_path="../utils/space.jpg", random_emojis=RANDOM_EMOJIS)
 env = st.session_state.env
 st.session_state.agent = RL_Agent_51_Streamlit(num_actions=env.total_squares, alpha=ALPHA, gamma=GAMMA, epsilon=EPSILON)
 agent = st.session_state.agent
@@ -426,6 +347,7 @@ with game_cols[2]:
         <ul class="custom-list">
             <li>Learning rate: <span class="number-highlight">{agent.alpha}</span></li>
             <li>Discount factor: <span class="number-highlight">{agent.gamma}</span></li>
+            <li>Epsilon: <span class="number-highlight">{agent.epsilon}</span></li>
             <li>Qtable: <span class="number-highlight">{env.total_squares}</span> × <span class="number-highlight">{env.total_squares}</span></li>
         </ul>
     </div>

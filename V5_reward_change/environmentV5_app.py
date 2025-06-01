@@ -1,11 +1,13 @@
 import cv2
 import math
+import os
+import random
 import numpy as np
 from PIL import Image
 from typing import Any
 
 class Scratch_Game_Environment5_Streamlit:
-    def __init__(self, frame_size: int, scratching_area: tuple[int, int, int, int], background_path: str = "utils/space.jpg"):
+    def __init__(self, frame_size: int, scratching_area: tuple[int, int, int, int], background_path: str = "utils/space.jpg", random_emojis: bool = False):
         self.scratched_count = 0
         self.FRAME_SIZE = frame_size
         self.rect_x, self.rect_y = scratching_area[0], scratching_area[1]
@@ -14,8 +16,8 @@ class Scratch_Game_Environment5_Streamlit:
         self.number_of_columns = math.ceil(self.rect_width / self.FRAME_SIZE)
         self.total_squares = self.number_of_rows * self.number_of_columns
         self.frames_mask = [-1] * self.total_squares  # -1 no rascado, 0 malo, 1 bueno
-        # self.emoji_paths = ["../emojis/axe.png", "../emojis/axe.png", "../emojis/axe.png"]
-        self.emoji_paths = ["emojis/axe.png", "emojis/axe.png", "emojis/axe.png"]
+        self.emoji_paths = ["../emojis/axe.png", "../emojis/axe.png", "../emojis/axe.png"] if not random_emojis else self.get_random_emojis()
+        # self.emoji_paths = ["emojis/axe.png", "emojis/axe.png", "emojis/axe.png"] if not random_emojis else self.get_random_emojis()
         self.emoji_images = [Image.open(path) for path in self.emoji_paths]
 
         self.background_path = background_path
@@ -26,6 +28,12 @@ class Scratch_Game_Environment5_Streamlit:
         self.squares_images: list[dict[str, Any]] = []
 
         self._setup_environment_and_contours()
+
+    def get_random_emojis(self) -> list[str]:
+        """Return a list of random emoji names."""
+        emoji_folder_path = "../emojis/"
+        emoji_names = random.choices(os.listdir(emoji_folder_path), k=3)
+        return [f"{emoji_folder_path}/{emoji_name}" for emoji_name in emoji_names]
 
     def _setup_environment_and_contours(self):
         """Set up the environment by identifying contours and placing the frames."""
