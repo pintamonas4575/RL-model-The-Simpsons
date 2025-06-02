@@ -62,48 +62,169 @@ st.sidebar.page_link("pages/gallery_app.py", icon="🖼️", label="Episode Gall
 # ************************************* MAIN BODY *************************************
 animation_html = """
     <style>
-        .bg {
-            position: relative;
-            width: 100%;
-            height: 300px;
-            overflow: hidden;
-            background: #000000;
-        }
-        .circle {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.6;
-        }
-        .c1 { width: 120px; height: 120px; background: #ff9800; left: 10%;  top: 120%; animation: rise 3s ease-out forwards; }
-        .c2 { width: 150px; height: 150px; background: #f44336; left: 50%;  top: 120%; animation: rise 3s ease-out 1s forwards; }
-        .c3 { width:  80px; height:  80px; background: #ffd600; left: 80%;  top: 120%; animation: rise 3s ease-out 2s forwards; }
-        @keyframes rise {
-            0%   { transform: translateY(0); }
-            80%  { transform: translateY(-140%); }
-            100% { transform: translateY(-140%); }
-        }
-
-        /* 2) Botón: fade-in tras terminar la animación de fondo */
-        @keyframes btn-fade {
-            from { opacity: 0; }
-            to   { opacity: 1; }
-        }
-        .btn-container {
-            opacity: 0;
-            animation: btn-fade 2s ease-in forwards;
-            animation-delay: 4s;  /* Empieza 4s después */
-            display: flex;
-            justify-content: center;
-            margin-top: 2em;
-        }
+    .bg-pro {
+        position: relative;
+        width: 100%;
+        height: 220px;
+        overflow: hidden;
+        background: linear-gradient(120deg, #232526 0%, #2c3e50 100%);
+        border-radius: 18px;
+        margin-bottom: 2em;
+        box-shadow: 0 6px 36px 0 rgba(44,62,80,0.10);
+    }
+    .circle-pro {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0.7;
+        filter: blur(4px);
+        mix-blend-mode: lighten;
+        animation: floatLoop 8s ease-in-out infinite alternate;
+    }
+    .c1-pro {
+        width: 70px; height: 70px;
+        background: radial-gradient(circle at 60% 40%, #ff9800 60%, #ffd600 100%);
+        left: 10%; top: 55%;
+        animation-delay: 0s;
+    }
+    .c2-pro {
+        width: 100px; height: 100px;
+        background: radial-gradient(circle at 30% 70%, #43e97b 60%, #38f9d7 100%);
+        left: 45%; top: 65%;
+        animation-delay: 1.5s;
+    }
+    .c3-pro {
+        width: 55px; height: 55px;
+        background: radial-gradient(circle at 80% 20%, #2196f3 60%, #9c27b0 100%);
+        left: 75%; top: 50%;
+        animation-delay: 3s;
+    }
+    .c4-pro {
+        width: 40px; height: 40px;
+        background: radial-gradient(circle at 50% 50%, #e91e63 60%, #ff9800 100%);
+        left: 65%; top: 80%;
+        animation-delay: 2.5s;
+    }
+    @keyframes floatLoop {
+        0%   { transform: translateY(0) scale(1);}
+        100% { transform: translateY(-30px) scale(1.07);}
+    }
     </style>
-    <div class="bg">
-        <div class="circle c1"></div>
-        <div class="circle c2"></div>
-        <div class="circle c3"></div>
+    <div class="bg-pro">
+        <div class="circle-pro c1-pro"></div>
+        <div class="circle-pro c2-pro"></div>
+        <div class="circle-pro c3-pro"></div>
+        <div class="circle-pro c4-pro"></div>
     </div>
 """
-st.markdown(animation_html, unsafe_allow_html=True)
+# st.markdown(animation_html, unsafe_allow_html=True)
+
+title_html = """
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap" rel="stylesheet">
+    <style>
+        .enhanced-title {
+            font-family: 'Orbitron', 'Courier New', monospace;
+            font-size: 3.2rem;
+            font-weight: 900;
+            text-align: center;
+            margin: 30px 0 40px 0;
+            padding: 20px;
+            background: linear-gradient(45deg, #000000, #1a1a1a, #000000);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(244, 70, 17, 0.3);
+        }
+        .title-text {
+            background: linear-gradient(90deg, 
+                #ff6b35 0%, 
+                #f7931e 15%, 
+                #ffeb3b 30%, 
+                #4caf50 45%, 
+                #2196f3 60%, 
+                #9c27b0 75%, 
+                #e91e63 90%, 
+                #ff6b35 100%);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: rainbow-flow 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.6));
+            position: relative;
+            z-index: 2;
+            letter-spacing: 2px;
+            line-height: 1.2;
+        }
+        .enhanced-title::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.2), 
+                transparent);
+            animation: shine-sweep 3s infinite;
+            z-index: 1;
+        }
+        .enhanced-title::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                #ff6b35, #f7931e, #ffeb3b, #4caf50, 
+                #2196f3, #9c27b0, #e91e63, #ff6b35);
+            background-size: 400% 400%;
+            border-radius: 17px;
+            z-index: -1;
+            animation: border-glow 3s ease-in-out infinite;
+        }
+        @keyframes rainbow-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes shine-sweep {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        @keyframes border-glow {
+            0%, 100% { 
+                background-position: 0% 50%;
+                filter: blur(4px) brightness(1);
+            }
+            50% { 
+                background-position: 100% 50%;
+                filter: blur(6px) brightness(1.3);
+            }
+        }
+        .highlight-word {
+            display: inline-block;
+            animation: pulse-glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes pulse-glow {
+            0% { 
+                transform: scale(1);
+                filter: drop-shadow(0 0 5px rgba(255, 107, 53, 0.4));
+            }
+            100% { 
+                transform: scale(1.05);
+                filter: drop-shadow(0 0 15px rgba(255, 107, 53, 0.8));
+            }
+        }
+    </style>
+    <div class="enhanced-title">
+        <div class="title-text">
+            Reinforcement Learning applied to custom dynamic environment
+        </div>
+    </div>
+"""
+st.markdown(title_html, unsafe_allow_html=True)
 
 button_html = """
     <style>

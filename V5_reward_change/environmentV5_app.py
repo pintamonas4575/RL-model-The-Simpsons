@@ -10,13 +10,14 @@ class Scratch_Game_Environment5_Streamlit:
     def __init__(self, frame_size: int, scratching_area: tuple[int, int, int, int], background_path: str = "utils/space.jpg", random_emojis: bool = False):
         self.scratched_count = 0
         self.FRAME_SIZE = frame_size
+        self.random_emojis = random_emojis
         self.rect_x, self.rect_y = scratching_area[0], scratching_area[1]
         self.rect_width, self.rect_height = scratching_area[2], scratching_area[3]
         self.number_of_rows = math.ceil(self.rect_height / self.FRAME_SIZE)
         self.number_of_columns = math.ceil(self.rect_width / self.FRAME_SIZE)
         self.total_squares = self.number_of_rows * self.number_of_columns
         self.frames_mask = [-1] * self.total_squares  # -1 no rascado, 0 malo, 1 bueno
-        self.emoji_paths = ["../emojis/axe.png", "../emojis/axe.png", "../emojis/axe.png"] if not random_emojis else self.get_random_emojis()
+        self.emoji_paths = ["../emojis/axe.png", "../emojis/axe.png", "../emojis/axe.png"] if not self.random_emojis else self.get_random_emojis()
         # self.emoji_paths = ["emojis/axe.png", "emojis/axe.png", "emojis/axe.png"] if not random_emojis else self.get_random_emojis()
         self.emoji_images = [Image.open(path) for path in self.emoji_paths]
 
@@ -117,7 +118,7 @@ class Scratch_Game_Environment5_Streamlit:
     
     def env_reset(self):
         """Reset the environment to its initial state for a new episode."""
-        self.__init__(self.FRAME_SIZE, (self.rect_x, self.rect_y, self.rect_width, self.rect_height), self.background_path)
+        self.__init__(self.FRAME_SIZE, (self.rect_x, self.rect_y, self.rect_width, self.rect_height), self.background_path, self.random_emojis)
 
 # env = Scratch_Game_Environment5_Streamlit(frame_size=40, scratching_area=(0, 0, 700, 350), background_path="utils/space.jpg")
 # for i in range(5):

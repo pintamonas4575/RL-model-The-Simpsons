@@ -199,7 +199,7 @@ title_html = """
         </div>
     </div>
 """
-st.markdown(title_html, unsafe_allow_html=True)
+# st.markdown(title_html, unsafe_allow_html=True)
 
 config_cols = st.columns([1, 0.6, 1])
 with config_cols[0]:
@@ -437,6 +437,12 @@ with game_cols[2]:
     """
     st.markdown(agent_params_html, unsafe_allow_html=True)
 
+st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
+start_button_cols = st.columns([1, 1, 1])
+with start_button_cols[1]:
+    if not st.button("START TRAINING", type="primary", use_container_width=True):
+        st.stop()
+
 # train progressbar
 percent_placeholder = st.empty()
 progress_placeholder = st.empty()
@@ -588,9 +594,9 @@ cache_gallery_list(gallery_images) # save the gallery images to cache
 
 # """******************************END OF TRAINING******************************"""
 finish_html = f"""
-<div style='text-align: center;font-size: 2rem;font-weight: bold;color: #43a047;display: flex;align-items: center;justify-content: center;gap: 10px;'>¡Finished!
-    <img src='https://em-content.zobj.net/source/animated-noto-color-emoji/356/hundred-points_1f4af.gif' style='width: 30px; height: 30px; vertical-align: middle;'>
-</div>
+    <div style='text-align: center;font-size: 2rem;font-weight: bold;color: #43a047;display: flex;align-items: center;justify-content: center;gap: 10px;'>¡Finished!
+        <img src='https://em-content.zobj.net/source/animated-noto-color-emoji/356/hundred-points_1f4af.gif' style='width: 30px; height: 30px; vertical-align: middle;'>
+    </div>
 """
 percent_placeholder.markdown(finish_html, unsafe_allow_html=True)
 progress_placeholder.progress(100)
