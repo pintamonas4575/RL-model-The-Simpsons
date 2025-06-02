@@ -1068,9 +1068,9 @@ if not gallery_images:
     st.info("No images in caché. Train a model before")
 else:
     cols = st.columns(3) # 3 column rows
-    for img, i in gallery_images:
+    for i, (img, episode) in enumerate(gallery_images):
         with cols[i % 3]:
-            st.image(img, caption=f"Episode {i}", use_container_width=True)
+            st.image(img, caption=f"Episode {episode}", use_container_width=True)
         if (i + 1) % 3 == 0 and (i + 1) < len(gallery_images):
             cols = st.columns(3)
 
