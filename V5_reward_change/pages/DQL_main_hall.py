@@ -14,7 +14,6 @@ import os
 import matplotlib.pyplot as plt
 from environmentV5_app import Scratch_Game_Environment5_Streamlit
 from agentV5_1_Qtable_app import RL_Agent_51_Streamlit
-from utils.gallery_cache import cache_gallery_list, get_cached_gallery
 
 # ************************************* UTILS FUNCTIONS *************************************
 def get_gradient_color(p: int) -> str:
@@ -33,7 +32,7 @@ def get_gradient_color(p: int) -> str:
     return f"rgb({r},{g},{b})"
 
 # ************************************* PAGE CONFIG *************************************
-st.set_page_config(page_title="Main Hall", page_icon="🖥️", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="DQL Main Hall", page_icon="🖥️", layout="wide", initial_sidebar_state="collapsed")
 st.markdown("""<style>.stApp {background-color: #000000;}.main .block-container {background-color: #000000;}</style>""", unsafe_allow_html=True)
 
 # ************************************* SIDEBAR MENU *************************************
@@ -89,116 +88,17 @@ st.markdown(side_bar_html, unsafe_allow_html=True)
 
 st.sidebar.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 st.sidebar.page_link("home_app.py", icon="🏠", label="Home")
-st.sidebar.page_link("pages/main_hall_app.py", icon="🖥️", label="Main Hall")
-st.sidebar.page_link("pages/gallery_app.py", icon="🖼️", label="Episode Gallery")
+st.sidebar.page_link("pages/QL_main_hall.py", icon="🖥️", label="QL Main Hall")
+st.sidebar.page_link("pages/DQL_main_hall.py", icon="🖥️", label="DQL Main Hall")
 
 # ************************************* MAIN APP *************************************
-title_html = """
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap" rel="stylesheet">
-    <style>
-        .enhanced-title {
-            font-family: 'Orbitron', 'Courier New', monospace;
-            font-size: 3.2rem;
-            font-weight: 900;
-            text-align: center;
-            margin: 30px 0 40px 0;
-            padding: 20px;
-            background: linear-gradient(45deg, #000000, #1a1a1a, #000000);
-            border-radius: 15px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(244, 70, 17, 0.3);
-        }
-        .title-text {
-            background: linear-gradient(90deg, 
-                #ff6b35 0%, 
-                #f7931e 15%, 
-                #ffeb3b 30%, 
-                #4caf50 45%, 
-                #2196f3 60%, 
-                #9c27b0 75%, 
-                #e91e63 90%, 
-                #ff6b35 100%);
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: rainbow-flow 4s ease-in-out infinite;
-            filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.6));
-            position: relative;
-            z-index: 2;
-            letter-spacing: 2px;
-            line-height: 1.2;
-        }
-        .enhanced-title::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, 
-                transparent, 
-                rgba(255, 255, 255, 0.2), 
-                transparent);
-            animation: shine-sweep 3s infinite;
-            z-index: 1;
-        }
-        .enhanced-title::after {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, 
-                #ff6b35, #f7931e, #ffeb3b, #4caf50, 
-                #2196f3, #9c27b0, #e91e63, #ff6b35);
-            background-size: 400% 400%;
-            border-radius: 17px;
-            z-index: -1;
-            animation: border-glow 3s ease-in-out infinite;
-        }
-        @keyframes rainbow-flow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        @keyframes shine-sweep {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-        @keyframes border-glow {
-            0%, 100% { 
-                background-position: 0% 50%;
-                filter: blur(4px) brightness(1);
-            }
-            50% { 
-                background-position: 100% 50%;
-                filter: blur(6px) brightness(1.3);
-            }
-        }
-        .highlight-word {
-            display: inline-block;
-            animation: pulse-glow 2s ease-in-out infinite alternate;
-        }
-        @keyframes pulse-glow {
-            0% { 
-                transform: scale(1);
-                filter: drop-shadow(0 0 5px rgba(255, 107, 53, 0.4));
-            }
-            100% { 
-                transform: scale(1.05);
-                filter: drop-shadow(0 0 15px rgba(255, 107, 53, 0.8));
-            }
-        }
-    </style>
-    <div class="enhanced-title">
-        <div class="title-text">
-            Reinforcement Learning applied to custom dynamic environment
-        </div>
-    </div>
+title_html = """ 
+    <h1 style='text-align: center; font-size: 2.8em; font-weight: 900; letter-spacing: 2px; margin-bottom: 0.3em;'>
+        🚀 <span style='color:#ff9800;'>Deep Q-Learning</span> <span style='color:#2196f3;'>Training</span> 🧠
+    </h1>
 """
+st.markdown(title_html, unsafe_allow_html=True)
+
 # st.markdown(title_html, unsafe_allow_html=True)
 
 config_cols = st.columns([1, 0.6, 1])
@@ -242,99 +142,99 @@ gallery_images = []
 game_cols = st.columns([0.3, 0.5, 0.3])
 with game_cols[0]:
     env_params_html = f"""
-    <style>
-        .full-bg-container {{
-            position: relative;
-            width: 100%;
-            min-height: 340px;
-            height: 100%;
-            background: #f44611;
-            border-radius: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: stretch;
-            padding: 36px 32px 36px 32px;
-            margin-bottom: 18px;
-        }}
-        .env-title-1 {{
-            text-align: center;
-            font-size: 28px;
-            color: #000;
-            font-weight: bold;
-            margin-bottom: 22px;
-            margin-top: 0px;
-            letter-spacing: 1.2px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }}
-        .arrow-container {{
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 24px 0 24px 0;
-            height: 40px;
-        }}
-        @keyframes bounce {{
-            0%, 100% {{ transform: translateY(0); }}
-            50% {{ transform: translateY(20px); }}
-        }}
-        @keyframes arrow-glow {{
-            0% {{ filter: drop-shadow(0 0 0px #fff8) brightness(1); }}
-            50% {{ filter: drop-shadow(0 0 16px #fff) brightness(1.25); }}
-            100% {{ filter: drop-shadow(0 0 0px #fff8) brightness(1); }}
-        }}
-        .arrow-svg-pro {{
-            width: 70px; height: 70px; display: block;
-            animation: bounce 1.4s infinite, arrow-glow 2s infinite;
-        }}
-        .squares-row {{
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 22px;
-            font-weight: bold;
-            color: #222;
-            margin-top: 10px;
-            justify-content: center;
-        }}
-        .number-highlight {{
-            color: #000;
-            background: #FFD700;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-weight: bold;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-        }}
-    </style>
-    <div class="full-bg-container">
-        <div class='env-title-1'>
-            <img src="https://em-content.zobj.net/source/animated-noto-color-emoji/356/globe-showing-europe-africa_1f30d.gif" alt="Globe" style="height:36px;vertical-align:middle;margin-right:8px;">
-            Env parameters
-            <img src="https://em-content.zobj.net/source/animated-noto-color-emoji/356/globe-showing-europe-africa_1f30d.gif" alt="Globe" style="height:36px;vertical-align:middle;margin-left:8px;">
+        <style>
+            .full-bg-container {{
+                position: relative;
+                width: 100%;
+                min-height: 340px;
+                height: 100%;
+                background: #f44611;
+                border-radius: 20px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: stretch;
+                padding: 36px 32px 36px 32px;
+                margin-bottom: 18px;
+            }}
+            .env-title-1 {{
+                text-align: center;
+                font-size: 28px;
+                color: #000;
+                font-weight: bold;
+                margin-bottom: 22px;
+                margin-top: 0px;
+                letter-spacing: 1.2px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+            }}
+            .arrow-container {{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin: 14px 0 24px 0;
+                height: 40px;
+            }}
+            @keyframes bounce {{
+                0%, 100% {{ transform: translateY(0); }}
+                50% {{ transform: translateY(20px); }}
+            }}
+            @keyframes arrow-glow {{
+                0% {{ filter: drop-shadow(0 0 0px #fff8) brightness(1); }}
+                50% {{ filter: drop-shadow(0 0 16px #fff) brightness(1.25); }}
+                100% {{ filter: drop-shadow(0 0 0px #fff8) brightness(1); }}
+            }}
+            .arrow-svg-pro {{
+                width: 70px; height: 70px; display: block;
+                animation: bounce 1.4s infinite, arrow-glow 2s infinite;
+            }}
+            .squares-row {{
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 22px;
+                font-weight: bold;
+                color: #222;
+                margin-top: 10px;
+                justify-content: center;
+            }}
+            .number-highlight {{
+                color: #000;
+                background: #FFD700;
+                padding: 2px 8px;
+                border-radius: 6px;
+                font-weight: bold;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            }}
+        </style>
+        <div class="full-bg-container">
+            <div class='env-title-1'>
+                <img src="https://em-content.zobj.net/source/animated-noto-color-emoji/356/globe-showing-europe-africa_1f30d.gif" alt="Globe" style="height:36px;vertical-align:middle;margin-right:8px;">
+                Env parameters
+                <img src="https://em-content.zobj.net/source/animated-noto-color-emoji/356/globe-showing-europe-africa_1f30d.gif" alt="Globe" style="height:36px;vertical-align:middle;margin-left:8px;">
+            </div>
+            <div class='env-title-1' style="font-size:23px; margin-bottom:0;">
+                Frame size: <span class="number-highlight">{env.FRAME_SIZE}</span>
+            </div>
+            <div class="arrow-container">
+                <svg class="arrow-svg-pro" viewBox="0 0 70 70" fill="none">
+                    <defs>
+                        <linearGradient id="arrow-gradient" x1="35" y1="10" x2="35" y2="60" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#fff" />
+                            <stop offset="1" stop-color="#ffdf70" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M35 12 V54" stroke="url(#arrow-gradient)" stroke-width="7" stroke-linecap="round"/>
+                    <polyline points="20,40 35,58 50,40"
+                        fill="none" stroke="url(#arrow-gradient)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class='env-title-1' style="font-size:23px; margin-bottom:0;">
+                Total squares: <span class="number-highlight">{env.total_squares}</span>
+            </div>
         </div>
-        <div class='env-title-1' style="font-size:23px; margin-bottom:0;">
-            Frame size: <span class="number-highlight">{env.FRAME_SIZE}</span>
-        </div>
-        <div class="arrow-container">
-            <svg class="arrow-svg-pro" viewBox="0 0 70 70" fill="none">
-                <defs>
-                    <linearGradient id="arrow-gradient" x1="35" y1="10" x2="35" y2="60" gradientUnits="userSpaceOnUse">
-                        <stop stop-color="#fff" />
-                        <stop offset="1" stop-color="#ffdf70" />
-                    </linearGradient>
-                </defs>
-                <path d="M35 12 V54" stroke="url(#arrow-gradient)" stroke-width="7" stroke-linecap="round"/>
-                <polyline points="20,40 35,58 50,40"
-                    fill="none" stroke="url(#arrow-gradient)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </div>
-        <div class='env-title-1' style="font-size:23px; margin-bottom:0;">
-            Total squares: <span class="number-highlight">{env.total_squares}</span>
-        </div>
-    </div>
     """
     st.markdown(env_params_html, unsafe_allow_html=True)
 with game_cols[1]:
@@ -588,9 +488,7 @@ for i in range(EPISODES):
         img: Image.Image = env.get_window_image()
         gallery_images.append((img, i)) 
         
-    time.sleep(0.08)
-
-cache_gallery_list(gallery_images) # save the gallery images to cache 
+    time.sleep(0.01)
 
 # """******************************END OF TRAINING******************************"""
 finish_html = f"""
@@ -1069,7 +967,6 @@ with gallery_title_cols[1]:
     """
     st.markdown(rainbow_html, unsafe_allow_html=True)
 
-gallery_images = get_cached_gallery()
 if not gallery_images:
     st.info("No images in caché. Train a model before")
 else:

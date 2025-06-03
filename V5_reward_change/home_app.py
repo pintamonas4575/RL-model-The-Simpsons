@@ -56,8 +56,8 @@ st.markdown(side_bar_html, unsafe_allow_html=True)
 
 st.sidebar.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 st.sidebar.page_link("home_app.py", icon="🏠", label="Home")
-st.sidebar.page_link("pages/main_hall_app.py", icon="🖥️", label="Main Hall")
-st.sidebar.page_link("pages/gallery_app.py", icon="🖼️", label="Episode Gallery")
+st.sidebar.page_link("pages/QL_main_hall.py", icon="🖥️", label="QL Main Hall")
+st.sidebar.page_link("pages/DQL_main_hall.py", icon="🖥️", label="DQL Main Hall")
 
 # ************************************* MAIN BODY *************************************
 animation_html = """
@@ -226,8 +226,38 @@ title_html = """
 """
 st.markdown(title_html, unsafe_allow_html=True)
 
-button_html = """
+buttons_html = """
     <style>
+        .button-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2em;
+            margin-top: 2.5em;
+            margin-bottom: 2em;
+        }
+        .fake-button {
+            display: inline-block;
+            background: linear-gradient(90deg, #ff9800 0%, #f44336 100%);
+            color: black !important;
+            font-size: 1.6em;
+            font-weight: bold;
+            border-radius: 2em;
+            padding: 0.75em 2.5em;
+            border: none;
+            text-decoration: none !important;
+            cursor: pointer;
+            user-select: none;
+            opacity: 0;
+            box-shadow:
+                0 0 0 0 #ff980000,
+                0 0 0 0 #ff572200,
+                0 0 0 0 #ffd60000;
+            filter: hue-rotate(0deg);
+            animation:
+                fade-in    3s cubic-bezier(.23,1.14,.69,.98) forwards,
+                pulse-glow 4s ease-in-out infinite           3s;
+        }
         @keyframes fade-in {
             0% {
                 opacity: 0;
@@ -271,34 +301,14 @@ button_html = """
                 filter: hue-rotate(360deg);
             }
         }
-        .fake-button {
-            display: inline-block;
-            background: linear-gradient(90deg, #ff9800 0%, #f44336 100%);
-            color: black !important;
-            font-size: 1.6em;
-            font-weight: bold;
-            border-radius: 2em;
-            padding: 0.75em 2.5em;
-            border: none;
-            text-decoration: none !important;
-            cursor: pointer;
-            user-select: none;
-            opacity: 0;
-            box-shadow:
-                0 0 0 0 #ff980000,
-                0 0 0 0 #ff572200,
-                0 0 0 0 #ffd60000;
-            filter: hue-rotate(0deg);
-            animation:
-                fade-in    3s cubic-bezier(.23,1.14,.69,.98) forwards,
-                pulse-glow 4s ease-in-out infinite           3s;
-        }
     </style>
-    <div style="display:flex; justify-content:center; margin-top:2em;">
-        <a class="fake-button" href="http://localhost:8501/main_hall_app" target="_self">GO TO GLORIOUS HALL</a>
+    <div class="button-row">
+        <a class="fake-button" href="http://localhost:8501/main_hall_app" target="_self">GO TO QL HALL</a>
+        <a class="fake-button" href="http://localhost:8501/DQL_main_hall" target="_self">GO TO DQL HALL</a>
     </div>
 """
-st.markdown(button_html, unsafe_allow_html=True)
+st.markdown(buttons_html, unsafe_allow_html=True)
+
 
 # ************************************* AUTHOR CREDITS *************************************
 author_html = """

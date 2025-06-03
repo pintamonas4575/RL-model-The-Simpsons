@@ -49,7 +49,7 @@ class RL_Agent_52():
         self.epsilon_decay = agent_parameters["epsilon_decay"]
         self.epsilon_min = agent_parameters["epsilon_min"]
         self.batch_size = agent_parameters["batch_size"]
-        self.memory = deque(maxlen=50000)
+        self.memory = deque(maxlen=20)
 
         self.num_actions = num_actions
         self.target_dqn = Custom_DQN(self.num_actions, self.num_actions).to(device)
@@ -57,54 +57,27 @@ class RL_Agent_52():
         self.optimizer = optim.Adam(self.policy_dqn.parameters(), lr=self.alpha)
         self.loss_fn = nn.SmoothL1Loss()
 
-    def remember(self, current_state: list[int], action: int, reward: float, next_state: list[int], done: bool) -> None:
+    def remember(self, current_state: list[int], action: int, next_state: list[int], reward: int, done: bool) -> None:
         """Store the experience in memory."""
-        # TODO: comprobar desde "main" que ambas listas de estados son one-hot
+        # NOTE: current_state and next_state are in raw mode
         if len(self.memory) >= self.memory.maxlen:
             random_sample = random.sample(self.memory, 1)
             self.memory.remove(random_sample[0])
         self.memory.append((current_state, action, reward, next_state, done))
 
-    def choose_action(self, current_state: list[int], current_action: int) -> int:
+    def choose_action(self, current_state: list[int]) -> int:
         """Choose the next action based on epsilon-greedy policy."""
-        # NOTE: current_action es la máscara, SIN ser one-hot
         possible_actions = [i for i, val in enumerate(current_state) if val == -1]
         if random.random() < self.epsilon:
             action_index = random.choice(possible_actions)
         else:
-            state_tensor = torch.eye(self.num_actions, dtype=torch.float32)[current_action].to(device).cpu().detach()
-            # state_tensor = torch.zeros(size=self.num_actions).to(device).cpu().detach()
-            # state_tensor[current_action] = 1.0
-            # state_tensor = state_tensor.unsqueeze(0)  # Add batch dimension
-            # print("************ state_tensor:", state_tensor.shape, "**************")
-            q_values = self.policy_dqn(state_tensor)
-            action_index = torch.argmax(q_values).item()
-
-            # ************* TODO: Check this code and how to adapt it *************
-            """1. Mantén la salida de la DQN fija (96 neuronas)
-            La arquitectura estándar de DQN asume un espacio de acción fijo. Cada salida corresponde a un Q-value para cada acción posible.
-            2. Aplica una máscara sobre los Q-values antes de elegir la acción
-            Cuando obtienes los Q-values de la red, pon un valor muy bajo (por ejemplo, −1e9) 
-            a las acciones no válidas antes de hacer el argmax. Así, nunca serán seleccionadas."""
-            # q_values = self.policy_dqn(state_tensor)  # [num_actions] = 96
-            # # Máscara: 1 si la acción es válida, 0 si no
-            # mask = torch.tensor([1 if val == -1 else 0 for val in current_state], dtype=torch.bool)
-            # masked_q_values = q_values.clone()
-            # masked_q_values[~mask] = -1e9  # Penaliza acciones inválidas
-            # action_index = torch.argmax(masked_q_values).item()
-
-            """3. Durante el entrenamiento (replay):
-            Aplica la misma máscara cuando calcules los next_q_values para el target:
-            Solo el máximo Q de las acciones válidas del siguiente estado debe contar. 
-            EJ:"""
-            # # next_states: [batch, num_actions]
-            # # mask_next: [batch, num_actions] (bool) donde True = acción válida
-            # next_q_values_all = self.target_dqn(next_states)  # [batch, num_actions]
-            # next_q_values_all[~mask_next] = -1e9
-            # next_q_values = next_q_values_all.max(1)[0]
-            # ************* TODO: Check this code and how to adapt it *************
-
-
+            state_tensor = torch.FloatTensor(current_state).unsqueeze(0).to(device)
+            with torch.no_grad():
+                q_values: torch.Tensor = self.policy_dqn(state_tensor)  # [batch, num_actions]
+                q_values_np = q_values[0].cpu().numpy()
+                masked_q_values = np.full_like(q_values_np, -np.inf)
+                masked_q_values[possible_actions] = q_values_np[possible_actions]
+                action_index = np.argmax(masked_q_values)
 
         return action_index
         
@@ -144,19 +117,19 @@ class RL_Agent_52():
 
 """**********************************************************"""
 agent_parameters = {
-    "alpha": 0.001,  # Learning rate
+    "alpha": 0.1,  # Learning rate
     "gamma": 0.99,  # Discount factor
-    "epsilon": 1.0,  # Exploration rate
+    "epsilon": 0.6,  # Exploration rate
     "epsilon_decay": 0.995,
-    "epsilon_min": 0.01,
+    "epsilon_min": 0.05,
     "batch_size": 128
 }
 
 my_env = Scratch_Game_Environment5_Streamlit(frame_size=50, scratching_area=(110,98,770,300))
 agent = RL_Agent_52(num_actions=my_env.total_squares, agent_parameters=agent_parameters)
 
-EPISODES = 1
-trace = 1
+EPISODES = 300
+trace = 50
 rewards, max_rewards = [], []
 actions_done, min_actions_done = [], []
 areas_scratched, min_areas_scratched = [], []
@@ -172,7 +145,7 @@ for i in range(EPISODES):
     episode_actions = 0
     episode_reward = 0
 
-    # agent.epsilon *= np.exp(-0.001 * i)
+    agent.epsilon *= np.exp(-0.001 * i)
 
     current_state = my_env.frames_mask
     indice_celda_actual = agent.num_actions // 2 # start in the middle of the grid
@@ -183,20 +156,16 @@ for i in range(EPISODES):
         episode_actions += 1
         step_counter += 1
 
-        # print("indice_celda_actual:", indice_celda_actual, step_counter)
-
-        action_index = agent.choose_action(current_state, indice_celda_actual)
-        next_state, reward, done = my_env.env_step(action_index=indice_celda_actual)
-        indice_proxima_celda = next_state[action_index]
-        agent.remember(indice_celda_actual, action_index, reward, indice_celda_actual, done)
+        action_index = agent.choose_action(current_state)
+        next_state, reward, done = my_env.env_step(action_index=action_index)
+        agent.remember(current_state, action_index, next_state, reward, done)
         agent.replay()
-
-        indice_celda_actual = indice_proxima_celda
+        
+        indice_celda_actual = action_index
         episode_reward += reward
 
-        if step_counter % 1000 == 0:
+        if step_counter % (agent.num_actions//2) == 0:
             agent.update_target_network()
-            print(f"Actions done: {episode_actions}")
 
     episode_percentage = (my_env.scratched_count / my_env.total_squares) * 100
 
@@ -207,7 +176,7 @@ for i in range(EPISODES):
     if i % trace == 0 or i == EPISODES-1:
         print(f"-----------------EPISODE {i+1}---------------------")
         print(f"Episode reward: {episode_reward}")
-        print(f"Episode actions: {episode_actions}")
+        print(f"Episode actions done: {episode_actions}")
         print(f"Episode percentage: {episode_percentage:.2f}%")
         image: Image.Image = my_env.get_window_image()
         image.save(f"episodes/V5_2_episode_{i}.png")
