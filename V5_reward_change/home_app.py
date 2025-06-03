@@ -303,8 +303,8 @@ buttons_html = """
         }
     </style>
     <div class="button-row">
-        <a class="fake-button" href="http://localhost:8501/QL_main_hall" target="_self">GO TO QL HALL</a>
-        <a class="fake-button" href="http://localhost:8501/DQL_main_hall" target="_self">GO TO DQL HALL</a>
+        <a class="fake-button" href="/QL_main_hall" target="_self">GO TO QL HALL</a>
+        <a class="fake-button" href="/DQL_main_hall" target="_self">GO TO DQL HALL</a>
     </div>
 """
 st.markdown(buttons_html, unsafe_allow_html=True)
