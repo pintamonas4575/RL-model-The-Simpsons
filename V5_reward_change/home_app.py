@@ -303,7 +303,7 @@ buttons_html = """
         }
     </style>
     <div class="button-row">
-        <a class="fake-button" href="http://localhost:8501/main_hall_app" target="_self">GO TO QL HALL</a>
+        <a class="fake-button" href="http://localhost:8501/QL_main_hall" target="_self">GO TO QL HALL</a>
         <a class="fake-button" href="http://localhost:8501/DQL_main_hall" target="_self">GO TO DQL HALL</a>
     </div>
 """
