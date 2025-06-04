@@ -1,17 +1,9 @@
 import time
-import io
-import gc
-import base64
 import streamlit as st
 from PIL import Image
-import plotly.graph_objects as go
-from io import BytesIO
 import pandas as pd
 import altair as alt
 import numpy as np
-import math
-import os
-import matplotlib.pyplot as plt
 from environmentV5_app import Scratch_Game_Environment5_Streamlit
 from agentV5_1_Qtable_app import RL_Agent_51_Streamlit
 
@@ -133,7 +125,7 @@ with config_cols[2]:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Epsilon</p>", unsafe_allow_html=True)
         EPSILON = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="epsilon", format="%.1f", label_visibility="collapsed")
 
-st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=FRAME_SIZE, scratching_area=(0, 0, 700, 350), background_path="../utils/space.jpg", random_emojis=RANDOM_EMOJIS)
+st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=FRAME_SIZE, scratching_area=(0, 0, 700, 350), random_emojis=RANDOM_EMOJIS)
 env = st.session_state.env
 st.session_state.agent = RL_Agent_51_Streamlit(num_actions=env.total_squares, alpha=ALPHA, gamma=GAMMA, epsilon=EPSILON)
 agent = st.session_state.agent

@@ -7,7 +7,7 @@ from PIL import Image
 from typing import Any
 
 class Scratch_Game_Environment5_Streamlit:
-    def __init__(self, frame_size: int, scratching_area: tuple[int, int, int, int], background_path: str = "utils/space.jpg", random_emojis: bool = False):
+    def __init__(self, frame_size: int, scratching_area: tuple[int, int, int, int], random_emojis: bool = False):
         self.scratched_count = 0
         self.FRAME_SIZE = frame_size
         self.random_emojis = random_emojis
@@ -17,11 +17,13 @@ class Scratch_Game_Environment5_Streamlit:
         self.number_of_columns = math.ceil(self.rect_width / self.FRAME_SIZE)
         self.total_squares = self.number_of_rows * self.number_of_columns
         self.frames_mask = [-1] * self.total_squares  # -1 no rascado, 0 malo, 1 bueno
-        self.emoji_paths = ["../emojis/axe.png", "../emojis/axe.png", "../emojis/axe.png"] if not self.random_emojis else self.get_random_emojis()
-        # self.emoji_paths = ["emojis/axe.png", "emojis/axe.png", "emojis/axe.png"] if not random_emojis else self.get_random_emojis()
+        # for local deployment
+        # self.emoji_paths = ["../emojis/axe.png", "../emojis/axe.png", "../emojis/axe.png"] if not self.random_emojis else self.get_random_emojis()
+        # for local tests and cloud deployment
+        self.emoji_paths = ["emojis/axe.png", "emojis/axe.png", "emojis/axe.png"] if not random_emojis else self.get_random_emojis()
         self.emoji_images = [Image.open(path) for path in self.emoji_paths]
 
-        self.background_path = background_path
+        self.background_path = "utils/space.jpg"
         self.background_image = Image.open(self.background_path).resize((self.rect_width, self.rect_height))
         self.game_image = Image.new("RGBA", (self.rect_width, self.rect_height), (255, 255, 255, 255))
 
@@ -32,7 +34,7 @@ class Scratch_Game_Environment5_Streamlit:
 
     def get_random_emojis(self) -> list[str]:
         """Return a list of random emoji names."""
-        emoji_folder_path = "../emojis/"
+        emoji_folder_path = "emojis/"
         emoji_names = random.choices(os.listdir(emoji_folder_path), k=3)
         return [f"{emoji_folder_path}/{emoji_name}" for emoji_name in emoji_names]
 
@@ -119,12 +121,3 @@ class Scratch_Game_Environment5_Streamlit:
     def env_reset(self):
         """Reset the environment to its initial state for a new episode."""
         self.__init__(self.FRAME_SIZE, (self.rect_x, self.rect_y, self.rect_width, self.rect_height), self.background_path, self.random_emojis)
-
-# env = Scratch_Game_Environment5_Streamlit(frame_size=40, scratching_area=(0, 0, 700, 350), background_path="utils/space.jpg")
-# for i in range(5):
-#     valid_indices = [i for i in range(env.total_squares) if env.frames_mask[i] == -1]
-#     frame_idx = np.random.choice(valid_indices)
-#     reward, done = env.scratch_frame(frame_idx)
-#     print(f"Scratch frame {frame_idx} -> reward: {reward}, game done: {done}")
-#     time.sleep(1)
-# env.get_window_image_and_save(with_grid=True).show()
