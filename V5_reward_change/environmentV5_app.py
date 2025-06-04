@@ -120,4 +120,4 @@ class Scratch_Game_Environment5_Streamlit:
     
     def env_reset(self):
         """Reset the environment to its initial state for a new episode."""
-        self.__init__(self.FRAME_SIZE, (self.rect_x, self.rect_y, self.rect_width, self.rect_height), self.background_path, self.random_emojis)
+        self.__init__(self.FRAME_SIZE, (self.rect_x, self.rect_y, self.rect_width, self.rect_height), self.random_emojis)
