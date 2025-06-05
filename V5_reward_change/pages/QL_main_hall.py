@@ -1,23 +1,25 @@
+import io
 import time
-import streamlit as st
-from PIL import Image
+import zipfile
+import numpy as np
 import pandas as pd
 import altair as alt
-import numpy as np
+import streamlit as st
+from PIL import Image
 from environmentV5_app import Scratch_Game_Environment5_Streamlit
 from agentV5_1_Qtable_app import RL_Agent_51_Streamlit
 
 # ************************************* UTILS FUNCTIONS *************************************
 def get_gradient_color(p: int) -> str:
-    """De 0% a 100%, devuelve un color hexadecimal de rojo a verde."""
-    # Rojo (#d32f2f) → Amarillo (#ffd600) → Verde (#43a047)
+    """From 0% to 100%, returns a hexadecimal color from red to green."""
+    # Red (#d32f2f) → Yellow (#ffd600) → Green (#43a047)
     if p < 50:
-        # Rojo a amarillo
+        # Red to yellow
         r = 211
         g = int(50 + (214 - 50) * (p / 50))
         b = 47
     else:
-        # Amarillo a verde
+        # Yellow to green
         r = int(211 - (211 - 67) * ((p - 50) / 50))
         g = int(214 + (160 - 214) * ((p - 50) / 50))
         b = int(47 + (71 - 47) * ((p - 50) / 50))
@@ -117,13 +119,13 @@ with config_cols[2]:
     agent_params_cols = st.columns(3)
     with agent_params_cols[0] as learning_rate_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Learning rate</p>", unsafe_allow_html=True)
-        ALPHA = st.number_input(" ", min_value=0.01, max_value=10.0, value=0.1, step=0.1, key="alpha", format="%.1f", label_visibility="collapsed")
+        ALPHA = st.number_input(" ", min_value=0.001, max_value=10.0, value=0.1, step=0.1, key="alpha", format="%.3f", label_visibility="collapsed")
     with agent_params_cols[1] as discount_factor_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Discount factor</p>", unsafe_allow_html=True)
-        GAMMA = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="gamma", format="%.1f", label_visibility="collapsed")
+        GAMMA = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="gamma", format="%.2f", label_visibility="collapsed")
     with agent_params_cols[2] as epsilon_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Epsilon</p>", unsafe_allow_html=True)
-        EPSILON = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="epsilon", format="%.1f", label_visibility="collapsed")
+        EPSILON = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="epsilon", format="%.2f", label_visibility="collapsed")
 
 st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=FRAME_SIZE, scratching_area=(0, 0, 700, 350), random_emojis=RANDOM_EMOJIS)
 env = st.session_state.env
@@ -398,9 +400,6 @@ for i in range(EPISODES):
         next_state, reward, done = env.env_step(action_index)
         agent.update_q_table(current_action, action_index, reward, next_state)
 
-        # image_placeholder.image(env.get_window_image(), caption=f'Paso {episode_actions+1}', width=1000)
-        # time.sleep(0.1)
-
         episode_reward += reward
         current_state = next_state
 
@@ -477,10 +476,10 @@ for i in range(EPISODES):
     progress_placeholder.progress(percent)
     # ---------------SAVE IMAGE TO GALLERY----------------
     if i % TRACE == 0 or i == EPISODES-1:
-        img: Image.Image = env.get_window_image()
-        gallery_images.append((img, i)) 
+        image: Image.Image = env.get_window_image()
+        gallery_images.append((image, i)) 
         
-    time.sleep(0.08)
+    time.sleep(0.01)
 
 # """******************************END OF TRAINING******************************"""
 finish_html = f"""
@@ -896,6 +895,7 @@ with time_cols[0]:
         </div>
     """
     st.markdown(time_taken_html, unsafe_allow_html=True)
+
 # ************************************* SECTION SEPARATOR *************************************
 separator_html = """
     <style>
@@ -968,6 +968,38 @@ else:
             st.image(img, caption=f"Episode {episode}", use_container_width=True)
         if (i + 1) % 3 == 0 and (i + 1) < len(gallery_images):
             cols = st.columns(3)
+
+zip_buffer = io.BytesIO()
+with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+    for img, episode in gallery_images:
+        img_bytes = io.BytesIO()
+        img.save(img_bytes, format="PNG")
+        img_bytes.seek(0)
+        zip_file.writestr(f"QL_episode_{episode}.png", img_bytes.read())
+zip_buffer.seek(0)
+
+st.markdown("""
+    <style>
+        div.stDownloadButton > button {
+            background-color: #0099ff;
+            color: white;
+            font-size: 18px;
+            border-radius: 10px;
+            padding: 10px 24px;
+            width: 100%;
+            max-width: 300px;
+            margin: auto;
+            display: block;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+@st.fragment
+def download_zip_fragment(zip_buffer: io.BytesIO) -> None:
+    zip_cols = st.columns([1, 2, 1])
+    with zip_cols[1]:
+        st.download_button(label="Download episode gallery as .ZIP", data=zip_buffer, file_name=f"QL_{EPISODES}_ep_{env.total_squares}.zip")
+download_zip_fragment(zip_buffer)
 
 # ************************************* AUTHOR CREDITS *************************************
 author_html = """
