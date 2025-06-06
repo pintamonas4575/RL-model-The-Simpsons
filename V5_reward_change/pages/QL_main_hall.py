@@ -1,5 +1,6 @@
 import io
 import time
+import math
 import zipfile
 import numpy as np
 import pandas as pd
@@ -97,7 +98,7 @@ st.markdown(title_html, unsafe_allow_html=True)
 
 config_cols = st.columns([1, 0.6, 1])
 with config_cols[0]:
-    st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Env Config ⚙️</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 28px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Env Config ⚙️</p>", unsafe_allow_html=True)
     env_config_cols = st.columns(2)
     with env_config_cols[0] as random_emojis_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Random Emojis</p>", unsafe_allow_html=True)
@@ -106,7 +107,7 @@ with config_cols[0]:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Frame Size</p>", unsafe_allow_html=True)
         FRAME_SIZE = st.number_input(" ", value=50, label_visibility="collapsed")
 with config_cols[1]:
-    st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Train Config ⚙️</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 28px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Train Config ⚙️</p>", unsafe_allow_html=True)
     train_config_cols = st.columns(2)
     with train_config_cols[0] as episodes_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Episodes</p>", unsafe_allow_html=True)
@@ -115,7 +116,7 @@ with config_cols[1]:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Trace Interval</p>", unsafe_allow_html=True)
         TRACE = st.number_input(" ", min_value=1, max_value=50, value=1, step=1, label_visibility="collapsed")
 with config_cols[2]:
-    st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Agent Config ⚙️</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 28px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Agent Config ⚙️</p>", unsafe_allow_html=True)
     agent_params_cols = st.columns(3)
     with agent_params_cols[0] as learning_rate_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Learning rate</p>", unsafe_allow_html=True)
@@ -349,6 +350,7 @@ areas_cols = st.columns([0.7, 0.3])
 
 max_reward, min_actions, min_area_scratched = -99999, 99999, 999 # best
 min_reward, max_actions, max_area_scratched = 99999, 0, 0        # worst
+epsilon_history = []
 
 # """******************************BEGINNING OF TRAINING******************************"""
 start = time.time()
@@ -362,21 +364,21 @@ with rewards_cols[0]:
     rewards_placeholder = st.empty()
     rewards_df = pd.DataFrame(columns=['Episode', 'Reward', 'Min Reward', 'Max Reward'])
 with actions_cols[0]:
-    st.markdown(
-        "<div style='text-align: center;'>"
-        "<h1>🎯 Actions/Episodes 🎯</h1>"
-        "</div>",
-        unsafe_allow_html=True
-    )
+    st.markdown(f"""
+        <div style='text-align: center;'>
+            <h1>🎯 Actions/Episodes 🎯 (Optimum: {len(env.good_frames_idx)})</h1>
+        </div>
+    """, unsafe_allow_html=True)
     actions_placeholder = st.empty()
     actions_df = pd.DataFrame(columns=['Episode', 'Actions Done', 'Min Actions', 'Max Actions'])
 with areas_cols[0]:
-    st.markdown(
-        "<div style='text-align: center;'>"
-        "<h1>🌍 Areas/Episodes 🌍</h1>"
-        "</div>",
-        unsafe_allow_html=True
-    )
+    optimum_area = math.ceil(len(env.good_frames_idx) / len(env.squares_images) * 100)
+    st.markdown(f"""
+        <div style='text-align: center;'>
+            <h1>🌍 Areas/Episodes 🌍 (Optimum: {optimum_area}%)</h1>
+
+        </div>
+    """, unsafe_allow_html=True)
     areas_placeholder = st.empty()
     areas_df = pd.DataFrame(columns=['Episode', 'Area Scratched', 'Min Area Scratched', 'Max Area Scratched'])
 
@@ -389,6 +391,7 @@ for i in range(EPISODES):
     episode_reward = 0
 
     agent.epsilon *= np.exp(-0.001 * i)
+    epsilon_history.append(agent.epsilon)
 
     current_state = env.frames_mask
     current_action = env.total_squares // 2
@@ -786,23 +789,26 @@ with areas_cols[1]:
     st.markdown(areas_resume_html, unsafe_allow_html=True)
 
 minutes, seconds = divmod(time.time()-start, 60)
-time_cols = st.columns(1)
-with time_cols[0]:
-    time_taken_html = f"""
+col_time, col_graph = st.columns([1, 1])
+with col_time:
+    st.markdown(f"""
         <style>
             .time-container {{
                 background: linear-gradient(135deg, #27ae60, #1e8449);
                 border-radius: 15px;
                 padding: 20px;
-                margin: 30px auto;
-                max-width: 600px;
-                text-align: center;
+                margin: auto;
+                max-width: 500px;
+                height: 120px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 position: relative;
                 overflow: hidden;
                 box-shadow: 0 8px 32px rgba(0,0,0,0.3);
                 border: 2px solid #27ae60;
+                transform: translateY(120px); /* desplaza hacia la mitad vertical del gráfico */
             }}
-            /* Haz de luz exhuberante */
             .time-container::before {{
                 content: '';
                 position: absolute;
@@ -816,7 +822,6 @@ with time_cols[0]:
                 animation: slide-shine 3s cubic-bezier(.6,0,.4,1) infinite;
                 z-index: 2;
             }}
-            /* Chispa animada */
             .sparkle {{
                 position: absolute;
                 top: 50%;
@@ -829,7 +834,6 @@ with time_cols[0]:
                 z-index: 3;
                 animation: sparkle-pop 3s cubic-bezier(.6,0,.4,1) infinite;
             }}
-            /* SVG de chispa */
             .sparkle svg {{
                 display: block;
                 width: 100%;
@@ -872,7 +876,8 @@ with time_cols[0]:
         </style>
         <div class="time-container">
             <div class="time-text">
-                <span class="time-icon">⏱️</span> Total training time: <span class="time-value">{int(minutes)} min {seconds:.2f} sec</span>
+                <span class="time-icon">⏱️</span> 
+                Total training time: <span class="time-value">{int(minutes)} min {seconds:.2f} sec</span>
             </div>
             <span class="sparkle">
                 <svg viewBox="0 0 36 36" fill="none">
@@ -893,8 +898,30 @@ with time_cols[0]:
                 </svg>
             </span>
         </div>
-    """
-    st.markdown(time_taken_html, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
+
+with col_graph:
+    epsilon_df = pd.DataFrame({"Episode": range(1, len(epsilon_history) + 1), "Epsilon": epsilon_history})
+    epsilon_chart = (
+        alt.Chart(epsilon_df.assign(Serie='Epsilon'))
+        .mark_line(point=True)
+        .encode(
+            x=alt.X('Episode:Q', title='Episode',
+                    axis=alt.Axis(tickMinStep=1, labelAngle=0, labelFontSize=18, titleFontSize=22, grid=False)),
+            y=alt.Y('Epsilon:Q', title='Epsilon',
+                    axis=alt.Axis(labelFontSize=18, titleFontSize=22, grid=False)),
+            color=alt.Color(
+                'Serie:N',
+                legend=alt.Legend(title=''),
+                scale=alt.Scale(domain=['Epsilon'], range=['#ff0080'])
+            )
+        )
+        .properties(width=900, height=400, padding={"top": 20})
+        .configure_view(strokeWidth=0)
+        .configure_axis(grid=False)
+        .interactive()
+    )
+    st.altair_chart(epsilon_chart, use_container_width=False)
 
 # ************************************* SECTION SEPARATOR *************************************
 separator_html = """
