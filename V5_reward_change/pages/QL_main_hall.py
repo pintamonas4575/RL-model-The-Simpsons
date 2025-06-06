@@ -899,7 +899,6 @@ with col_time:
             </span>
         </div>
     """, unsafe_allow_html=True)
-
 with col_graph:
     epsilon_df = pd.DataFrame({"Episode": range(1, len(epsilon_history) + 1), "Epsilon": epsilon_history})
     epsilon_chart = (
