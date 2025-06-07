@@ -18,12 +18,13 @@ class Scratch_Game_Environment5_Streamlit:
         self.total_squares = self.number_of_rows * self.number_of_columns
         self.frames_mask = [-1] * self.total_squares  # -1 no rascado, 0 malo, 1 bueno
         # for local deployment
-        # self.emoji_paths = ["../emojis/axe.png", "../emojis/axe.png", "../emojis/axe.png"] if not self.random_emojis else self.get_random_emojis()
+        self.background_path = "../utils/space.jpg"
+        self.emoji_paths = ["../emojis/axe.png", "../emojis/axe.png", "../emojis/axe.png"] if not self.random_emojis else self.get_random_emojis()
         # for local tests and cloud deployment
-        self.emoji_paths = ["emojis/axe.png", "emojis/axe.png", "emojis/axe.png"] if not random_emojis else self.get_random_emojis()
+        # self.background_path = "utils/space.jpg"
+        # self.emoji_paths = ["emojis/axe.png", "emojis/axe.png", "emojis/axe.png"] if not random_emojis else self.get_random_emojis()
         self.emoji_images = [Image.open(path) for path in self.emoji_paths]
 
-        self.background_path = "utils/space.jpg"
         self.background_image = Image.open(self.background_path).resize((self.rect_width, self.rect_height))
         self.game_image = Image.new("RGBA", (self.rect_width, self.rect_height), (255, 255, 255, 255))
 
