@@ -53,21 +53,22 @@ class RL_Agent_52():
         self.epsilon_decay = agent_parameters["epsilon_decay"]
         self.epsilon_min = agent_parameters["epsilon_min"]
         self.batch_size = agent_parameters["batch_size"]
-        self.memory = deque(maxlen=10000)
+        self.memory = deque(maxlen=15000)
 
         self.num_actions = num_actions
         self.target_dqn = Custom_DQN(self.num_actions, self.num_actions).to(device)
         self.policy_dqn = Custom_DQN(self.num_actions, self.num_actions).to(device)
         self.optimizer = optim.Adam(self.policy_dqn.parameters(), lr=self.alpha)
-        # self.loss_fn = nn.SmoothL1Loss()
-        self.loss_fn = nn.MSELoss()
+        self.loss_fn = nn.SmoothL1Loss()
 
     def remember(self, current_state: list[int], action: int, next_state: list[int], reward: int, done: bool) -> None:
         """Store the experience in memory."""
         # NOTE: current_state and next_state are in raw mode
         if len(self.memory) >= self.memory.maxlen:
-            random_sample = random.sample(self.memory, 1)[0]
-            self.memory.remove(random_sample)
+            n_samples_to_remove = self.batch_size
+            random_samples = random.sample(self.memory, n_samples_to_remove)
+            for sample in random_samples:
+                self.memory.remove(sample)
         self.memory.append((current_state, action, next_state, reward, done))
 
     def choose_action(self, current_state: list[int]) -> int:
@@ -88,13 +89,10 @@ class RL_Agent_52():
         
     def replay(self) -> None:
         """Train the DQN model using replay experiences."""
-        # if len(self.memory) < self.batch_size:
-            # return
-        if len(self.memory) < 2:
+        if len(self.memory) < self.batch_size:
             return
 
-        # batch = np.random.choice(len(self.memory), self.batch_size, replace=False)
-        batch = np.random.choice(len(self.memory), 2, replace=False)
+        batch = np.random.choice(len(self.memory), self.batch_size, replace=False)
         current_states, actions, next_states, rewards, dones = zip(*[self.memory[i] for i in batch])
 
         current_states = torch.tensor(current_states, dtype=torch.float32).to(device)
@@ -119,17 +117,17 @@ class RL_Agent_52():
 """**********************************************************"""
 agent_parameters = {
     "alpha": 0.001,  # Learning rate
-    "gamma": 0.90,  # Discount factor
+    "gamma": 0.80,  # Discount factor
     "epsilon": 0.9,  # Exploration rate
     "epsilon_decay": 0.995,
     "epsilon_min": 0.05,
-    "batch_size": 16
+    "batch_size": 64
 }
 
 my_env = Scratch_Game_Environment5_Streamlit(frame_size=50, scratching_area=(110,98,770,300))
 agent = RL_Agent_52(num_actions=my_env.total_squares, agent_parameters=agent_parameters)
 
-EPISODES = 200
+EPISODES = 500
 trace = 50
 epsilon_history = []
 rewards, max_rewards = [], []
