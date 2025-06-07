@@ -1,5 +1,6 @@
 import io
 import time
+import math
 import zipfile
 import numpy as np
 import pandas as pd
@@ -7,7 +8,9 @@ import altair as alt
 import streamlit as st
 from PIL import Image
 from environmentV5_app import Scratch_Game_Environment5_Streamlit
-from agentV5_1_Qtable_app import RL_Agent_51_Streamlit
+from agentV5_2_DQN_app import RL_Agent_52
+
+device = "cpu"
 
 # ************************************* UTILS FUNCTIONS *************************************
 def get_gradient_color(p: int) -> str:
@@ -93,44 +96,56 @@ title_html = """
 """
 st.markdown(title_html, unsafe_allow_html=True)
 
-# st.markdown(title_html, unsafe_allow_html=True)
-
 config_cols = st.columns([1, 0.6, 1])
 with config_cols[0]:
-    st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Env Config ⚙️</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 28px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Env Config ⚙️</p>", unsafe_allow_html=True)
     env_config_cols = st.columns(2)
     with env_config_cols[0] as random_emojis_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Random Emojis</p>", unsafe_allow_html=True)
         RANDOM_EMOJIS = st.selectbox(" ", options=[True, False], index=1, label_visibility="collapsed")
     with env_config_cols[1] as frame_size_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Frame Size</p>", unsafe_allow_html=True)
-        FRAME_SIZE = st.number_input(" ", value=50, label_visibility="collapsed")
+        FRAME_SIZE = st.number_input(" ", min_value=5, value=50, label_visibility="collapsed")
 with config_cols[1]:
-    st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Train Config ⚙️</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 28px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Train Config ⚙️</p>", unsafe_allow_html=True)
     train_config_cols = st.columns(2)
     with train_config_cols[0] as episodes_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Episodes</p>", unsafe_allow_html=True)
-        EPISODES = st.number_input(" ", min_value=1, max_value=1000, value=10, step=1, label_visibility="collapsed")
+        EPISODES = st.number_input(" ", min_value=5, value=500, step=1, label_visibility="collapsed")
     with train_config_cols[1] as trace_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Trace Interval</p>", unsafe_allow_html=True)
-        TRACE = st.number_input(" ", min_value=1, max_value=50, value=1, step=1, label_visibility="collapsed")
+        TRACE = st.number_input(" ", min_value=1, value=50, step=1, label_visibility="collapsed")
 with config_cols[2]:
-    st.markdown("<p style='font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Agent Config ⚙️</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 28px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Agent Config ⚙️</p>", unsafe_allow_html=True)
     agent_params_cols = st.columns(3)
     with agent_params_cols[0] as learning_rate_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Learning rate</p>", unsafe_allow_html=True)
-        ALPHA = st.number_input(" ", min_value=0.001, max_value=10.0, value=0.1, step=0.1, key="alpha", format="%.3f", label_visibility="collapsed")
+        ALPHA = st.number_input(" ", min_value=0.00001, max_value=10.0, value=0.001, step=0.1, key="alpha", format="%.4f", label_visibility="collapsed")
+        st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Epsilon decay</p>", unsafe_allow_html=True)
+        EPSILON_DECAY = st.number_input(" ", value=0.995, key="decay", format="%.4f", label_visibility="collapsed")
     with agent_params_cols[1] as discount_factor_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Discount factor</p>", unsafe_allow_html=True)
-        GAMMA = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="gamma", format="%.2f", label_visibility="collapsed")
+        GAMMA = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.8, step=0.01, key="gamma", format="%.2f", label_visibility="collapsed")
+        st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Batch size</p>", unsafe_allow_html=True)
+        BATCH_SIZE = st.number_input(" ", min_value=16, max_value=512, value=64, key="batch", label_visibility="collapsed")
     with agent_params_cols[2] as epsilon_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Epsilon</p>", unsafe_allow_html=True)
         EPSILON = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="epsilon", format="%.2f", label_visibility="collapsed")
+        st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Memory size</p>", unsafe_allow_html=True)
+        MEMORY_SIZE = st.number_input(" ", min_value=10000, max_value=50000, value=15000, step=100, key="memory", label_visibility="collapsed")
 
-st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=FRAME_SIZE, scratching_area=(0, 0, 700, 350), random_emojis=RANDOM_EMOJIS)
-env = st.session_state.env
-st.session_state.agent = RL_Agent_51_Streamlit(num_actions=env.total_squares, alpha=ALPHA, gamma=GAMMA, epsilon=EPSILON)
-agent = st.session_state.agent
+agent_parameters = {
+    "alpha": ALPHA,  # Learning rate
+    "gamma": GAMMA,  # Discount factor
+    "epsilon": EPSILON,  # Exploration rate
+    "epsilon_decay": EPSILON_DECAY,
+    "epsilon_min": 0.05,
+    "batch_size": BATCH_SIZE,
+    "memory_size": MEMORY_SIZE
+}
+
+env = Scratch_Game_Environment5_Streamlit(frame_size=FRAME_SIZE, scratching_area=(0, 0, 700, 350), random_emojis=RANDOM_EMOJIS)
+agent = RL_Agent_52(num_actions=env.total_squares, agent_parameters=agent_parameters)
 gallery_images = []
 
 game_cols = st.columns([0.3, 0.5, 0.3])
@@ -240,8 +255,7 @@ with game_cols[2]:
         .full-bg-container {{
             position: relative;
             width: 100%;
-            min-height: 340px;
-            height: 100%;
+            min-height: 400px;
             background: #f44611;
             border-radius: 20px;
             display: flex;
@@ -325,7 +339,7 @@ with game_cols[2]:
             <li>Learning rate: <span class="number-highlight">{agent.alpha}</span></li>
             <li>Discount factor: <span class="number-highlight">{agent.gamma}</span></li>
             <li>Epsilon: <span class="number-highlight">{agent.epsilon}</span></li>
-            <li>Qtable: <span class="number-highlight">{env.total_squares}</span> × <span class="number-highlight">{env.total_squares}</span></li>
+            <li>DQN params: <span class="number-highlight">{agent.policy_dqn.get_num_parameters()}</span></li>
         </ul>
     </div>
     """
@@ -349,6 +363,8 @@ areas_cols = st.columns([0.7, 0.3])
 
 max_reward, min_actions, min_area_scratched = -99999, 99999, 999 # best
 min_reward, max_actions, max_area_scratched = 99999, 0, 0        # worst
+epsilon_history = []
+step_counter = 0
 
 # """******************************BEGINNING OF TRAINING******************************"""
 start = time.time()
@@ -362,21 +378,21 @@ with rewards_cols[0]:
     rewards_placeholder = st.empty()
     rewards_df = pd.DataFrame(columns=['Episode', 'Reward', 'Min Reward', 'Max Reward'])
 with actions_cols[0]:
-    st.markdown(
-        "<div style='text-align: center;'>"
-        "<h1>🎯 Actions/Episodes 🎯</h1>"
-        "</div>",
-        unsafe_allow_html=True
-    )
+    st.markdown(f"""
+        <div style='text-align: center;'>
+            <h1>🎯 Actions/Episodes 🎯 (Optimum: {len(env.good_frames_idx)})</h1>
+        </div>
+    """, unsafe_allow_html=True)
     actions_placeholder = st.empty()
     actions_df = pd.DataFrame(columns=['Episode', 'Actions Done', 'Min Actions', 'Max Actions'])
 with areas_cols[0]:
-    st.markdown(
-        "<div style='text-align: center;'>"
-        "<h1>🌍 Areas/Episodes 🌍</h1>"
-        "</div>",
-        unsafe_allow_html=True
-    )
+    optimum_area = math.ceil(len(env.good_frames_idx) / len(env.squares_images) * 100)
+    st.markdown(f"""
+        <div style='text-align: center;'>
+            <h1>🌍 Areas/Episodes 🌍 (Optimum: {optimum_area}%)</h1>
+
+        </div>
+    """, unsafe_allow_html=True)
     areas_placeholder = st.empty()
     areas_df = pd.DataFrame(columns=['Episode', 'Area Scratched', 'Min Area Scratched', 'Max Area Scratched'])
 
@@ -388,20 +404,25 @@ for i in range(EPISODES):
     episode_actions = 0
     episode_reward = 0
 
-    agent.epsilon *= np.exp(-0.001 * i)
+    agent.epsilon = max(agent.epsilon * agent.epsilon_decay, agent.epsilon_min)
+    epsilon_history.append(agent.epsilon)
 
-    current_state = env.frames_mask
-    current_action = env.total_squares // 2
+    current_state = env.frames_mask.copy()
 
     while not done:
         episode_actions += 1
+        step_counter += 1
 
-        action_index = agent.choose_action(current_action, current_state)
+        action_index = agent.choose_action(current_state)
         next_state, reward, done = env.env_step(action_index)
-        agent.update_q_table(current_action, action_index, reward, next_state)
+        agent.remember(current_state, action_index, next_state, reward, done)
+        agent.replay()
 
         episode_reward += reward
-        current_state = next_state
+        current_state = next_state.copy()
+
+        if step_counter % (agent.num_actions//2) == 0:
+            agent.update_target_network()
 
     episode_area = (env.scratched_count / env.total_squares) * 100
 
@@ -479,8 +500,6 @@ for i in range(EPISODES):
         image: Image.Image = env.get_window_image()
         gallery_images.append((image, i)) 
         
-    time.sleep(0.01)
-
 # """******************************END OF TRAINING******************************"""
 finish_html = f"""
     <div style='text-align: center;font-size: 2rem;font-weight: bold;color: #43a047;display: flex;align-items: center;justify-content: center;gap: 10px;'>¡Finished!
@@ -786,23 +805,26 @@ with areas_cols[1]:
     st.markdown(areas_resume_html, unsafe_allow_html=True)
 
 minutes, seconds = divmod(time.time()-start, 60)
-time_cols = st.columns(1)
-with time_cols[0]:
-    time_taken_html = f"""
+col_time, col_graph = st.columns([1, 1])
+with col_time:
+    st.markdown(f"""
         <style>
             .time-container {{
                 background: linear-gradient(135deg, #27ae60, #1e8449);
                 border-radius: 15px;
                 padding: 20px;
-                margin: 30px auto;
-                max-width: 600px;
-                text-align: center;
+                margin: auto;
+                max-width: 500px;
+                height: 120px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 position: relative;
                 overflow: hidden;
                 box-shadow: 0 8px 32px rgba(0,0,0,0.3);
                 border: 2px solid #27ae60;
+                transform: translateY(120px); /* desplaza hacia la mitad vertical del gráfico */
             }}
-            /* Haz de luz exhuberante */
             .time-container::before {{
                 content: '';
                 position: absolute;
@@ -816,7 +838,6 @@ with time_cols[0]:
                 animation: slide-shine 3s cubic-bezier(.6,0,.4,1) infinite;
                 z-index: 2;
             }}
-            /* Chispa animada */
             .sparkle {{
                 position: absolute;
                 top: 50%;
@@ -829,7 +850,6 @@ with time_cols[0]:
                 z-index: 3;
                 animation: sparkle-pop 3s cubic-bezier(.6,0,.4,1) infinite;
             }}
-            /* SVG de chispa */
             .sparkle svg {{
                 display: block;
                 width: 100%;
@@ -872,7 +892,8 @@ with time_cols[0]:
         </style>
         <div class="time-container">
             <div class="time-text">
-                <span class="time-icon">⏱️</span> Total training time: <span class="time-value">{int(minutes)} min {seconds:.2f} sec</span>
+                <span class="time-icon">⏱️</span> 
+                Total training time: <span class="time-value">{int(minutes)} min {seconds:.2f} sec</span>
             </div>
             <span class="sparkle">
                 <svg viewBox="0 0 36 36" fill="none">
@@ -893,8 +914,29 @@ with time_cols[0]:
                 </svg>
             </span>
         </div>
-    """
-    st.markdown(time_taken_html, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
+with col_graph:
+    epsilon_df = pd.DataFrame({"Episode": range(1, len(epsilon_history) + 1), "Epsilon": epsilon_history})
+    epsilon_chart = (
+        alt.Chart(epsilon_df.assign(Serie='Epsilon'))
+        .mark_line(point=True)
+        .encode(
+            x=alt.X('Episode:Q', title='Episode',
+                    axis=alt.Axis(tickMinStep=1, labelAngle=0, labelFontSize=18, titleFontSize=22, grid=False)),
+            y=alt.Y('Epsilon:Q', title='Epsilon',
+                    axis=alt.Axis(labelFontSize=18, titleFontSize=22, grid=False)),
+            color=alt.Color(
+                'Serie:N',
+                legend=alt.Legend(title=''),
+                scale=alt.Scale(domain=['Epsilon'], range=['#ff0080'])
+            )
+        )
+        .properties(width=900, height=400, padding={"top": 20})
+        .configure_view(strokeWidth=0)
+        .configure_axis(grid=False)
+        .interactive()
+    )
+    st.altair_chart(epsilon_chart, use_container_width=False)
 
 # ************************************* SECTION SEPARATOR *************************************
 separator_html = """

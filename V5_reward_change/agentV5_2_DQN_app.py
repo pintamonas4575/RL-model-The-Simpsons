@@ -11,20 +11,23 @@ class Custom_DQN(nn.Module):
     """Custom Deep Q-Network (DQN) model."""
     def __init__(self, input_dim: int, output_dim: int):
         super(Custom_DQN, self).__init__()
-        self.fc1 = nn.Linear(input_dim, 128)
-        self.fc2 = nn.Linear(128, 128)
-        self.fc3 = nn.Linear(128, output_dim)
+        self.fc1 = nn.Linear(input_dim, 256)
+        self.fc2 = nn.Linear(256, 256)
+        self.fc3 = nn.Linear(256, 128)
+        self.fc4 = nn.Linear(128, 128)
+        self.fc5 = nn.Linear(128, output_dim)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = torch.relu(self.fc1(x))
         x = torch.relu(self.fc2(x))
-        x = self.fc3(x)
+        x = torch.relu(self.fc3(x))
+        x = torch.relu(self.fc4(x))
+        x = self.fc5(x)
         return x
     
-    def print_num_parameters(self) -> None:
-        total_params = sum(p.numel() for p in self.parameters())
-        print(f"Total number of parameters: {total_params}")
-
+    def get_num_parameters(self) -> int:
+        total = sum(p.numel() for p in self.parameters())
+        return f"{total:,}".replace(",", ".")
 class RL_Agent_52():
     """Reinforcement Learning Agent using DQN."""
 
@@ -35,7 +38,7 @@ class RL_Agent_52():
         self.epsilon_decay = agent_parameters["epsilon_decay"]
         self.epsilon_min = agent_parameters["epsilon_min"]
         self.batch_size = agent_parameters["batch_size"]
-        self.memory = deque(maxlen=20)
+        self.memory = deque(maxlen=agent_parameters["memory_size"])
 
         self.num_actions = num_actions
         self.target_dqn = Custom_DQN(self.num_actions, self.num_actions).to(device)
@@ -44,12 +47,14 @@ class RL_Agent_52():
         self.loss_fn = nn.SmoothL1Loss()
 
     def remember(self, current_state: list[int], action: int, next_state: list[int], reward: int, done: bool) -> None:
-        """Store the experience in memory."""
+        """Store the experience in memory. If memory is full, remove random samples."""
         # NOTE: current_state and next_state are in raw mode
         if len(self.memory) >= self.memory.maxlen:
-            random_sample = random.sample(self.memory, 1)
-            self.memory.remove(random_sample[0])
-        self.memory.append((current_state, action, reward, next_state, done))
+            n_samples_to_remove = self.batch_size
+            random_samples = random.sample(self.memory, n_samples_to_remove)
+            for sample in random_samples:
+                self.memory.remove(sample)
+        self.memory.append((current_state, action, next_state, reward, done))
 
     def choose_action(self, current_state: list[int]) -> int:
         """Choose the next action based on epsilon-greedy policy."""
@@ -57,13 +62,13 @@ class RL_Agent_52():
         if random.random() < self.epsilon:
             action_index = random.choice(possible_actions)
         else:
-            state_tensor = torch.FloatTensor(current_state).unsqueeze(0).to(device)
+            current_state = torch.FloatTensor(current_state).unsqueeze(0).to(device) # [batch, num_actions]
             with torch.no_grad():
-                q_values: torch.Tensor = self.policy_dqn(state_tensor)  # [batch, num_actions]
-                q_values_np = q_values[0].cpu().numpy()
-                masked_q_values = np.full_like(q_values_np, -np.inf)
-                masked_q_values[possible_actions] = q_values_np[possible_actions]
-                action_index = np.argmax(masked_q_values)
+                q_values: torch.Tensor = self.policy_dqn(current_state)
+            q_values_np = q_values[0].cpu().numpy()
+            masked_q_values = np.full_like(q_values_np, -np.inf)
+            masked_q_values[possible_actions] = q_values_np[possible_actions]
+            action_index = np.argmax(masked_q_values)
 
         return action_index
         
@@ -71,30 +76,19 @@ class RL_Agent_52():
         """Train the DQN model using replay experiences."""
         if len(self.memory) < self.batch_size:
             return
-        else:
-            print("*******************")
-            print(f"states", type(states))
-            print("*******************")
 
         batch = np.random.choice(len(self.memory), self.batch_size, replace=False)
-        states, actions, rewards, next_states, dones = zip(*[self.memory[i] for i in batch])
+        current_states, actions, next_states, rewards, dones = zip(*[self.memory[i] for i in batch])
 
-        # states = torch.tensor(states, dtype=torch.float32).to(device)
-        # actions = torch.tensor(actions).to(device)
-        # rewards = torch.tensor(rewards).to(device)
-        # next_states = torch.tensor(next_states, dtype=torch.float32).to(device)
-        # dones = torch.tensor(dones).to(device)
-
-        # Convert integer states to one-hot encoded vectors to match the input dimensions of the network
-        states = torch.eye(self.num_actions, dtype=torch.float32)[list(states)].to(device)
+        current_states = torch.tensor(current_states, dtype=torch.float32).to(device)
         actions = torch.tensor(actions).to(device)
         rewards = torch.tensor(rewards).to(device)
-        next_states = torch.eye(self.num_actions, dtype=torch.float32)[list(next_states)].to(device)
+        next_states = torch.tensor(next_states, dtype=torch.float32).to(device)
         dones = torch.tensor(dones, dtype=torch.float32).to(device)
 
-        q_values = self.policy_dqn(states).gather(1, actions.unsqueeze(1)).squeeze(1)
+        q_values = self.policy_dqn(current_states).gather(1, actions.unsqueeze(1)).squeeze(1)
         next_q_values = self.target_dqn(next_states).max(1)[0]
-        target_q_values = rewards + (self.gamma * next_q_values * (1 - dones))
+        target_q_values: torch.Tensor = rewards + (self.gamma * next_q_values * (1 - dones))
 
         loss = self.loss_fn(q_values, target_q_values.detach())
         self.optimizer.zero_grad()
