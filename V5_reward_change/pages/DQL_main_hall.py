@@ -103,6 +103,28 @@ title_html = """
             overflow: hidden;
             margin-bottom: 2rem;
         }
+        .modern-frame::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255,152,0,0.1),
+                rgba(255,152,0,0.1) 2px,
+                transparent 2px,
+                transparent 5px
+            );
+            animation: spin-aspas 8s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes spin-aspas {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         .awesome-title {
             text-align: center;
             font-size: 2.5em;
@@ -116,7 +138,6 @@ title_html = """
         }
         .mint {
             color: #50ffb1;
-            /* Puedes añadir sombra si quieres más impacto visual */
             text-shadow: 0 0 8px #50ffb199;
         }
         .electric {
