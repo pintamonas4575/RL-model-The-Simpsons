@@ -105,16 +105,16 @@ with config_cols[0]:
         RANDOM_EMOJIS = st.selectbox(" ", options=[True, False], index=1, label_visibility="collapsed")
     with env_config_cols[1] as frame_size_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Frame Size</p>", unsafe_allow_html=True)
-        FRAME_SIZE = st.number_input(" ", value=50, label_visibility="collapsed")
+        FRAME_SIZE = st.number_input(" ", min_value=5, value=50, label_visibility="collapsed")
 with config_cols[1]:
     st.markdown("<p style='font-size: 28px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Train Config ⚙️</p>", unsafe_allow_html=True)
     train_config_cols = st.columns(2)
     with train_config_cols[0] as episodes_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Episodes</p>", unsafe_allow_html=True)
-        EPISODES = st.number_input(" ", min_value=1, max_value=1000, value=10, step=1, label_visibility="collapsed")
+        EPISODES = st.number_input(" ", min_value=5, value=300, step=1, label_visibility="collapsed")
     with train_config_cols[1] as trace_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Trace Interval</p>", unsafe_allow_html=True)
-        TRACE = st.number_input(" ", min_value=1, max_value=50, value=1, step=1, label_visibility="collapsed")
+        TRACE = st.number_input(" ", min_value=1, value=20, step=1, label_visibility="collapsed")
 with config_cols[2]:
     st.markdown("<p style='font-size: 28px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Agent Config ⚙️</p>", unsafe_allow_html=True)
     agent_params_cols = st.columns(3)
