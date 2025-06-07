@@ -87,18 +87,96 @@ st.sidebar.page_link("pages/QL_main_hall.py", icon="🖥️", label="QL Main Hal
 st.sidebar.page_link("pages/DQL_main_hall.py", icon="🖥️", label="DQL Main Hall")
 
 # ************************************* MAIN APP *************************************
-title_html = """ 
-    <h1 style='text-align: center; font-size: 2.8em; font-weight: 900; letter-spacing: 2px; margin-bottom: 0.3em;'>
-        🚀 <span style='color:#ff9800;'>Q-Learning</span> <span style='color:#2196f3;'>Training</span> 🧠
-    </h1>
+title_html = """
+    <style>
+        .modern-frame {
+            border: 2px solid;
+            border-image: linear-gradient(45deg, #000, #ff9800, #000, #ff9800) 1;
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 0 16px rgba(255,152,0,0.2);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        .awesome-title {
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            margin: 0;
+            font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+            color: #fff;
+            position: relative;
+            z-index: 2;
+        }
+        .mint {
+            color: #50ffb1;
+            /* Puedes añadir sombra si quieres más impacto visual */
+            text-shadow: 0 0 8px #50ffb199;
+        }
+        .electric {
+            color: #00b4db;
+            text-shadow: 0 0 8px #00b4db99;
+        }
+        .rocket, .brain {
+            animation: float 3s ease-in-out infinite;
+            display: inline-block;
+            font-size: 1.2em;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+    <div class="modern-frame">
+        <h1 class="awesome-title">
+            <span class="rocket">🚀</span>
+            <span class="mint">Q-Learning</span>
+            <span class="electric"> Training</span>
+            <span class="brain">🧠</span>
+        </h1>
+    </div>
 """
 st.markdown(title_html, unsafe_allow_html=True)
 
-# st.markdown(title_html, unsafe_allow_html=True)
-
 config_cols = st.columns([1, 0.6, 1])
 with config_cols[0]:
-    st.markdown("<p style='font-size: 28px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Env Config ⚙️</p>", unsafe_allow_html=True)
+    env_config_html = """
+        <style>
+            .env-config-title {
+                font-size: 28px !important;
+                font-weight: bold !important;
+                margin-bottom: 10px;
+                text-align: center;
+                letter-spacing: 1px;
+                position: relative;
+            }
+            .env-config-text {
+                color: #f94d0b; /* Naranja intenso de tu imagen */
+                filter: drop-shadow(0 0 5px rgba(249, 77, 11, 0.5));
+                animation: orange-glow 3.5s ease-in-out infinite alternate;
+            }
+            @keyframes orange-glow {
+                0% {
+                    text-shadow: 0 0 8px rgba(249, 77, 11, 0.7), 0 0 15px rgba(255, 213, 79, 0.6);
+                    filter: drop-shadow(0 0 5px rgba(249, 77, 11, 0.5));
+                }
+                50% {
+                    text-shadow: 0 0 12px rgba(249, 77, 11, 0.9), 0 0 20px rgba(255, 213, 79, 0.8), 0 0 30px rgba(255, 224, 178, 0.6);
+                    filter: drop-shadow(0 0 10px rgba(249, 77, 11, 0.7));
+                }
+                100% {
+                    text-shadow: 0 0 8px rgba(249, 77, 11, 0.7), 0 0 15px rgba(255, 213, 79, 0.6);
+                    filter: drop-shadow(0 0 5px rgba(249, 77, 11, 0.5));
+                }
+            }
+        </style>
+        <p class='env-config-title'><span class='env-config-text'>Env Config</span> ⚙️</p>
+    """
+    st.markdown(env_config_html, unsafe_allow_html=True)
     env_config_cols = st.columns(2)
     with env_config_cols[0] as random_emojis_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Random Emojis</p>", unsafe_allow_html=True)
@@ -107,7 +185,39 @@ with config_cols[0]:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Frame Size</p>", unsafe_allow_html=True)
         FRAME_SIZE = st.number_input(" ", min_value=5, value=50, label_visibility="collapsed")
 with config_cols[1]:
-    st.markdown("<p style='font-size: 28px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Train Config ⚙️</p>", unsafe_allow_html=True)
+    train_config_html = """
+        <style>
+            .train-config-title {
+                font-size: 28px !important;
+                font-weight: bold !important;
+                margin-bottom: 10px;
+                text-align: center;
+                letter-spacing: 1px;
+                position: relative;
+            }
+            .train-config-text {
+                color: #00BFFF; /* DeepSkyBlue */
+                filter: drop-shadow(0 0 5px rgba(0, 191, 255, 0.5));
+                animation: blue-glow 3.5s ease-in-out infinite alternate;
+            }
+            @keyframes blue-glow {
+                0% {
+                    text-shadow: 0 0 8px rgba(0, 191, 255, 0.7), 0 0 15px rgba(100, 220, 255, 0.6);
+                    filter: drop-shadow(0 0 5px rgba(0, 191, 255, 0.5));
+                }
+                50% {
+                    text-shadow: 0 0 12px rgba(0, 191, 255, 0.9), 0 0 20px rgba(100, 220, 255, 0.8), 0 0 30px rgba(180, 240, 255, 0.6);
+                    filter: drop-shadow(0 0 10px rgba(0, 191, 255, 0.7));
+                }
+                100% {
+                    text-shadow: 0 0 8px rgba(0, 191, 255, 0.7), 0 0 15px rgba(100, 220, 255, 0.6);
+                    filter: drop-shadow(0 0 5px rgba(0, 191, 255, 0.5));
+                }
+            }
+        </style>
+        <p class='train-config-title'><span class='train-config-text'>Train Config</span> ⚙️</p>
+    """
+    st.markdown(train_config_html, unsafe_allow_html=True)
     train_config_cols = st.columns(2)
     with train_config_cols[0] as episodes_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Episodes</p>", unsafe_allow_html=True)
@@ -116,7 +226,39 @@ with config_cols[1]:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Trace Interval</p>", unsafe_allow_html=True)
         TRACE = st.number_input(" ", min_value=1, value=20, step=1, label_visibility="collapsed")
 with config_cols[2]:
-    st.markdown("<p style='font-size: 28px; font-weight: bold; margin-bottom: 10px; text-align: center;'>Agent Config ⚙️</p>", unsafe_allow_html=True)
+    agent_config_html = """
+        <style>
+            .agent-config-title {
+                font-size: 28px !important;
+                font-weight: bold !important;
+                margin-bottom: 10px;
+                text-align: center;
+                letter-spacing: 1px;
+                position: relative;
+            }
+            .agent-config-text {
+                color: #f94d0b; /* Naranja intenso de tu imagen */
+                filter: drop-shadow(0 0 5px rgba(249, 77, 11, 0.5));
+                animation: orange-glow 3.5s ease-in-out infinite alternate;
+            }
+            @keyframes orange-glow {
+                0% {
+                    text-shadow: 0 0 8px rgba(249, 77, 11, 0.7), 0 0 15px rgba(255, 213, 79, 0.6);
+                    filter: drop-shadow(0 0 5px rgba(249, 77, 11, 0.5));
+                }
+                50% {
+                    text-shadow: 0 0 12px rgba(249, 77, 11, 0.9), 0 0 20px rgba(255, 213, 79, 0.8), 0 0 30px rgba(255, 224, 178, 0.6);
+                    filter: drop-shadow(0 0 10px rgba(249, 77, 11, 0.7));
+                }
+                100% {
+                    text-shadow: 0 0 8px rgba(249, 77, 11, 0.7), 0 0 15px rgba(255, 213, 79, 0.6);
+                    filter: drop-shadow(0 0 5px rgba(249, 77, 11, 0.5));
+                }
+            }
+        </style>
+        <p class='agent-config-title'><span class='agent-config-text'>Agent Config</span> ⚙️</p>
+    """
+    st.markdown(agent_config_html, unsafe_allow_html=True)
     agent_params_cols = st.columns(3)
     with agent_params_cols[0] as learning_rate_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Learning rate</p>", unsafe_allow_html=True)
@@ -128,10 +270,8 @@ with config_cols[2]:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Epsilon</p>", unsafe_allow_html=True)
         EPSILON = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="epsilon", format="%.2f", label_visibility="collapsed")
 
-st.session_state.env = Scratch_Game_Environment5_Streamlit(frame_size=FRAME_SIZE, scratching_area=(0, 0, 700, 350), random_emojis=RANDOM_EMOJIS)
-env = st.session_state.env
-st.session_state.agent = RL_Agent_51_Streamlit(num_actions=env.total_squares, alpha=ALPHA, gamma=GAMMA, epsilon=EPSILON)
-agent = st.session_state.agent
+env = Scratch_Game_Environment5_Streamlit(frame_size=FRAME_SIZE, scratching_area=(0, 0, 700, 350), random_emojis=RANDOM_EMOJIS)
+agent = RL_Agent_51_Streamlit(num_actions=env.total_squares, alpha=ALPHA, gamma=GAMMA, epsilon=EPSILON)
 gallery_images = []
 
 game_cols = st.columns([0.3, 0.5, 0.3])
