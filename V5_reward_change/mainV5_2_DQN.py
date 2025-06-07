@@ -34,15 +34,6 @@ class Custom_DQN(nn.Module):
         total_params = sum(p.numel() for p in self.parameters())
         print(f"Total number of parameters: {total_params}")
 
-    def print_gpu_memory_usage(self) -> None:
-        if device == "cuda":
-            allocated_memory = torch.cuda.memory_allocated(device) / (1024 ** 2)
-            reserved_memory = torch.cuda.memory_reserved(device) / (1024 ** 2)
-            print(f"Allocated GPU memory: {allocated_memory:.2f} MB")
-            print(f"Reserved GPU memory: {reserved_memory:.2f} MB")
-        else:
-            print("CUDA not available or not being used")
-
 class RL_Agent_52():
     """Reinforcement Learning Agent using DQN."""
 
@@ -53,7 +44,7 @@ class RL_Agent_52():
         self.epsilon_decay = agent_parameters["epsilon_decay"]
         self.epsilon_min = agent_parameters["epsilon_min"]
         self.batch_size = agent_parameters["batch_size"]
-        self.memory = deque(maxlen=15000)
+        self.memory = deque(maxlen=agent_parameters["memory_size"])
 
         self.num_actions = num_actions
         self.target_dqn = Custom_DQN(self.num_actions, self.num_actions).to(device)
@@ -62,7 +53,7 @@ class RL_Agent_52():
         self.loss_fn = nn.SmoothL1Loss()
 
     def remember(self, current_state: list[int], action: int, next_state: list[int], reward: int, done: bool) -> None:
-        """Store the experience in memory."""
+        """Store the experience in memory. If memory is full, remove random samples."""
         # NOTE: current_state and next_state are in raw mode
         if len(self.memory) >= self.memory.maxlen:
             n_samples_to_remove = self.batch_size
@@ -121,7 +112,8 @@ agent_parameters = {
     "epsilon": 0.9,  # Exploration rate
     "epsilon_decay": 0.995,
     "epsilon_min": 0.05,
-    "batch_size": 64
+    "batch_size": 64,
+    "memory_size": 15000
 }
 
 my_env = Scratch_Game_Environment5_Streamlit(frame_size=50, scratching_area=(110,98,770,300))
