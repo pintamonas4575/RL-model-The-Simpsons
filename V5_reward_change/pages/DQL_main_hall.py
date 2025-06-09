@@ -596,42 +596,42 @@ for i in range(EPISODES):
     rewards_chart = alt.Chart(rewards_df).transform_fold(
         ['Reward', 'Min Reward', 'Max Reward'], as_=['Serie', 'Valor']
     ).mark_line(point=True).encode(
-        x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(tickMinStep=1, labelAngle=0, labelFontSize=18, titleFontSize=22, grid=False)),
-        y=alt.Y('Valor:Q', title='Reward', axis=alt.Axis(labelFontSize=18, titleFontSize=22, grid=False), scale=alt.Scale(zero=False)),
+        x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
+        y=alt.Y('Valor:Q', title='Reward', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
         color=alt.Color(
             'Serie:N',
-            legend=alt.Legend(title=""),
+            legend=alt.Legend(title=None),
             scale=alt.Scale(domain=['Reward', 'Min Reward', 'Max Reward'], range=["#06e7f7", "#ff0000", "#15f10e"])
         )
-    ).properties(width=1200, height=400, padding={"top": 20}).configure_view(strokeWidth=0).configure_axis(grid=False).interactive()
+    ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
     rewards_placeholder.altair_chart(rewards_chart, use_container_width=False)
     # ---------------ACTIONS EVOLUTION----------------
     actions_df.loc[len(actions_df)] = [i + 1, episode_actions, min(episode_actions, min_actions), max(episode_actions, max_actions)]
     actions_chart = alt.Chart(actions_df).transform_fold(
         ['Actions Done', 'Min Actions', 'Max Actions'], as_=['Serie', 'Valor']
     ).mark_line(point=True).encode(
-        x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(tickMinStep=1, labelAngle=0, labelFontSize=18, titleFontSize=22, grid=False)),
-        y=alt.Y('Valor:Q', title='Actions Done', axis=alt.Axis(labelFontSize=18, titleFontSize=22, grid=False), scale=alt.Scale(zero=False)),
+        x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
+        y=alt.Y('Valor:Q', title='Actions Done', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
         color=alt.Color(
             'Serie:N',
-            legend=alt.Legend(title=""),
+            legend=alt.Legend(title=None),
             scale=alt.Scale(domain=['Actions Done', 'Min Actions', 'Max Actions'], range=["#06e7f7", "#15f10e", "#ff0000"])
         )
-    ).properties(width=1200, height=400, padding={"top": 20}).configure_view(strokeWidth=0).configure_axis(grid=False).interactive()
+    ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
     actions_placeholder.altair_chart(actions_chart, use_container_width=False)
     # ---------------AREAS EVOLUTION----------------
     areas_df.loc[len(areas_df)] = [i + 1, episode_area, min(episode_area, min_area_scratched), max(episode_area, max_area_scratched)]
     areas_chart = alt.Chart(areas_df).transform_fold(
         ['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], as_=['Serie', 'Valor']
     ).mark_line(point=True).encode(
-        x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(tickMinStep=1, labelAngle=0, labelFontSize=18, titleFontSize=22, grid=False)),
-        y=alt.Y('Valor:Q', title='Area Scratched (%)', axis=alt.Axis(labelFontSize=18, titleFontSize=22, grid=False), scale=alt.Scale(zero=False)),
+        x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
+        y=alt.Y('Valor:Q', title='Area Scratched (%)', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
         color=alt.Color(
             'Serie:N',
-            legend=alt.Legend(title=""),
+            legend=alt.Legend(title=None),
             scale=alt.Scale(domain=['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], range=["#06e7f7", "#15f10e", "#ff0000"])
         )
-    ).properties(width=1200, height=400, padding={"top": 20}).configure_view(strokeWidth=0).configure_axis(grid=False).interactive()
+    ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
     areas_placeholder.altair_chart(areas_chart, use_container_width=False)
     # ---------------UPDATE PROGRESS BAR----------------
     percent = int(100 * (i + 1) / EPISODES) 
