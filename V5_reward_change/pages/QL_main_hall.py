@@ -512,9 +512,10 @@ areas_cols = st.columns([0.7, 0.3])
 max_reward, min_actions, min_area_scratched = -99999, 99999, 999 # best
 min_reward, max_actions, max_area_scratched = 99999, 0, 0        # worst
 epsilon_history = []
+train_df = pd.DataFrame(columns=['Episode', 'Reward', 'Min Reward', 'Max Reward',
+                                 'Actions Done', 'Min Actions', 'Max Actions',
+                                 'Area Scratched', 'Min Area Scratched', 'Max Area Scratched'])
 
-# """******************************BEGINNING OF TRAINING******************************"""
-start = time.time()
 with rewards_cols[0]:
     st.markdown(
         "<div style='text-align: center;'>"
@@ -523,7 +524,6 @@ with rewards_cols[0]:
         unsafe_allow_html=True
     )
     rewards_placeholder = st.empty()
-    rewards_df = pd.DataFrame(columns=['Episode', 'Reward', 'Min Reward', 'Max Reward'])
 with actions_cols[0]:
     st.markdown(f"""
         <div style='text-align: center;'>
@@ -531,7 +531,6 @@ with actions_cols[0]:
         </div>
     """, unsafe_allow_html=True)
     actions_placeholder = st.empty()
-    actions_df = pd.DataFrame(columns=['Episode', 'Actions Done', 'Min Actions', 'Max Actions'])
 with areas_cols[0]:
     optimum_area = math.ceil(len(env.good_frames_idx) / len(env.squares_images) * 100)
     st.markdown(f"""
@@ -541,8 +540,9 @@ with areas_cols[0]:
         </div>
     """, unsafe_allow_html=True)
     areas_placeholder = st.empty()
-    areas_df = pd.DataFrame(columns=['Episode', 'Area Scratched', 'Min Area Scratched', 'Max Area Scratched'])
 
+# """******************************BEGINNING OF TRAINING******************************"""
+start = time.time()
 for i in range(EPISODES):
 
     env.env_reset()
@@ -575,9 +575,14 @@ for i in range(EPISODES):
     max_reward = episode_reward if episode_reward > max_reward else max_reward
     max_actions = episode_actions if episode_actions > max_actions else max_actions
     max_area_scratched = episode_area if episode_area > max_area_scratched else max_area_scratched
+
+    train_df.loc[len(train_df)] = [
+        i + 1, episode_reward, min_reward, max_reward,
+        episode_actions, min_actions, max_actions,
+        episode_area, min_area_scratched, max_area_scratched
+    ]
     # ---------------REWARDS EVOLUTION----------------
-    rewards_df.loc[len(rewards_df)] = [i + 1, episode_reward, min(episode_reward, min_reward), max(episode_reward, max_reward)] 
-    rewards_chart = alt.Chart(rewards_df).transform_fold(
+    rewards_chart = alt.Chart(train_df[['Episode', 'Reward', 'Min Reward', 'Max Reward']]).transform_fold(
         ['Reward', 'Min Reward', 'Max Reward'], as_=['Serie', 'Valor']
     ).mark_line(point=True).encode(
         x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
@@ -590,8 +595,7 @@ for i in range(EPISODES):
     ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
     rewards_placeholder.altair_chart(rewards_chart, use_container_width=False)
     # ---------------ACTIONS EVOLUTION----------------
-    actions_df.loc[len(actions_df)] = [i + 1, episode_actions, min(episode_actions, min_actions), max(episode_actions, max_actions)]
-    actions_chart = alt.Chart(actions_df).transform_fold(
+    actions_chart = alt.Chart(train_df[['Episode', 'Actions Done', 'Min Actions', 'Max Actions']]).transform_fold(
         ['Actions Done', 'Min Actions', 'Max Actions'], as_=['Serie', 'Valor']
     ).mark_line(point=True).encode(
         x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
@@ -604,8 +608,7 @@ for i in range(EPISODES):
     ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
     actions_placeholder.altair_chart(actions_chart, use_container_width=False)
     # ---------------AREAS EVOLUTION----------------
-    areas_df.loc[len(areas_df)] = [i + 1, episode_area, min(episode_area, min_area_scratched), max(episode_area, max_area_scratched)]
-    areas_chart = alt.Chart(areas_df).transform_fold(
+    areas_chart = alt.Chart(train_df[['Episode', 'Area Scratched', 'Min Area Scratched', 'Max Area Scratched']]).transform_fold(
         ['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], as_=['Serie', 'Valor']
     ).mark_line(point=True).encode(
         x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
@@ -659,9 +662,9 @@ image_placeholder.image(env.get_window_image(), use_container_width=True)
 
 # """******************************STATS GRAPHICS******************************"""
 with rewards_cols[1]:
-    min_val = rewards_df['Reward'].min()
-    max_val = rewards_df['Reward'].max()
-    avg_val = rewards_df['Reward'].mean()
+    min_val = train_df['Reward'].min()
+    max_val = train_df['Reward'].max()
+    avg_val = train_df['Reward'].mean()
     rewards_resume_html = f"""
     <style>
         .wrapper-center {{
@@ -736,11 +739,11 @@ with rewards_cols[1]:
         <div class="triangle-container">
             <div class="triangle-row">
             <div class="stat-circle circle-min">
-                <div class="stat-number">{min_val}💶</div>
+                <div class="stat-number">{min_val:.0f}💶</div>
                 <div class="stat-label">Min</div>
             </div>
             <div class="stat-circle circle-max">
-                <div class="stat-number">{max_val}💶</div>
+                <div class="stat-number">{max_val:.0f}💶</div>
                 <div class="stat-label">Max</div>
             </div>
             </div>
@@ -755,9 +758,9 @@ with rewards_cols[1]:
     """
     st.markdown(rewards_resume_html, unsafe_allow_html=True)
 with actions_cols[1]:
-    min_val = actions_df['Actions Done'].min()
-    max_val = actions_df['Actions Done'].max()
-    avg_val = actions_df['Actions Done'].mean()
+    min_val = train_df['Actions Done'].min()
+    max_val = train_df['Actions Done'].max()
+    avg_val = train_df['Actions Done'].mean()
     actions_resume_html = f"""
     <style>
         .wrapper-center {{
@@ -832,11 +835,11 @@ with actions_cols[1]:
         <div class="triangle-container">
             <div class="triangle-row">
             <div class="stat-triangle triangle-min">
-                <div class="stat-value">{min_val}</div>
+                <div class="stat-value">{min_val:.0f}</div>
                 <div class="stat-label">Min</div>
             </div>
             <div class="stat-triangle triangle-max">
-                <div class="stat-value">{max_val}</div>
+                <div class="stat-value">{max_val:.0f}</div>
                 <div class="stat-label">Max</div>
             </div>
             </div>
@@ -849,9 +852,9 @@ with actions_cols[1]:
     """
     st.markdown(actions_resume_html, unsafe_allow_html=True)
 with areas_cols[1]:
-    min_val = areas_df['Area Scratched'].min()
-    max_val = areas_df['Area Scratched'].max()
-    avg_val = areas_df['Area Scratched'].mean()
+    min_val = train_df['Area Scratched'].min()
+    max_val = train_df['Area Scratched'].max()
+    avg_val = train_df['Area Scratched'].mean()
     areas_resume_html = f"""
     <style>
         .wrapper-center {{
@@ -1146,16 +1149,14 @@ with gallery_title_cols[1]:
     """
     st.markdown(rainbow_html, unsafe_allow_html=True)
 
-if not gallery_images:
-    st.info("No images in caché. Train a model before")
-else:
-    cols = st.columns(3) # 3 column rows
-    for i, (img, episode) in enumerate(gallery_images):
-        with cols[i % 3]:
-            st.image(img, caption=f"Episode {episode}", use_container_width=True)
-        if (i + 1) % 3 == 0 and (i + 1) < len(gallery_images):
-            cols = st.columns(3)
+cols = st.columns(3) # 3 column rows
+for i, (img, episode) in enumerate(gallery_images):
+    with cols[i % 3]:
+        st.image(img, caption=f"Episode {episode}", use_container_width=True)
+    if (i + 1) % 3 == 0 and (i + 1) < len(gallery_images):
+        cols = st.columns(3)
 
+# ************************************* DOWNLOAD ZIP GALLERY *************************************
 zip_buffer = io.BytesIO()
 with zipfile.ZipFile(zip_buffer, "w") as zip_file:
     for img, episode in gallery_images:
