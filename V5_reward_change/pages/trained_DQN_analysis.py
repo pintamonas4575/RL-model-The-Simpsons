@@ -1,0 +1,563 @@
+import pandas as pd
+import altair as alt
+import streamlit as st
+
+# ************************************* PAGE CONFIG *************************************
+st.set_page_config(page_title="DQN trained data", page_icon="🤖", layout="wide", initial_sidebar_state="collapsed")
+st.markdown("""<style>.stApp {background-color: #000000;}.main .block-container {background-color: #000000;}</style>""", unsafe_allow_html=True)
+
+# ************************************* SIDEBAR MENU *************************************
+st.sidebar.markdown("""<div style='text-align:center;'><span style='font-size:24px; font-weight:bold; color:#ffb300; letter-spacing:1px;'>🌟 MENU 🌟</span></div>""", unsafe_allow_html=True)
+
+side_bar_html = """
+    <style>
+        /* Fondo y bordes del sidebar */
+        [data-testid="stSidebar"] {
+            background: linear-gradient(180deg, #000000 60%, #f44611 100%);
+            border-radius: 0 20px 20px 0;
+            box-shadow: 2px 0 18px #0002;
+        }
+        /* Radio button */
+        [data-testid="stSidebar"] .stRadio [role="radiogroup"] > div {
+            background: rgba(255,255,255,0.10);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            transition: background 0.2s;
+            box-shadow: 0 1px 6px #0001;
+            padding: 10px 16px;
+        }
+        [data-testid="stSidebar"] .stRadio [role="radiogroup"] > div:hover {
+            background: rgba(255,255,255,0.18);
+        }
+        /* Texto de opciones */
+        [data-testid="stSidebar"] .stRadio [role="radio"] p {
+            color: #fff !important;
+            font-weight: 600;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+        }
+        /* Captions */
+        [data-testid="stSidebar"] .stRadio [data-testid="stCaption"] {
+            color: #ffe07a !important;
+            font-size: 13px !important;
+            margin-top: 2px;
+            margin-left: 6px;
+            font-style: italic;
+        }
+        /* Círculo de selección */
+        [data-testid="stSidebar"] .stRadio [role="radio"] span[aria-checked] {
+            border: 2px solid #ffe07a !important;
+            box-shadow: 0 0 8px #ffe07a44;
+        }
+        [data-testid="stSidebar"] .stRadio [role="radio"][aria-checked="true"] span[aria-checked] {
+            background: #ffe07a !important;
+            border: 2px solid #fff !important;
+        }
+    </style>
+"""
+st.markdown(side_bar_html, unsafe_allow_html=True)
+
+st.sidebar.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+st.sidebar.page_link("home_app.py", icon="🏠", label="Home")
+st.sidebar.page_link("pages/QL_main_hall.py", icon="🖥️", label="QL Main Hall")
+st.sidebar.page_link("pages/DQL_main_hall.py", icon="🖥️", label="DQL Main Hall")
+st.sidebar.page_link("pages/trained_DQN_analysis.py", icon="📊", label="Analyze DQN training")
+st.sidebar.page_link("pages/test_DQN.py", icon="🤖", label="Test a DQN model")
+
+# ********************************** CSV FILE UPLOAD **********************************
+title_html = """
+    <style>
+        .modern-frame {
+            border: 2px solid;
+            border-image: linear-gradient(45deg, #000, #ff9800, #000, #ff9800) 1;
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 0 16px rgba(255,152,0,0.2);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        .modern-frame::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255,152,0,0.1),
+                rgba(255,152,0,0.1) 2px,
+                transparent 2px,
+                transparent 5px
+            );
+            animation: spin-aspas 8s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes spin-aspas {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .awesome-title {
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            margin: 0;
+            font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+            color: #fff;
+            position: relative;
+            z-index: 2;
+        }
+        .mint {
+            color: #50ffb1;
+            text-shadow: 0 0 8px #50ffb199;
+        }
+        .electric {
+            color: #00b4db;
+            text-shadow: 0 0 8px #00b4db99;
+        }
+        .rocket, .brain {
+            animation: float 3s ease-in-out infinite;
+            display: inline-block;
+            font-size: 1.2em;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+    <div class="modern-frame">
+        <h1 class="awesome-title">
+            <span class="mint">DQN</span>
+            <span class="electric"> Training Analysis</span>
+        </h1>
+    </div>
+"""
+st.markdown(title_html, unsafe_allow_html=True)
+
+drag_files_html = """
+    <style>
+        .upload-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        .stFileUploader {
+            width: 400px !important;
+            min-height: 400px !important;
+            margin: 0 auto !important;
+        }
+        .stFileUploader > div {
+            height: 100% !important;
+            min-height: 400px !important;
+            border: 3px dashed #ffb300 !important;
+            border-radius: 20px !important;
+            background: rgba(255, 179, 0, 0.1) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 20px !important;
+        }
+        .stFileUploader > div > div {
+            text-align: center !important;
+            width: 100% !important;
+        }
+        .stFileUploader > div > div > div {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+        }
+        .stFileUploader > div > div > div > span {
+            font-size: 1.2em !important;
+            margin-bottom: 10px !important;
+        }
+    </style>
+"""
+st.markdown(drag_files_html, unsafe_allow_html=True)
+
+with st.container():
+    st.markdown('<div class="upload-container">', unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("📁 Drop your CSV file here or click to browse", type=['csv'])
+    st.markdown('</div>', unsafe_allow_html=True)
+if uploaded_file is not None:
+    # verify .csv extension
+    file_name: str = uploaded_file.name
+    if not (file_name.lower().endswith('.csv')):
+        st.error("File must be CSV.")
+        st.stop()
+    try:
+        train_df = pd.read_csv(uploaded_file)
+        st.success("CSV file uploaded correctly!")
+    except Exception as e:
+        st.error(f"Error reading CSV file: {str(e)}")
+        st.stop()
+else:
+    st.warning("Please, upload a CSV file to continue.")
+    st.stop()
+
+
+rewards_cols = st.columns([0.7, 0.3])
+actions_cols = st.columns([0.7, 0.3])
+areas_cols = st.columns([0.7, 0.3])
+
+with rewards_cols[0]:
+    st.markdown(
+        "<div style='text-align: center;'>"
+        "<h1>🏆 Rewards/Episodes 🏆</h1>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+    rewards_placeholder = st.empty()
+with actions_cols[0]:
+    st.markdown(f"""
+        <div style='text-align: center;'>
+            <h1>🎯 Actions/Episodes 🎯)</h1>
+        </div>
+    """, unsafe_allow_html=True)
+    actions_placeholder = st.empty()
+with areas_cols[0]:
+    st.markdown(f"""
+        <div style='text-align: center;'>
+            <h1>🌍 Areas/Episodes 🌍</h1>
+
+        </div>
+    """, unsafe_allow_html=True)
+    areas_placeholder = st.empty()
+
+# ************************************* REWARDS CHART *************************************
+rewards_chart = alt.Chart(train_df[['Episode', 'Reward', 'Min Reward', 'Max Reward']]).transform_fold(
+        ['Reward', 'Min Reward', 'Max Reward'], as_=['Serie', 'Valor']
+    ).mark_line(point=True).encode(
+        x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
+        y=alt.Y('Valor:Q', title='Reward', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
+        color=alt.Color(
+            'Serie:N',
+            legend=alt.Legend(title=None),
+            scale=alt.Scale(domain=['Reward', 'Min Reward', 'Max Reward'], range=["#06e7f7", "#ff0000", "#15f10e"])
+        )
+    ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
+rewards_placeholder.altair_chart(rewards_chart, use_container_width=False)
+# ************************************* ACTIONS CHART *************************************
+actions_chart = alt.Chart(train_df[['Episode', 'Actions Done', 'Min Actions', 'Max Actions']]).transform_fold(
+        ['Actions Done', 'Min Actions', 'Max Actions'], as_=['Serie', 'Valor']
+    ).mark_line(point=True).encode(
+        x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
+        y=alt.Y('Valor:Q', title='Actions Done', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
+        color=alt.Color(
+            'Serie:N',
+            legend=alt.Legend(title=None),
+            scale=alt.Scale(domain=['Actions Done', 'Min Actions', 'Max Actions'], range=["#06e7f7", "#15f10e", "#ff0000"])
+        )
+    ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
+actions_placeholder.altair_chart(actions_chart, use_container_width=False)
+# ************************************* AREAS CHART *************************************
+areas_chart = alt.Chart(train_df[['Episode', 'Area Scratched', 'Min Area Scratched', 'Max Area Scratched']]).transform_fold(
+        ['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], as_=['Serie', 'Valor']
+    ).mark_line(point=True).encode(
+        x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
+        y=alt.Y('Valor:Q', title='Area Scratched (%)', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
+        color=alt.Color(
+            'Serie:N',
+            legend=alt.Legend(title=None),
+            scale=alt.Scale(domain=['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], range=["#06e7f7", "#15f10e", "#ff0000"])
+        )
+    ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
+areas_placeholder.altair_chart(areas_chart, use_container_width=False)
+
+# *********************************TRAINING STATS*********************************
+with rewards_cols[1]:
+    min_val = train_df['Reward'].min()
+    max_val = train_df['Reward'].max()
+    avg_val = train_df['Reward'].mean()
+    rewards_resume_html = f"""
+    <style>
+        .wrapper-center {{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            min-height: 500px;
+        }}
+        .triangle-container {{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0px;
+        }}
+        .triangle-row {{
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 80px;
+            margin-bottom: 0px;
+        }}
+        .triangle-bottom {{
+            display: flex;
+            justify-content: center;
+            margin-top: 28px;
+        }}
+        .stat-circle {{
+            width: 175px; height: 175px; border-radius: 88px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: white; font-size: 40px; font-weight: bold;
+            box-shadow: 2px 2px 16px #88888866;
+            margin: 0 8px;
+            position: relative;
+        }}
+        .circle-min {{
+            background: linear-gradient(135deg, #d32f2f 60%, #ff8a65 100%);
+            border: 6px solid #d32f2f;
+        }}
+        .circle-max {{
+            background: linear-gradient(135deg, #388e3c 60%, #66bb6a 100%);
+            border: 6px solid #388e3c;
+        }}
+        .circle-avg {{
+            background: linear-gradient(135deg, #ff9800 60%, #ffd54f 100%);
+            border: 6px solid #ff9800;
+        }}
+        .stat-number {{
+            font-size: 40px;
+            font-weight: bold;
+            margin-bottom: 10px;   /* Ajusta este valor para subir/bajar el número */
+            margin-top: -12px;     /* Puedes ajustar este valor para subirlo más o menos */
+            color: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }}
+        .stat-label {{
+            font-size: 19px;
+            font-weight: normal;
+            margin-top: 4px;
+            color: #000000;
+            letter-spacing: 0.5px;
+            text-align: center;
+            width: 100%;
+        }}
+    </style>
+    <div class="wrapper-center">
+        <div class="triangle-container">
+            <div class="triangle-row">
+            <div class="stat-circle circle-min">
+                <div class="stat-number">{min_val:.0f}💶</div>
+                <div class="stat-label">Min</div>
+            </div>
+            <div class="stat-circle circle-max">
+                <div class="stat-number">{max_val:.0f}💶</div>
+                <div class="stat-label">Max</div>
+            </div>
+            </div>
+            <div class="triangle-bottom">
+            <div class="stat-circle circle-avg">
+                <div class="stat-number">{avg_val:.0f}💶</div>
+                <div class="stat-label">Mean</div>
+            </div>
+            </div>
+        </div>
+    </div>
+    """
+    st.markdown(rewards_resume_html, unsafe_allow_html=True)
+with actions_cols[1]:
+    min_val = train_df['Actions Done'].min()
+    max_val = train_df['Actions Done'].max()
+    avg_val = train_df['Actions Done'].mean()
+    actions_resume_html = f"""
+    <style>
+        .wrapper-center {{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            min-height: 500px;
+        }}
+        .triangle-container {{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }}
+        .triangle-row {{
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+            margin-bottom: 30px;
+        }}
+        .stat-triangle {{
+            width: 175px;
+            height: 175px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            box-shadow: 2px 2px 16px #88888866;
+            margin: 0 8px;
+            position: relative;
+            /* Triángulo equilátero apuntando hacia arriba */
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }}
+        .triangle-min {{
+            background: linear-gradient(135deg, #388e3c 60%, #66bb6a 100%);
+            border: 6px solid #388e3c;
+        }}
+        .triangle-max {{
+            background: linear-gradient(135deg, #d32f2f 60%, #ff8a65 100%);
+            border: 6px solid #d32f2f;
+        }}
+        .triangle-avg {{
+            background: linear-gradient(135deg, #ff9800 60%, #ffd54f 100%);
+            border: 6px solid #ff9800;
+        }}
+        .stat-label {{
+            font-size: 19px;
+            font-weight: normal;
+            margin-top: 7px;
+            color: #f0f0f0;
+            letter-spacing: 0.5px;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: max-content;
+        }}
+        .stat-value {{
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            color: black;
+        }}
+    </style>
+    <div class="wrapper-center">
+        <div class="triangle-container">
+            <div class="triangle-row">
+            <div class="stat-triangle triangle-min">
+                <div class="stat-value">{min_val:.0f}</div>
+                <div class="stat-label">Min</div>
+            </div>
+            <div class="stat-triangle triangle-max">
+                <div class="stat-value">{max_val:.0f}</div>
+                <div class="stat-label">Max</div>
+            </div>
+            </div>
+            <div class="stat-triangle triangle-avg" style="margin-top: 40px;">
+                <div class="stat-value">{avg_val:.0f}</div>
+                <div class="stat-label">Mean</div>
+            </div>
+        </div>
+    </div>
+    """
+    st.markdown(actions_resume_html, unsafe_allow_html=True)
+with areas_cols[1]:
+    min_val = train_df['Area Scratched'].min()
+    max_val = train_df['Area Scratched'].max()
+    avg_val = train_df['Area Scratched'].mean()
+    areas_resume_html = f"""
+    <style>
+        .wrapper-center {{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            min-height: 500px;
+        }}
+        .square-container {{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }}
+        .square-row {{
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+            margin-bottom: 0px;
+        }}
+        .square-bottom {{
+            display: flex;
+            justify-content: center;
+            margin-top: 28px;
+        }}
+        .stat-square {{
+            width: 175px;
+            height: 175px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            box-shadow: 2px 2px 16px #88888866;
+            margin: 0 8px;
+            border-radius: 12px;
+            position: relative;
+        }}
+        .square-min {{
+            background: linear-gradient(135deg, #388e3c 60%, #66bb6a 100%);
+            border: 6px solid #388e3c;
+        }}
+        .square-max {{
+            background: linear-gradient(135deg, #d32f2f 60%, #ff8a65 100%);
+            border: 6px solid #d32f2f;
+        }}
+        .square-avg {{
+            background: linear-gradient(135deg, #ff9800 60%, #ffd54f 100%);
+            border: 6px solid #ff9800;
+        }}
+        .stat-number {{
+            font-size: 40px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            margin-top: -12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            color: black;
+        }}
+        .stat-label {{
+            font-size: 19px;
+            font-weight: normal;
+            margin-top: 4px;
+            color: #f0f0f0;
+            letter-spacing: 0.5px;
+            text-align: center;
+            width: 100%;
+        }}
+    </style>
+    <div class="wrapper-center">
+        <div class="square-container">
+            <div class="square-row">
+            <div class="stat-square square-min">
+                <div class="stat-number">{min_val:.1f}%</div>
+                <div class="stat-label">Min</div>
+            </div>
+            <div class="stat-square square-max">
+                <div class="stat-number">{max_val:.1f}%</div>
+                <div class="stat-label">Max</div>
+            </div>
+            </div>
+            <div class="square-bottom">
+            <div class="stat-square square-avg">
+                <div class="stat-number">{avg_val:.1f}%</div>
+                <div class="stat-label">Mean</div>
+            </div>
+            </div>
+        </div>
+    </div>
+    """
+    st.markdown(areas_resume_html, unsafe_allow_html=True)

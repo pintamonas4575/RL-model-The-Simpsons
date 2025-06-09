@@ -87,6 +87,8 @@ st.sidebar.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 st.sidebar.page_link("home_app.py", icon="🏠", label="Home")
 st.sidebar.page_link("pages/QL_main_hall.py", icon="🖥️", label="QL Main Hall")
 st.sidebar.page_link("pages/DQL_main_hall.py", icon="🖥️", label="DQL Main Hall")
+st.sidebar.page_link("pages/trained_DQN_analysis.py", icon="📊", label="Analyze DQN training")
+st.sidebar.page_link("pages/test_DQN.py", icon="🤖", label="Test a DQN model")
 
 # ************************************* MAIN APP *************************************
 title_html = """
@@ -674,7 +676,7 @@ progress_placeholder.progress(100)
 # final image
 image_placeholder.image(env.get_window_image(), use_container_width=True)
 
-# """******************************STATS GRAPHICS******************************"""
+# *********************************TRAINING STATS*********************************
 with rewards_cols[1]:
     min_val = train_df['Reward'].min()
     max_val = train_df['Reward'].max()
@@ -1180,7 +1182,7 @@ with zipfile.ZipFile(zip_buffer, "w") as zip_file:
         zip_file.writestr(f"DQN_episode_{episode}.png", img_bytes.read())
 zip_buffer.seek(0)
 
-st.markdown("""
+zip_button_html = """
     <style>
         div.stDownloadButton > button {
             background-color: #0099ff;
@@ -1194,7 +1196,12 @@ st.markdown("""
             display: block;
         }
     </style>
-""", unsafe_allow_html=True)
+"""
+st.markdown(zip_button_html, unsafe_allow_html=True)
+
+# Save training data to CSV
+csv_filename = f"DQN_{EPISODES}_episodes_{env.total_squares}_squares.csv"
+train_df.to_csv(csv_filename, index=False)
 
 @st.fragment
 def download_zip_fragment(zip_buffer: io.BytesIO) -> None:
