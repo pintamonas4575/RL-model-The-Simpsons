@@ -140,7 +140,6 @@ for i in range(EPISODES):
     agent.epsilon = max(agent.epsilon * agent.epsilon_decay, agent.epsilon_min)
     epsilon_history.append(agent.epsilon)
 
-    # current_state = my_env.frames_mask
     current_state = my_env.frames_mask.copy()
 
     while not done:
@@ -154,7 +153,6 @@ for i in range(EPISODES):
 
         episode_reward += reward
         current_state = next_state.copy()
-        # current_state = next_state
 
         if step_counter % (agent.num_actions//2) == 0:
             agent.update_target_network()
