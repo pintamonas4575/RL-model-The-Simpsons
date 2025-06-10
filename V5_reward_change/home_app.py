@@ -58,7 +58,7 @@ st.sidebar.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 st.sidebar.page_link("home_app.py", icon="🏠", label="Home")
 st.sidebar.page_link("pages/QL_main_hall.py", icon="🖥️", label="QL Main Hall")
 st.sidebar.page_link("pages/DQL_main_hall.py", icon="🖥️", label="DQL Main Hall")
-st.sidebar.page_link("pages/trained_DQN_analysis.py", icon="📊", label="Analyze trained model")
+st.sidebar.page_link("pages/trained_model_analysis.py", icon="📊", label="Analyze trained model")
 st.sidebar.page_link("pages/test_DQN.py", icon="🤖", label="Test a DQN model")
 
 # ************************************* MAIN BODY *************************************
@@ -261,7 +261,7 @@ buttons_html = """
     <div class="button-grid">
         <a class="fake-button" href="/QL_main_hall" target="_self">GO TO QL HALL</a>
         <a class="fake-button" href="/DQL_main_hall" target="_self">GO TO DQL HALL</a>
-        <a class="fake-button" href="/trained_DQN_analysis" target="_self">TRAINED MODEL ANALYSIS</a>
+        <a class="fake-button" href="/trained_model_analysis" target="_self">TRAINED MODEL ANALYSIS</a>
         <a class="fake-button" href="/test_DQN" target="_self">DQN TESTING</a>
     </div>
 """

@@ -87,7 +87,7 @@ st.sidebar.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 st.sidebar.page_link("home_app.py", icon="🏠", label="Home")
 st.sidebar.page_link("pages/QL_main_hall.py", icon="🖥️", label="QL Main Hall")
 st.sidebar.page_link("pages/DQL_main_hall.py", icon="🖥️", label="DQL Main Hall")
-st.sidebar.page_link("pages/trained_DQN_analysis.py", icon="📊", label="Analyze trained model")
+st.sidebar.page_link("pages/trained_model_analysis.py", icon="📊", label="Analyze trained model")
 st.sidebar.page_link("pages/test_DQN.py", icon="🤖", label="Test a DQN model")
 
 # ************************************* MAIN APP *************************************
