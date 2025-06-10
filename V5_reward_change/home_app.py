@@ -58,68 +58,10 @@ st.sidebar.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 st.sidebar.page_link("home_app.py", icon="🏠", label="Home")
 st.sidebar.page_link("pages/QL_main_hall.py", icon="🖥️", label="QL Main Hall")
 st.sidebar.page_link("pages/DQL_main_hall.py", icon="🖥️", label="DQL Main Hall")
-st.sidebar.page_link("pages/trained_DQN_analysis.py", icon="📊", label="Analyze DQN training")
+st.sidebar.page_link("pages/trained_DQN_analysis.py", icon="📊", label="Analyze trained model")
 st.sidebar.page_link("pages/test_DQN.py", icon="🤖", label="Test a DQN model")
 
 # ************************************* MAIN BODY *************************************
-animation_html = """
-    <style>
-    .bg-pro {
-        position: relative;
-        width: 100%;
-        height: 220px;
-        overflow: hidden;
-        background: linear-gradient(120deg, #232526 0%, #2c3e50 100%);
-        border-radius: 18px;
-        margin-bottom: 2em;
-        box-shadow: 0 6px 36px 0 rgba(44,62,80,0.10);
-    }
-    .circle-pro {
-        position: absolute;
-        border-radius: 50%;
-        opacity: 0.7;
-        filter: blur(4px);
-        mix-blend-mode: lighten;
-        animation: floatLoop 8s ease-in-out infinite alternate;
-    }
-    .c1-pro {
-        width: 70px; height: 70px;
-        background: radial-gradient(circle at 60% 40%, #ff9800 60%, #ffd600 100%);
-        left: 10%; top: 55%;
-        animation-delay: 0s;
-    }
-    .c2-pro {
-        width: 100px; height: 100px;
-        background: radial-gradient(circle at 30% 70%, #43e97b 60%, #38f9d7 100%);
-        left: 45%; top: 65%;
-        animation-delay: 1.5s;
-    }
-    .c3-pro {
-        width: 55px; height: 55px;
-        background: radial-gradient(circle at 80% 20%, #2196f3 60%, #9c27b0 100%);
-        left: 75%; top: 50%;
-        animation-delay: 3s;
-    }
-    .c4-pro {
-        width: 40px; height: 40px;
-        background: radial-gradient(circle at 50% 50%, #e91e63 60%, #ff9800 100%);
-        left: 65%; top: 80%;
-        animation-delay: 2.5s;
-    }
-    @keyframes floatLoop {
-        0%   { transform: translateY(0) scale(1);}
-        100% { transform: translateY(-30px) scale(1.07);}
-    }
-    </style>
-    <div class="bg-pro">
-        <div class="circle-pro c1-pro"></div>
-        <div class="circle-pro c2-pro"></div>
-        <div class="circle-pro c3-pro"></div>
-        <div class="circle-pro c4-pro"></div>
-    </div>
-"""
-# st.markdown(animation_html, unsafe_allow_html=True)
-
 title_html = """
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap" rel="stylesheet">
     <style>
@@ -230,16 +172,24 @@ st.markdown(title_html, unsafe_allow_html=True)
 
 buttons_html = """
     <style>
-        .button-row {
-            display: flex;
-            justify-content: center;
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 4em 2em;
+            justify-items: center;
             align-items: center;
-            gap: 2em;
             margin-top: 2.5em;
             margin-bottom: 2em;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .fake-button {
-            display: inline-block;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
             background: linear-gradient(90deg, #ff9800 0%, #f44336 100%);
             color: black !important;
             font-size: 1.6em;
@@ -259,6 +209,10 @@ buttons_html = """
             animation:
                 fade-in    3s cubic-bezier(.23,1.14,.69,.98) forwards,
                 pulse-glow 4s ease-in-out infinite           3s;
+            height: 3.5em;
+            min-width: 12em;
+            text-align: center;
+            line-height: normal;
         }
         @keyframes fade-in {
             0% {
@@ -304,13 +258,14 @@ buttons_html = """
             }
         }
     </style>
-    <div class="button-row">
+    <div class="button-grid">
         <a class="fake-button" href="/QL_main_hall" target="_self">GO TO QL HALL</a>
         <a class="fake-button" href="/DQL_main_hall" target="_self">GO TO DQL HALL</a>
+        <a class="fake-button" href="/trained_DQN_analysis" target="_self">TRAINED MODEL ANALYSIS</a>
+        <a class="fake-button" href="/test_DQN" target="_self">DQN TESTING</a>
     </div>
 """
 st.markdown(buttons_html, unsafe_allow_html=True)
-
 
 # ************************************* AUTHOR CREDITS *************************************
 author_html = """

@@ -85,7 +85,7 @@ st.sidebar.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
 st.sidebar.page_link("home_app.py", icon="🏠", label="Home")
 st.sidebar.page_link("pages/QL_main_hall.py", icon="🖥️", label="QL Main Hall")
 st.sidebar.page_link("pages/DQL_main_hall.py", icon="🖥️", label="DQL Main Hall")
-st.sidebar.page_link("pages/trained_DQN_analysis.py", icon="📊", label="Analyze DQN training")
+st.sidebar.page_link("pages/trained_DQN_analysis.py", icon="📊", label="Analyze trained model")
 st.sidebar.page_link("pages/test_DQN.py", icon="🤖", label="Test a DQN model")
 
 # ************************************* MAIN APP *************************************
@@ -1168,7 +1168,7 @@ with zipfile.ZipFile(zip_buffer, "w") as zip_file:
         zip_file.writestr(f"QL_episode_{episode}.png", img_bytes.read())
 zip_buffer.seek(0)
 
-st.markdown("""
+zip_button_html = """
     <style>
         div.stDownloadButton > button {
             background-color: #0099ff;
@@ -1182,7 +1182,8 @@ st.markdown("""
             display: block;
         }
     </style>
-""", unsafe_allow_html=True)
+"""
+st.markdown(zip_button_html, unsafe_allow_html=True)
 
 @st.fragment
 def download_zip_fragment(zip_buffer: io.BytesIO) -> None:
@@ -1190,6 +1191,10 @@ def download_zip_fragment(zip_buffer: io.BytesIO) -> None:
     with zip_cols[1]:
         st.download_button(label="Download episode gallery as .ZIP", data=zip_buffer, file_name=f"QL_{EPISODES}_ep_{env.total_squares}.zip")
 download_zip_fragment(zip_buffer)
+
+# ************************************** SAVE TRAINING DATA *************************************
+csv_filename = f"QL_{EPISODES}_episodes_{env.total_squares}_squares.csv"
+train_df.to_csv(csv_filename, index=False)
 
 # ************************************* AUTHOR CREDITS *************************************
 author_html = """
