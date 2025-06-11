@@ -7,6 +7,7 @@ import pandas as pd
 import altair as alt
 import streamlit as st
 from PIL import Image
+from torch import save as torch_save
 from environmentV5_app import Scratch_Game_Environment5_Streamlit
 from agentV5_2_DQN_app import RL_Agent_52
 
@@ -241,9 +242,9 @@ with config_cols[1]:
     """
     st.markdown(train_config_html, unsafe_allow_html=True)
     st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Episodes</p>", unsafe_allow_html=True)
-    EPISODES = st.number_input(" ", min_value=5, value=500, step=1, label_visibility="collapsed")
+    EPISODES = st.number_input(" ", min_value=5, value=300, step=1, label_visibility="collapsed")
     st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Trace Interval</p>", unsafe_allow_html=True)
-    TRACE = st.number_input(" ", min_value=1, value=50, step=1, label_visibility="collapsed")
+    TRACE = st.number_input(" ", min_value=1, value=20, step=1, label_visibility="collapsed")
 with config_cols[2]:
     agent_config_html = """
         <style>
@@ -582,7 +583,7 @@ for i in range(EPISODES):
         episode_reward += reward
         current_state = next_state.copy()
 
-        if step_counter % (agent.num_actions//2) == 0:
+        if step_counter % agent.num_actions == 0:
             agent.update_target_network()
 
     episode_area = (env.scratched_count / env.total_squares) * 100
@@ -1209,6 +1210,9 @@ download_zip_fragment(zip_buffer)
 # ************************************** SAVE TRAINING DATA *************************************
 csv_filename = f"DQN_{EPISODES}_episodes_{env.total_squares}_squares.csv"
 train_df.to_csv(csv_filename, index=False)
+
+torch_save(agent.policy_dqn.state_dict(), f"V5_2_policy_{agent.num_actions}_{EPISODES}.pth")
+torch_save(agent.target_dqn.state_dict(), f"V5_2_target_{agent.num_actions}_{EPISODES}.pth")
 
 # ************************************* AUTHOR CREDITS *************************************
 author_html = """

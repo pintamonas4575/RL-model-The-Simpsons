@@ -556,7 +556,7 @@ for i in range(EPISODES):
     agent.epsilon *= np.exp(-0.001 * i)
     epsilon_history.append(agent.epsilon)
 
-    current_state = env.frames_mask
+    current_state = env.frames_mask.copy()
     current_action = env.total_squares // 2
 
     while not done:
@@ -567,7 +567,7 @@ for i in range(EPISODES):
         agent.update_q_table(current_action, action_index, reward, next_state)
 
         episode_reward += reward
-        current_state = next_state
+        current_state = next_state.copy()
 
     episode_area = (env.scratched_count / env.total_squares) * 100
 
