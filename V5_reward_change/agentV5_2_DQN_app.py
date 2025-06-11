@@ -35,8 +35,6 @@ class RL_Agent_52():
         self.alpha = agent_parameters["alpha"]  # Learning rate
         self.gamma = agent_parameters["gamma"]  # Discount factor
         self.epsilon = agent_parameters["epsilon"]  # Exploration rate
-        self.epsilon_decay = agent_parameters["epsilon_decay"]
-        self.epsilon_min = agent_parameters["epsilon_min"]
         self.batch_size = agent_parameters["batch_size"]
         self.memory = deque(maxlen=agent_parameters["memory_size"])
 
