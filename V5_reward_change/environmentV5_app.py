@@ -16,31 +16,38 @@ class Scratch_Game_Environment5_Streamlit:
         self.number_of_rows = math.ceil(self.rect_height / self.FRAME_SIZE)
         self.number_of_columns = math.ceil(self.rect_width / self.FRAME_SIZE)
         self.total_squares = self.number_of_rows * self.number_of_columns
-        self.frames_mask = [-1] * self.total_squares  # -1 no rascado, 0 malo, 1 bueno
-        # for local deployment
-        self.background_path = "../utils/space.jpg"
-        self.emoji_paths = ["../emojis/axe.png", "../emojis/axe.png", "../emojis/axe.png"] if not self.random_emojis else self.get_random_emojis()
-        # for local tests and cloud deployment
-        # self.background_path = "utils/space.jpg"
-        # self.emoji_paths = ["emojis/axe.png", "emojis/axe.png", "emojis/axe.png"] if not random_emojis else self.get_random_emojis()
-        self.emoji_images = [Image.open(path) for path in self.emoji_paths]
+        self.frames_mask = [-1] * self.total_squares  # -1 no scratched, 0 bad, 1 good
 
-        self.background_image = Image.open(self.background_path).resize((self.rect_width, self.rect_height))
+        self.emoji_images = self.get_emoji_images()
         self.game_image = Image.new("RGBA", (self.rect_width, self.rect_height), (255, 255, 255, 255))
 
         self.good_frames_idx = set()
         self.squares_images: list[dict[str, Any]] = []
 
         self._setup_environment_and_contours()
-
-    def get_random_emojis(self) -> list[str]:
-        """Return a list of random emoji names."""
-        emoji_folder_path = "emojis/"
-        emoji_names = random.choices(os.listdir(emoji_folder_path), k=3)
-        return [f"{emoji_folder_path}/{emoji_name}" for emoji_name in emoji_names]
+    
+    def get_emoji_images(self) -> list[Image.Image]:
+        """Return a list of emoji images, depending if the user want them random or not."""
+        if not self.random_emojis:
+            try:
+                emoji_images = [Image.open("../emojis/axe.png") for _ in range(3)]
+            except Exception:
+                emoji_images = [Image.open("emojis/axe.png") for _ in range(3)]
+        else:
+            try:
+                emoji_images = [Image.open(f"../emojis/{emoji_name}") for emoji_name in random.choices(os.listdir("../emojis"), k=3)]
+            except Exception:
+                emoji_images = [Image.open(f"emojis/{emoji_name}") for emoji_name in random.choices(os.listdir("emojis"), k=3)]
+        return emoji_images
 
     def _setup_environment_and_contours(self):
         """Set up the environment by identifying contours and placing the frames."""
+        try:
+            self.background_path = "../utils/space.jpg" # local deployment
+        except Exception:
+            self.background_path = "utils/space.jpg" # local tests and cloud deployment
+        self.background_image = Image.open(self.background_path).resize((self.rect_width, self.rect_height))
+
         aux_img = Image.new("RGBA", (self.rect_width, self.rect_height), (255,255,255,255))
         emoji_width, emoji_height = self.emoji_images[0].size
         gap = 40
