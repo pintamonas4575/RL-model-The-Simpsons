@@ -662,8 +662,7 @@ for i in range(EPISODES):
     progress_placeholder.progress(percent)
     # ---------------SAVE IMAGE TO GALLERY----------------
     if i % TRACE == 0 or i == EPISODES-1:
-        image: Image.Image = env.get_window_image()
-        gallery_images.append((image, i)) 
+        gallery_images.append((env.get_window_image(), i)) 
         
 # """******************************END OF TRAINING******************************"""
 finish_html = f"""
