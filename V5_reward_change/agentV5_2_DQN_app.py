@@ -50,8 +50,7 @@ class RL_Agent_52():
         """Store the experience in memory. If memory is full, remove random samples."""
         # NOTE: current_state and next_state are in raw mode
         if len(self.memory) >= self.memory.maxlen:
-            n_samples_to_remove = self.batch_size
-            random_samples = random.sample(self.memory, n_samples_to_remove)
+            random_samples = random.sample(self.memory, k=self.batch_size)
             for sample in random_samples:
                 self.memory.remove(sample)
         self.memory.append((current_state, action, next_state, reward, done))
