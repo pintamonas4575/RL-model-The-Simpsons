@@ -283,28 +283,28 @@ with config_cols[2]:
     with agent_params_cols[0] as learning_rate_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Learning rate</p>", unsafe_allow_html=True)
         ALPHA = st.number_input(" ", min_value=0.00001, max_value=10.0, value=0.001, step=0.1, key="alpha", format="%.4f", label_visibility="collapsed")
-        st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Epsilon decay</p>", unsafe_allow_html=True)
-        EPSILON_DECAY = st.number_input(" ", value=0.995, key="decay", format="%.4f", label_visibility="collapsed")
-    with agent_params_cols[1] as discount_factor_col:
-        st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Discount factor</p>", unsafe_allow_html=True)
-        GAMMA = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.8, step=0.01, key="gamma", format="%.2f", label_visibility="collapsed")
-        st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Batch size</p>", unsafe_allow_html=True)
-        BATCH_SIZE = st.number_input(" ", min_value=16, max_value=512, value=64, key="batch", label_visibility="collapsed")
-    with agent_params_cols[2] as epsilon_col:
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Epsilon</p>", unsafe_allow_html=True)
         EPSILON = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.9, step=0.01, key="epsilon", format="%.2f", label_visibility="collapsed")
+    with agent_params_cols[1] as discount_factor_col:
+        st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Discount factor</p>", unsafe_allow_html=True)
+        GAMMA = st.number_input(" ", min_value=0.01, max_value=1.0, value=0.7, step=0.01, key="gamma", format="%.2f", label_visibility="collapsed")
+        st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Epsilon min</p>", unsafe_allow_html=True)
+        EPSILON_MIN = st.number_input(" ", value=0.05, key="epsilon_min", format="%.2f", label_visibility="collapsed")
+    with agent_params_cols[2] as epsilon_col:
+        st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Batch size</p>", unsafe_allow_html=True)
+        BATCH_SIZE = st.number_input(" ", min_value=16, max_value=512, value=64, key="batch", label_visibility="collapsed")
         st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Memory size</p>", unsafe_allow_html=True)
-        MEMORY_SIZE = st.number_input(" ", min_value=10000, max_value=50000, value=15000, step=100, key="memory", label_visibility="collapsed")
+        MEMORY_SIZE = st.number_input(" ", min_value=1000, max_value=100000, value=15000, step=100, key="memory", label_visibility="collapsed")
 
 agent_parameters = {
     "alpha": ALPHA,  # Learning rate
     "gamma": GAMMA,  # Discount factor
     "epsilon": EPSILON,  # Exploration rate
-    "epsilon_decay": EPSILON_DECAY,
-    "epsilon_min": 0.05,
+    "epsilon_min": EPSILON_MIN,  # Minimum exploration rate
     "batch_size": BATCH_SIZE,
     "memory_size": MEMORY_SIZE
 }
+EPSILON_DECAY_RATE = (agent_parameters["epsilon"] - agent_parameters["epsilon_min"]) / EPISODES
 
 env = Scratch_Game_Environment5_Streamlit(frame_size=FRAME_SIZE, scratching_area=(0, 0, 700, 350), random_emojis=RANDOM_EMOJIS)
 agent = RL_Agent_52(num_actions=env.total_squares, agent_parameters=agent_parameters)
@@ -566,7 +566,7 @@ for i in range(EPISODES):
     episode_actions = 0
     episode_reward = 0
 
-    agent.epsilon = max(agent.epsilon * agent.epsilon_decay, agent.epsilon_min)
+    agent.epsilon = max(agent_parameters["epsilon_min"], agent_parameters["epsilon"] - EPSILON_DECAY_RATE * i)
     epsilon_history.append(agent.epsilon)
 
     current_state = env.frames_mask.copy()
