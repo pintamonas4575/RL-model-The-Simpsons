@@ -48,6 +48,7 @@ class Scratch_Game_Environment5_Streamlit:
             self.background_path = "utils/space.jpg" # local tests and cloud deployment
         self.background_image = Image.open(self.background_path).resize((self.rect_width, self.rect_height))
 
+        """Place the emoji images"""
         aux_img = Image.new("RGBA", (self.rect_width, self.rect_height), (255,255,255,255))
         emoji_width, emoji_height = self.emoji_images[0].size
         gap = 40
@@ -60,6 +61,10 @@ class Scratch_Game_Environment5_Streamlit:
             self.emoji_bboxes.append((x, y, x + emoji_width, y + emoji_height))
             aux_img.paste(emoji_img, (x, y), emoji_img.convert("RGBA"))
 
+        for (x1, y1, x2, y2), emoji_img in zip(self.emoji_bboxes, self.emoji_images):
+            self.background_image.paste(emoji_img, (x1, y1), emoji_img.convert("RGBA"))
+
+        """Detect contours"""
         gray = cv2.cvtColor(np.asarray(aux_img), cv2.COLOR_RGBA2GRAY)
         edges = cv2.Canny(gray, 100, 200)
         kernel = np.ones((3, 3), np.uint8)
@@ -71,9 +76,7 @@ class Scratch_Game_Environment5_Streamlit:
         contour_mask = np.array(contour_mask)
         aux_img.close()
 
-        for (x1, y1, x2, y2), emoji_img in zip(self.emoji_bboxes, self.emoji_images):
-            self.background_image.paste(emoji_img, (x1, y1), emoji_img.convert("RGBA"))
-
+        """Place the frames"""
         idx = 0
         for row in range(self.number_of_rows):
             for col in range(self.number_of_columns):
