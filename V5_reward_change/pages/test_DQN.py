@@ -1,11 +1,12 @@
 import io
 import time
+import torch
 import numpy as np
-import pandas as pd
-import altair as alt
 import streamlit as st
 from environmentV5_app import Scratch_Game_Environment5_Streamlit
-from agentV5_2_DQN_app import RL_Agent_52
+from agentV5_2_DQN_app import RL_Agent_52, Custom_DQN
+
+device = "cpu"
 
 # ************************************* PAGE CONFIG *************************************
 st.set_page_config(page_title="DQN trained data", page_icon="🤖", layout="wide", initial_sidebar_state="collapsed")
@@ -69,7 +70,7 @@ st.sidebar.page_link("pages/DQL_main_hall.py", icon="🖥️", label="DQL Main H
 st.sidebar.page_link("pages/trained_model_analysis.py", icon="📊", label="Analyze trained model")
 st.sidebar.page_link("pages/test_DQN.py", icon="🤖", label="Test a DQN model")
 
-# ************************************* MODEL UPLOAD *************************************
+# ************************************* AGENT UPLOAD AND SETUP *************************************
 title_html = """
     <style>
         .modern-frame {
@@ -146,45 +147,167 @@ title_html = """
 """
 st.markdown(title_html, unsafe_allow_html=True)
 
-# drag and drop file upload
-uploaded_file = st.file_uploader("Upload your trained DQN model file", type=["pt", "pth"], label_visibility="collapsed", accept_multiple_files=True)
-if uploaded_file:
-    model_files = [file for file in uploaded_file if file.name.endswith(('.pt', '.pth'))]
-    if model_files:
-        st.session_state["model_files"] = model_files
-        st.success(f"Successfully loaded {len(model_files)} model files!")
-    else:
-        st.error("No valid model files found. Please upload .pt or .pth files.")
+uploaded_file = st.file_uploader("Upload your trained POLICY DQN file", type=["pt", "pth"])
+if uploaded_file is None:
+    st.stop()
+else:
+    bytes_data = uploaded_file.getvalue()
+    buffer = io.BytesIO(bytes_data)
+    policy_checkpoint = torch.load(buffer, map_location=device)
 
+# NOTE: PROBAR A PASAR UN CARTÓN DIFERENTE AL ENTRENADO
+policy_dqn = Custom_DQN(policy_checkpoint["input_dim"], policy_checkpoint["output_dim"]).to(device)
+policy_dqn.load_state_dict(policy_checkpoint["policy_dict"])
+policy_dqn.eval()
+
+# ************************************* ENV SETUP *************************************
+config_cols = st.columns([1, 0.6, 1])
+with config_cols[0]:
+    env_config_html = """
+        <style>
+            .env-config-title {
+                font-size: 28px !important;
+                font-weight: bold !important;
+                margin-bottom: 10px;
+                text-align: center;
+                letter-spacing: 1px;
+                position: relative;
+            }
+            .env-config-text {
+                color: #f94d0b; /* Naranja intenso de tu imagen */
+                filter: drop-shadow(0 0 5px rgba(249, 77, 11, 0.5));
+                animation: orange-glow 3.5s ease-in-out infinite alternate;
+            }
+            @keyframes orange-glow {
+                0% {
+                    text-shadow: 0 0 8px rgba(249, 77, 11, 0.7), 0 0 15px rgba(255, 213, 79, 0.6);
+                    filter: drop-shadow(0 0 5px rgba(249, 77, 11, 0.5));
+                }
+                50% {
+                    text-shadow: 0 0 12px rgba(249, 77, 11, 0.9), 0 0 20px rgba(255, 213, 79, 0.8), 0 0 30px rgba(255, 224, 178, 0.6);
+                    filter: drop-shadow(0 0 10px rgba(249, 77, 11, 0.7));
+                }
+                100% {
+                    text-shadow: 0 0 8px rgba(249, 77, 11, 0.7), 0 0 15px rgba(255, 213, 79, 0.6);
+                    filter: drop-shadow(0 0 5px rgba(249, 77, 11, 0.5));
+                }
+            }
+        </style>
+        <p class='env-config-title'><span class='env-config-text'>Env Config</span> ⚙️</p>
+    """
+    st.markdown(env_config_html, unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Random Emojis</p>", unsafe_allow_html=True)
+    RANDOM_EMOJIS = st.selectbox(" ", options=[True, False], index=1, label_visibility="collapsed")
+    st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Frame Size</p>", unsafe_allow_html=True)
+    FRAME_SIZE = st.number_input(" ", min_value=5, value=50, label_visibility="collapsed")
+
+env = Scratch_Game_Environment5_Streamlit(frame_size=50, scratching_area=(0, 0, 700, 350), random_emojis=RANDOM_EMOJIS)
+game_cols = st.columns([0.3, 0.5, 0.3])
+with game_cols[1]:
+    image_placeholder = st.empty()
+    image_placeholder.image(env.get_window_image(), use_container_width=True)
+
+# *********************************** 1 EPISODE LOOP *******************************************
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 start_button_cols = st.columns([1, 1, 1])
 with start_button_cols[1]:
     if not st.button("START TRAINING", type="primary", use_container_width=True):
         st.stop()
 
-# ************************************* CLASSES SETUP *************************************
-my_env = Scratch_Game_Environment5_Streamlit(frame_size=50, scratching_area=(110, 98, 770, 300))
-
-
-agent = RL_Agent_52(num_actions=100, agent_parameters={
-    "learning_rate": 0.001,
-    "gamma": 0.99,
-    "epsilon_start": 1.0,
-    "epsilon_min": 0.01,
-    "epsilon_decay": 0.995,
-    "batch_size": 32,
-    "memory_size": 10000,
-    "target_update_freq": 10
-})
-
-# ************************************* TRAINING SETUP *************************************
-action_trace = 3
-
+ACTION_TRACE = 3
 start = time.time()
 
+done = False
+episode_actions = 0
+episode_reward = 0
 
+current_state = env.frames_mask.copy()
 
+while not done:
+    episode_actions += 1
 
+    possible_actions = [i for i, val in enumerate(current_state) if val == -1]
+    current_state_tensor = torch.FloatTensor(current_state).unsqueeze(0).to(device)  # [batch, num_actions]
+    with torch.no_grad():
+        q_values = policy_dqn(current_state_tensor)
+    q_values_np = q_values[0].cpu().numpy()
+    masked_q_values = np.full_like(q_values_np, -np.inf)
+    masked_q_values[possible_actions] = q_values_np[possible_actions]
+    action_index = np.argmax(masked_q_values)
+
+    next_state, reward, done = env.env_step(action_index)
+    episode_reward += reward
+    current_state = next_state.copy()
+
+    # Update the game image
+    image_placeholder.image(env.get_window_image(), use_container_width=True)
+    time.sleep(0.05)
+
+episode_area = (env.scratched_count / env.total_squares) * 100
+
+# ************************************* EPISODE RESULTS *************************************
+results_html = f"""
+    <style>
+        .results-container {{
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border: 2px solid #f44611;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 8px 32px rgba(244, 70, 17, 0.3);
+        }}
+        .results-title {{
+            font-size: 28px;
+            font-weight: bold;
+            color: #f44611;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(244, 70, 17, 0.5);
+        }}
+        .results-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }}
+        .result-card {{
+            background: rgba(244, 70, 17, 0.1);
+            border: 1px solid #f44611;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }}
+        .result-label {{
+            font-size: 16px;
+            color: #ffb300;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }}
+        .result-value {{
+            font-size: 24px;
+            color: #fff;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }}
+    </style>
+    <div class="results-container">
+        <div class="results-title">🧪 Testing Results 🧪</div>
+        <div class="results-grid">
+            <div class="result-card">
+                <div class="result-label">Area Scratched</div>
+                <div class="result-value">{episode_area:.2f}%</div>
+            </div>
+            <div class="result-card">
+                <div class="result-label">Total Actions</div>
+                <div class="result-value">{episode_actions}</div>
+            </div>
+            <div class="result-card">
+                <div class="result-label">Episode Reward</div>
+                <div class="result-value">{episode_reward:.0f}</div>
+            </div>
+        </div>
+    </div>
+"""
+st.markdown(results_html, unsafe_allow_html=True)
 
 # ************************************* AUTHOR CREDITS *************************************
 author_html = """
