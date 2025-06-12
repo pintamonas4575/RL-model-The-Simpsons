@@ -41,8 +41,6 @@ class RL_Agent_52():
         self.alpha = agent_parameters["alpha"]  # Learning rate
         self.gamma = agent_parameters["gamma"]  # Discount factor
         self.epsilon = agent_parameters["epsilon"]  # Exploration rate
-        self.epsilon_decay = agent_parameters["epsilon_decay"]
-        self.epsilon_min = agent_parameters["epsilon_min"]
         self.batch_size = agent_parameters["batch_size"]
         self.memory = deque(maxlen=agent_parameters["memory_size"])
 
@@ -108,10 +106,8 @@ class RL_Agent_52():
 """**********************************************************"""
 agent_parameters = {
     "alpha": 0.001,  # Learning rate
-    "gamma": 0.80,  # Discount factor
+    "gamma": 0.80,  # Discount factor; 0.7 para 300 episodios
     "epsilon": 0.9,  # Exploration rate
-    "epsilon_decay": 0.995,
-    "epsilon_min": 0.05,
     "batch_size": 64,
     "memory_size": 15000
 }
@@ -129,6 +125,9 @@ max_reward, min_actions, min_area_scratched = -99999, 99999, 999
 path_to_save = f"V5_version/V5_2_DQN_{agent.num_actions}_{EPISODES}"
 step_counter = 0
 
+epsilon_min = 0.05
+decay_rate = (agent_parameters["epsilon"] - epsilon_min) / EPISODES
+
 start = time.time()
 for i in range(EPISODES):
     my_env.env_reset()
@@ -137,7 +136,7 @@ for i in range(EPISODES):
     episode_actions = 0
     episode_reward = 0
 
-    agent.epsilon = max(agent.epsilon * agent.epsilon_decay, agent.epsilon_min)
+    agent.epsilon = max(epsilon_min, agent_parameters["epsilon"] - decay_rate * i)
     epsilon_history.append(agent.epsilon)
 
     current_state = my_env.frames_mask.copy()
@@ -154,7 +153,7 @@ for i in range(EPISODES):
         episode_reward += reward
         current_state = next_state.copy()
 
-        if step_counter % (agent.num_actions//2) == 0:
+        if step_counter % agent.num_actions == 0:
             agent.update_target_network()
 
     episode_percentage = (my_env.scratched_count / my_env.total_squares) * 100
@@ -168,9 +167,7 @@ for i in range(EPISODES):
         print(f"Episode reward: {episode_reward}")
         print(f"Episode actions done: {episode_actions}")
         print(f"Episode percentage: {episode_percentage:.2f}%")
-        image: Image.Image = my_env.get_window_image()
-        image.save(f"episodes/V5_2_episode_{i}.png")
-    
+
     # ---------------data for graphics----------------
     rewards.append(episode_reward)
     actions_done.append(episode_actions)
@@ -185,8 +182,8 @@ print(f"***** Total training time: {int(minutes)} minutes and {seconds:.2f} seco
 
 """**********************************************************"""
 
-torch.save(agent.policy_dqn.state_dict(), f"results/V5_version/V5_2_policy_{agent.num_actions}_{EPISODES}.pth")
-torch.save(agent.target_dqn.state_dict(), f"results/V5_version/V5_2_target_{agent.num_actions}_{EPISODES}.pth")
+torch.save(agent.policy_dqn.state_dict(), f"../results/V5_version/V5_2_policy_{agent.num_actions}_{EPISODES}.pth")
+torch.save(agent.target_dqn.state_dict(), f"../results/V5_version/V5_2_target_{agent.num_actions}_{EPISODES}.pth")
 
 # always saves in "results" folder
 plot_results(rewards, actions_done, areas_scratched,
@@ -194,4 +191,4 @@ plot_results(rewards, actions_done, areas_scratched,
              f"{path_to_save}.png", time_taken=(int(minutes), seconds))
 
 from utils.functionalities import plot_epsilon_history
-plot_epsilon_history(epsilon_history, f"results/{path_to_save}_epsilon.png")
+plot_epsilon_history(epsilon_history, f"../results/{path_to_save}_epsilon.png")

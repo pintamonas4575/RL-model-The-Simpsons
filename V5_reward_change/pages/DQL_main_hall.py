@@ -1210,8 +1210,16 @@ download_zip_fragment(zip_buffer)
 csv_filename = f"DQN_{EPISODES}_episodes_{env.total_squares}_squares.csv"
 train_df.to_csv(csv_filename, index=False)
 
-torch_save(agent.policy_dqn.state_dict(), f"V5_2_policy_{agent.num_actions}_{EPISODES}.pth")
-torch_save(agent.target_dqn.state_dict(), f"V5_2_target_{agent.num_actions}_{EPISODES}.pth")
+torch_save({
+    "input_dim": agent.num_actions,
+    "output_dim": agent.num_actions,
+    "policy_dict": agent.policy_dqn.state_dict()
+}, f"V5_2_policy_{agent.num_actions}_{EPISODES}.pth")
+torch_save({
+    "input_dim": agent.num_actions,
+    "output_dim": agent.num_actions,
+    "target_dict": agent.target_dqn.state_dict()
+}, f"V5_2_target_{agent.num_actions}_{EPISODES}.pth")
 
 # ************************************* AUTHOR CREDITS *************************************
 author_html = """
