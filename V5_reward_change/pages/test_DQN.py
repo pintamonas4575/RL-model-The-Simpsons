@@ -330,13 +330,13 @@ results_html = f"""
             text-align: center;
         }}
         .result-label {{
-            font-size: 16px;
+            font-size: 24px;
             color: #ffb300;
             font-weight: bold;
             margin-bottom: 5px;
         }}
         .result-value {{
-            font-size: 24px;
+            font-size: 35px;
             color: #fff;
             font-weight: bold;
             text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
@@ -346,16 +346,16 @@ results_html = f"""
         <div class="results-title">🧪 Testing Results 🧪</div>
         <div class="results-grid">
             <div class="result-card">
-                <div class="result-label">Area Scratched</div>
-                <div class="result-value">{episode_area:.2f}%</div>
+                <div class="result-label">Episode Reward</div>
+                <div class="result-value">{episode_reward:.0f}</div>
             </div>
             <div class="result-card">
                 <div class="result-label">Total Actions</div>
                 <div class="result-value">{episode_actions}</div>
             </div>
             <div class="result-card">
-                <div class="result-label">Episode Reward</div>
-                <div class="result-value">{episode_reward:.0f}</div>
+                <div class="result-label">Area Scratched</div>
+                <div class="result-value">{episode_area:.2f}%</div>
             </div>
         </div>
     </div>
