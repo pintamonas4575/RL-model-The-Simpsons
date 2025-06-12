@@ -4,7 +4,7 @@ import torch
 import numpy as np
 import streamlit as st
 from environmentV5_app import Scratch_Game_Environment5_Streamlit
-from agentV5_2_DQN_app import RL_Agent_52, Custom_DQN
+from agentV5_2_DQN_app import Custom_DQN
 
 device = "cpu"
 
@@ -161,8 +161,8 @@ policy_dqn.load_state_dict(policy_checkpoint["policy_dict"])
 policy_dqn.eval()
 
 # ************************************* ENV SETUP *************************************
-config_cols = st.columns([1, 0.6, 1])
-with config_cols[0]:
+config_cols = st.columns([1, 1, 1])
+with config_cols[1]:
     env_config_html = """
         <style>
             .env-config-title {
@@ -193,15 +193,69 @@ with config_cols[0]:
                 }
             }
         </style>
-        <p class='env-config-title'><span class='env-config-text'>Env Config</span> ⚙️</p>
+        <p class='env-config-title'><span class='env-config-text'>Test env Config</span> ⚙️</p>
     """
     st.markdown(env_config_html, unsafe_allow_html=True)
-    st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Random Emojis</p>", unsafe_allow_html=True)
-    RANDOM_EMOJIS = st.selectbox(" ", options=[True, False], index=1, label_visibility="collapsed")
-    st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Frame Size</p>", unsafe_allow_html=True)
-    FRAME_SIZE = st.number_input(" ", min_value=5, value=50, label_visibility="collapsed")
+    subcols = st.columns(3)
+    with subcols[0]:
+        st.markdown("<div style='font-size: 18px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Random Emojis</div>", unsafe_allow_html=True)
+        RANDOM_EMOJIS = st.selectbox("", options=[True, False], index=1, label_visibility="collapsed")
+    with subcols[1]:
+        st.markdown("<div style='font-size: 18px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Frame Size</div>", unsafe_allow_html=True)
+        frame_size_html = f"""
+            <style>
+                .mini-banner1 {{
+                    width: 80px;
+                    background: linear-gradient(90deg, #F47F26, #D96F1E);  /* naranja intenso con degradado */
+                    color: white;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    font-size: 26px;
+                    font-weight: 700;
+                    text-align: center;
+                    padding: 8px 0;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 6px rgba(244, 127, 38, 0.6);  /* sombra con naranja intenso */
+                    margin: 0 auto;
+                    letter-spacing: 1px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 44px;
+                    box-sizing: border-box;
+                }}
+            </style>
+            <div class="mini-banner1">{policy_checkpoint["frame_size"]}</div>
+        """
+        st.markdown(frame_size_html, unsafe_allow_html=True)
+    with subcols[2]:
+        st.markdown("<div style='font-size: 18px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Number of frames</div>", unsafe_allow_html=True)
+        frames_html = f"""
+            <style>
+                .mini-banner2 {{
+                    width: 80px;
+                    background: linear-gradient(90deg, #F47F26, #D96F1E);  /* naranja intenso con degradado */
+                    color: white;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    font-size: 26px;
+                    font-weight: 700;
+                    text-align: center;
+                    padding: 8px 0;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 6px rgba(244, 127, 38, 0.6);  /* sombra con naranja intenso */
+                    margin: 0 auto;
+                    letter-spacing: 1px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 44px;
+                    box-sizing: border-box;
+                }}
+            </style>
+            <div class="mini-banner2">{policy_checkpoint["input_dim"]}</div>
+        """
+        st.markdown(frames_html, unsafe_allow_html=True)
 
-env = Scratch_Game_Environment5_Streamlit(frame_size=50, scratching_area=(0, 0, 700, 350), random_emojis=RANDOM_EMOJIS)
+env = Scratch_Game_Environment5_Streamlit(frame_size=policy_checkpoint["frame_size"], scratching_area=(0, 0, 700, 350), random_emojis=RANDOM_EMOJIS)
 game_cols = st.columns([0.3, 0.5, 0.3])
 with game_cols[1]:
     image_placeholder = st.empty()
@@ -215,21 +269,20 @@ with start_button_cols[1]:
         st.stop()
 
 ACTION_TRACE = 3
-start = time.time()
-
 done = False
 episode_actions = 0
 episode_reward = 0
 
 current_state = env.frames_mask.copy()
 
+start = time.time()
 while not done:
     episode_actions += 1
 
     possible_actions = [i for i, val in enumerate(current_state) if val == -1]
     current_state_tensor = torch.FloatTensor(current_state).unsqueeze(0).to(device)  # [batch, num_actions]
     with torch.no_grad():
-        q_values = policy_dqn(current_state_tensor)
+        q_values: torch.Tensor = policy_dqn(current_state_tensor)
     q_values_np = q_values[0].cpu().numpy()
     masked_q_values = np.full_like(q_values_np, -np.inf)
     masked_q_values[possible_actions] = q_values_np[possible_actions]
