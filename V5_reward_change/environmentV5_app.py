@@ -45,7 +45,7 @@ class Scratch_Game_Environment5_Streamlit:
         try:
             self.background_path = "../utils/space.jpg" # local deployment
         except Exception:
-            self.background_path = "utils/space.jpg" # local tests and cloud deployment
+            self.background_path = "/utils/space.jpg" # local tests and cloud deployment
         self.background_image = Image.open(self.background_path).resize((self.rect_width, self.rect_height))
 
         """Place the emoji images"""
