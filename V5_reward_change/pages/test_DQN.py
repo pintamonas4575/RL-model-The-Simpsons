@@ -265,10 +265,9 @@ with game_cols[1]:
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 start_button_cols = st.columns([1, 1, 1])
 with start_button_cols[1]:
-    if not st.button("START TRAINING", type="primary", use_container_width=True):
+    if not st.button("START TESTING", type="primary", use_container_width=True):
         st.stop()
 
-ACTION_TRACE = 3
 done = False
 episode_actions = 0
 episode_reward = 0
@@ -294,7 +293,7 @@ while not done:
 
     # Update the game image
     image_placeholder.image(env.get_window_image(), use_container_width=True)
-    time.sleep(0.05)
+    time.sleep(0.8)
 
 episode_area = (env.scratched_count / env.total_squares) * 100
 

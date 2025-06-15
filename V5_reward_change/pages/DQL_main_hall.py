@@ -242,7 +242,7 @@ with config_cols[1]:
     """
     st.markdown(train_config_html, unsafe_allow_html=True)
     st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Episodes</p>", unsafe_allow_html=True)
-    EPISODES = st.number_input(" ", min_value=5, value=5, step=1, label_visibility="collapsed")
+    EPISODES = st.number_input(" ", min_value=5, value=300, step=1, label_visibility="collapsed")
     st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Trace Interval</p>", unsafe_allow_html=True)
     TRACE = st.number_input(" ", min_value=1, value=20, step=1, label_visibility="collapsed")
 with config_cols[2]:
@@ -507,11 +507,11 @@ with game_cols[2]:
     """
     st.markdown(agent_params_html, unsafe_allow_html=True)
 
-# st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
-# start_button_cols = st.columns([1, 1, 1])
-# with start_button_cols[1]:
-#     if not st.button("START TRAINING", type="primary", use_container_width=True):
-#         st.stop()
+st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
+start_button_cols = st.columns([1, 1, 1])
+with start_button_cols[1]:
+    if not st.button("START TRAINING", type="primary", use_container_width=True):
+        st.stop()
 
 # train progressbar
 percent_placeholder = st.empty()
