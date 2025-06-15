@@ -293,7 +293,7 @@ while not done:
 
     # Update the game image
     image_placeholder.image(env.get_window_image(), use_container_width=True)
-    time.sleep(0.4)
+    time.sleep(0.2)
 
 episode_area = (env.scratched_count / env.total_squares) * 100
 
