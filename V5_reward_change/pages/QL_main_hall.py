@@ -1087,6 +1087,25 @@ with col_graph:
     )
     st.altair_chart(epsilon_chart, use_container_width=False)
 
+# ************************************** SAVE TRAINING DATA *************************************
+csv_filename = f"QL_{EPISODES}_episodes_{env.total_squares}_squares.csv"
+csv_buffer = io.StringIO()
+train_df.to_csv(csv_buffer, index=False)
+csv_data = csv_buffer.getvalue()
+
+st.markdown("""
+<style>
+    .stDownloadButton>button {
+        width: 100%;
+        height: 60px;
+        font-size: 20px;
+        background-color: #4CAF50;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.download_button(label="Download training data as CSV", data=csv_data, file_name=csv_filename, mime="text/csv")
+
 # ************************************* SECTION SEPARATOR *************************************
 separator_html = """
     <style>
@@ -1191,9 +1210,101 @@ def download_zip_fragment(zip_buffer: io.BytesIO) -> None:
         st.download_button(label="Download episode gallery as .ZIP", data=zip_buffer, file_name=f"QL_{EPISODES}_ep_{env.total_squares}.zip")
 download_zip_fragment(zip_buffer)
 
-# ************************************** SAVE TRAINING DATA *************************************
-csv_filename = f"QL_{EPISODES}_episodes_{env.total_squares}_squares.csv"
-train_df.to_csv(csv_filename, index=False)
+# ************************************* OTHER PAGE BUTTONS *************************************
+buttons_html = """
+    <style>
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* Tres columnas iguales */
+            grid-template-rows: 1fr;
+            gap: 2em;
+            justify-items: center;
+            align-items: center;
+            margin: 2.5em auto 2em auto;
+            width: 100%;
+            max-width: 1920px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .fake-button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(90deg, #ff9800 0%, #f44336 100%);
+            color: black !important;
+            font-size: 1.6em;
+            font-weight: bold;
+            border-radius: 2em;
+            padding: 0.75em 2.5em;
+            border: none;
+            text-decoration: none !important;
+            cursor: pointer;
+            user-select: none;
+            opacity: 0;
+            box-shadow:
+                0 0 0 0 #ff980000,
+                0 0 0 0 #ff572200,
+                0 0 0 0 #ffd60000;
+            filter: hue-rotate(0deg);
+            animation:
+                fade-in    3s cubic-bezier(.23,1.14,.69,.98) forwards,
+                pulse-glow 4s ease-in-out infinite           3s;
+            height: 3.5em;
+            min-width: 13em;
+            text-align: center;
+            line-height: normal;
+        }
+        @keyframes fade-in {
+            0% {
+                opacity: 0;
+                transform: translateY(32px);
+                box-shadow:
+                    0 0 0 0 #ff980000,
+                    0 0 0 0 #ff572200,
+                    0 0 0 0 #ffd60000;
+                filter: hue-rotate(0deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+                box-shadow:
+                    0 0 16px 6px #ff980088,
+                    0 0 32px 12px #ff5722aa,
+                    0 0 48px 24px #ffd60055;
+                filter: hue-rotate(0deg);
+            }
+        }
+        @keyframes pulse-glow {
+            0% {
+                box-shadow:
+                    0 0 16px 6px #ff980088,
+                    0 0 32px 12px #ff5722aa,
+                    0 0 48px 24px #ffd60055;
+                filter: hue-rotate(0deg);
+            }
+            50% {
+                box-shadow:
+                    0 0 36px 14px #ff5722aa,
+                    0 0 44px 20px #ff5722cc,
+                    0 0 60px 32px #ffd60088;
+                filter: hue-rotate(180deg);
+            }
+            100% {
+                box-shadow:
+                    0 0 16px 6px #ff980088,
+                    0 0 32px 12px #ff5722aa,
+                    0 0 48px 24px #ffd60055;
+                filter: hue-rotate(360deg);
+            }
+        }
+    </style>
+    <div class="button-grid">
+        <a class="fake-button" href="/DQL_main_hall" target="_self">GO TO DQL HALL</a>
+        <a class="fake-button" href="/trained_model_analysis" target="_self">TRAINED MODEL ANALYSIS</a>
+        <a class="fake-button" href="/test_DQN" target="_self">DQN TESTING</a>
+    </div>
+"""
+st.markdown(buttons_html, unsafe_allow_html=True)
 
 # ************************************* AUTHOR CREDITS *************************************
 author_html = """

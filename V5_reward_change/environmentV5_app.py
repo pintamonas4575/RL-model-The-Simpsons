@@ -31,22 +31,21 @@ class Scratch_Game_Environment5_Streamlit:
         if not self.random_emojis:
             try:
                 emoji_images = [Image.open("../emojis/axe.png") for _ in range(3)]
-            except Exception:
+            except FileNotFoundError:
                 emoji_images = [Image.open("emojis/axe.png") for _ in range(3)]
         else:
             try:
                 emoji_images = [Image.open(f"../emojis/{emoji_name}") for emoji_name in random.choices(os.listdir("../emojis"), k=3)]
-            except Exception:
+            except FileNotFoundError:
                 emoji_images = [Image.open(f"emojis/{emoji_name}") for emoji_name in random.choices(os.listdir("emojis"), k=3)]
         return emoji_images
 
     def _setup_environment_and_contours(self):
         """Set up the environment by identifying contours and placing the frames."""
         try:
-            self.background_path = "utils/space.jpg" # local tests and cloud deployment
-        except Exception:
-            self.background_path = "../utils/space.jpg" # local deployment
-        self.background_image = Image.open(self.background_path).resize((self.rect_width, self.rect_height))
+            self.background_image = Image.open("../utils/space.jpg").resize((self.rect_width, self.rect_height)) # local deployment
+        except FileNotFoundError:
+            self.background_image = Image.open("utils/space.jpg").resize((self.rect_width, self.rect_height)) # local tests and cloud deployment
 
         """Place the emoji images"""
         aux_img = Image.new("RGBA", (self.rect_width, self.rect_height), (255,255,255,255))

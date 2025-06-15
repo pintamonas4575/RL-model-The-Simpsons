@@ -242,7 +242,7 @@ with config_cols[1]:
     """
     st.markdown(train_config_html, unsafe_allow_html=True)
     st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Episodes</p>", unsafe_allow_html=True)
-    EPISODES = st.number_input(" ", min_value=5, value=300, step=1, label_visibility="collapsed")
+    EPISODES = st.number_input(" ", min_value=5, value=5, step=1, label_visibility="collapsed")
     st.markdown("<p style='font-size: 20px; font-weight: bold; margin-bottom: 5px; text-align: center;'>Trace Interval</p>", unsafe_allow_html=True)
     TRACE = st.number_input(" ", min_value=1, value=20, step=1, label_visibility="collapsed")
 with config_cols[2]:
@@ -507,11 +507,11 @@ with game_cols[2]:
     """
     st.markdown(agent_params_html, unsafe_allow_html=True)
 
-st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
-start_button_cols = st.columns([1, 1, 1])
-with start_button_cols[1]:
-    if not st.button("START TRAINING", type="primary", use_container_width=True):
-        st.stop()
+# st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
+# start_button_cols = st.columns([1, 1, 1])
+# with start_button_cols[1]:
+#     if not st.button("START TRAINING", type="primary", use_container_width=True):
+#         st.stop()
 
 # train progressbar
 percent_placeholder = st.empty()
@@ -1102,6 +1102,55 @@ with col_graph:
     )
     st.altair_chart(epsilon_chart, use_container_width=False)
 
+# ************************************** SAVE TRAINING DATA *************************************
+csv_filename = f"DQN_{EPISODES}_episodes_{env.total_squares}_squares.csv"
+csv_buffer = io.StringIO()
+train_df.to_csv(csv_buffer, index=False)
+csv_data = csv_buffer.getvalue()
+
+pth_policy = io.BytesIO()
+torch_save({
+    "frame_size": env.FRAME_SIZE,
+    "input_dim": agent.num_actions,
+    "output_dim": agent.num_actions,
+    "policy_dict": agent.policy_dqn.state_dict()
+}, pth_policy)
+pth_policy.seek(0)
+
+pth_target = io.BytesIO()
+torch_save({
+    "frame_size": env.FRAME_SIZE,
+    "input_dim": agent.num_actions,
+    "output_dim": agent.num_actions,
+    "target_dict": agent.target_dqn.state_dict()
+}, pth_target)
+pth_target.seek(0)
+
+zip_buffer = io.BytesIO()
+with zipfile.ZipFile(zip_buffer, 'w') as zipf:
+    zipf.writestr(csv_filename, csv_data)
+    zipf.writestr(f"V5_2_policy_{agent.num_actions}_{EPISODES}.pth", pth_policy.getvalue())
+    zipf.writestr(f"V5_2_target_{agent.num_actions}_{EPISODES}.pth", pth_target.getvalue())
+zip_buffer.seek(0)
+
+st.markdown("""
+<style>
+    .stDownloadButton>button {
+        width: 100%;
+        height: 60px;
+        font-size: 20px;
+        background-color: #4CAF50;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.download_button(
+    label="Download all data and models as ZIP",
+    data=zip_buffer, 
+    file_name=f"DQN_{EPISODES}_episodes_{env.total_squares}_squares.zip", 
+    mime="application/zip"
+)
+
 # ************************************* SECTION SEPARATOR *************************************
 separator_html = """
     <style>
@@ -1206,22 +1255,101 @@ def download_zip_fragment(zip_buffer: io.BytesIO) -> None:
         st.download_button(label="Download episode gallery as .ZIP", data=zip_buffer, file_name=f"DQN_{EPISODES}_ep_{env.total_squares}.zip")
 download_zip_fragment(zip_buffer)
 
-# ************************************** SAVE TRAINING DATA *************************************
-csv_filename = f"DQN_{EPISODES}_episodes_{env.total_squares}_squares.csv"
-train_df.to_csv(csv_filename, index=False)
-
-torch_save({
-    "frame_size": env.FRAME_SIZE,
-    "input_dim": agent.num_actions,
-    "output_dim": agent.num_actions,
-    "policy_dict": agent.policy_dqn.state_dict()
-}, f"V5_2_policy_{agent.num_actions}_{EPISODES}.pth")
-torch_save({
-    "frame_size": env.FRAME_SIZE,
-    "input_dim": agent.num_actions,
-    "output_dim": agent.num_actions,
-    "target_dict": agent.target_dqn.state_dict()
-}, f"V5_2_target_{agent.num_actions}_{EPISODES}.pth")
+# ************************************* OTHER PAGE BUTTONS *************************************
+buttons_html = """
+    <style>
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* Tres columnas iguales */
+            grid-template-rows: 1fr;
+            gap: 2em;
+            justify-items: center;
+            align-items: center;
+            margin: 2.5em auto 2em auto;
+            width: 100%;
+            max-width: 1920px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .fake-button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(90deg, #ff9800 0%, #f44336 100%);
+            color: black !important;
+            font-size: 1.6em;
+            font-weight: bold;
+            border-radius: 2em;
+            padding: 0.75em 2.5em;
+            border: none;
+            text-decoration: none !important;
+            cursor: pointer;
+            user-select: none;
+            opacity: 0;
+            box-shadow:
+                0 0 0 0 #ff980000,
+                0 0 0 0 #ff572200,
+                0 0 0 0 #ffd60000;
+            filter: hue-rotate(0deg);
+            animation:
+                fade-in    3s cubic-bezier(.23,1.14,.69,.98) forwards,
+                pulse-glow 4s ease-in-out infinite           3s;
+            height: 3.5em;
+            min-width: 13em;
+            text-align: center;
+            line-height: normal;
+        }
+        @keyframes fade-in {
+            0% {
+                opacity: 0;
+                transform: translateY(32px);
+                box-shadow:
+                    0 0 0 0 #ff980000,
+                    0 0 0 0 #ff572200,
+                    0 0 0 0 #ffd60000;
+                filter: hue-rotate(0deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+                box-shadow:
+                    0 0 16px 6px #ff980088,
+                    0 0 32px 12px #ff5722aa,
+                    0 0 48px 24px #ffd60055;
+                filter: hue-rotate(0deg);
+            }
+        }
+        @keyframes pulse-glow {
+            0% {
+                box-shadow:
+                    0 0 16px 6px #ff980088,
+                    0 0 32px 12px #ff5722aa,
+                    0 0 48px 24px #ffd60055;
+                filter: hue-rotate(0deg);
+            }
+            50% {
+                box-shadow:
+                    0 0 36px 14px #ff5722aa,
+                    0 0 44px 20px #ff5722cc,
+                    0 0 60px 32px #ffd60088;
+                filter: hue-rotate(180deg);
+            }
+            100% {
+                box-shadow:
+                    0 0 16px 6px #ff980088,
+                    0 0 32px 12px #ff5722aa,
+                    0 0 48px 24px #ffd60055;
+                filter: hue-rotate(360deg);
+            }
+        }
+    </style>
+    <div class="button-grid">
+        <a class="fake-button" href="/QL_main_hall" target="_self">GO TO QL HALL</a>
+        <a class="fake-button" href="/trained_model_analysis" target="_self">TRAINED MODEL ANALYSIS</a>
+        <a class="fake-button" href="/test_DQN" target="_self">DQN TESTING</a>
+    </div>
+"""
+st.markdown(buttons_html, unsafe_allow_html=True)
 
 # ************************************* AUTHOR CREDITS *************************************
 author_html = """
