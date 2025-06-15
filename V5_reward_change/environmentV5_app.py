@@ -43,9 +43,9 @@ class Scratch_Game_Environment5_Streamlit:
     def _setup_environment_and_contours(self):
         """Set up the environment by identifying contours and placing the frames."""
         try:
-            self.background_path = "../utils/space.jpg" # local deployment
+            self.background_path = "utils/space.jpg" # local tests and cloud deployment
         except Exception:
-            self.background_path = "/utils/space.jpg" # local tests and cloud deployment
+            self.background_path = "../utils/space.jpg" # local deployment
         self.background_image = Image.open(self.background_path).resize((self.rect_width, self.rect_height))
 
         """Place the emoji images"""
