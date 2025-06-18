@@ -18,7 +18,7 @@ class Scratch_Game_Environment5_Streamlit:
         self.total_squares = self.number_of_rows * self.number_of_columns
         self.frames_mask = [-1] * self.total_squares  # -1 no scratched, 0 bad, 1 good
 
-        self.emoji_images = self.get_emoji_images()
+        self.emoji_images = self._get_emoji_images()
         self.game_image = Image.new("RGBA", (self.rect_width, self.rect_height), (255, 255, 255, 255))
 
         self.good_frames_idx = set()
@@ -26,7 +26,7 @@ class Scratch_Game_Environment5_Streamlit:
 
         self._setup_environment_and_contours()
     
-    def get_emoji_images(self) -> list[Image.Image]:
+    def _get_emoji_images(self) -> list[Image.Image]:
         """Return a list of emoji images, depending if the user want them random or not."""
         if not self.random_emojis:
             try:
@@ -96,7 +96,7 @@ class Scratch_Game_Environment5_Streamlit:
         """Return the current game image status for displaying purposes."""
         return self.game_image
     
-    def scratch_frame(self, idx: int) -> tuple[int, bool]:
+    def _scratch_frame(self, idx: int) -> tuple[int, bool]:
         """Replace the frame area in game_image with the corresponding area from background_image"""
         x0, y0 = self.squares_images[idx]["coords"]
         area = (x0, y0, x0 + self.FRAME_SIZE, y0 + self.FRAME_SIZE)
@@ -124,10 +124,10 @@ class Scratch_Game_Environment5_Streamlit:
 
     def env_step(self, action_index: int) -> tuple[list[int], int, bool]:
         """Removed the frame selected and return the next state, reward, and game status."""
-        reward, game_done = self.scratch_frame(action_index) # self.frames_mask is updated here
+        reward, game_done = self._scratch_frame(action_index) # self.frames_mask is updated here
         next_state = self.frames_mask
         return next_state, reward, game_done
     
-    def env_reset(self):
+    def env_reset(self) -> None:
         """Reset the environment to its initial state for a new episode."""
         self.__init__(self.FRAME_SIZE, (self.rect_x, self.rect_y, self.rect_width, self.rect_height), self.random_emojis)
