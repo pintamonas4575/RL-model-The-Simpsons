@@ -86,6 +86,7 @@ st.sidebar.page_link("home_app.py", icon="🏠", label="Home")
 st.sidebar.page_link("pages/QL_main_hall.py", icon="🖥️", label="QL Main Hall")
 st.sidebar.page_link("pages/DQL_main_hall.py", icon="🖥️", label="DQL Main Hall")
 st.sidebar.page_link("pages/trained_model_analysis.py", icon="📊", label="Analyze trained model")
+st.sidebar.page_link("pages/test_QL.py", icon="🤖", label="Test a Qtable model")
 st.sidebar.page_link("pages/test_DQN.py", icon="🤖", label="Test a DQN model")
 
 # ************************************* MAIN APP *************************************
@@ -1104,7 +1105,24 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.download_button(label="Download training data as CSV", data=csv_data, file_name=csv_filename, mime="text/csv")
+zip_buffer = io.BytesIO()
+with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+    zip_file.writestr(csv_filename, csv_data)
+
+    with io.StringIO() as buffer:
+        np.savetxt(buffer, agent.q_table)
+        buffer.write(f"{env.FRAME_SIZE}")
+        buffer.seek(0)
+        zip_file.writestr(f"Qtable_{EPISODES}_{env.total_squares}.txt", buffer.getvalue())
+zip_buffer.seek(0)
+
+st.download_button(
+    label="Download data and model as .ZIP",
+    data=zip_buffer,
+    file_name=f"QL_{EPISODES}_episodes_{env.total_squares}_squares.zip",
+    mime="application/zip",
+    on_click="ignore"
+)
 
 # ************************************* SECTION SEPARATOR *************************************
 separator_html = """
@@ -1203,25 +1221,28 @@ zip_button_html = """
 """
 st.markdown(zip_button_html, unsafe_allow_html=True)
 
-@st.fragment
-def download_zip_fragment(zip_buffer: io.BytesIO) -> None:
-    zip_cols = st.columns([1, 2, 1])
-    with zip_cols[1]:
-        st.download_button(label="Download episode gallery as .ZIP", data=zip_buffer, file_name=f"QL_{EPISODES}_ep_{env.total_squares}.zip")
-download_zip_fragment(zip_buffer)
+zip_cols = st.columns([1, 2, 1])
+with zip_cols[1]:
+    st.download_button(
+        label="Download episode gallery as .ZIP", 
+        data=zip_buffer, 
+        file_name=f"QL_{EPISODES}_episodes_{env.total_squares}_squares_gallery.zip",
+        mime="application/zip",
+        on_click="ignore"
+    )
 
 # ************************************* OTHER PAGE BUTTONS *************************************
 buttons_html = """
     <style>
         .button-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* Tres columnas iguales */
-            grid-template-rows: 1fr;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: 2fr;
             gap: 2em;
             justify-items: center;
             align-items: center;
             margin: 2.5em auto 2em auto;
-            width: 100%;
+            width: 60%;
             max-width: 1920px;
             margin-left: auto;
             margin-right: auto;
@@ -1301,6 +1322,7 @@ buttons_html = """
     <div class="button-grid">
         <a class="fake-button" href="/DQL_main_hall" target="_self">GO TO DQL HALL</a>
         <a class="fake-button" href="/trained_model_analysis" target="_self">TRAINED MODEL ANALYSIS</a>
+        <a class="fake-button" href="/test_QL" target="_self">QL TESTING</a>
         <a class="fake-button" href="/test_DQN" target="_self">DQN TESTING</a>
     </div>
 """

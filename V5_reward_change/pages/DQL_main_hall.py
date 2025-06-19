@@ -2,11 +2,9 @@ import io
 import time
 import math
 import zipfile
-import numpy as np
 import pandas as pd
 import altair as alt
 import streamlit as st
-from PIL import Image
 from torch import save as torch_save
 from environmentV5_app import Scratch_Game_Environment5_Streamlit
 from agentV5_2_DQN_app import RL_Agent_52
@@ -89,6 +87,7 @@ st.sidebar.page_link("home_app.py", icon="🏠", label="Home")
 st.sidebar.page_link("pages/QL_main_hall.py", icon="🖥️", label="QL Main Hall")
 st.sidebar.page_link("pages/DQL_main_hall.py", icon="🖥️", label="DQL Main Hall")
 st.sidebar.page_link("pages/trained_model_analysis.py", icon="📊", label="Analyze trained model")
+st.sidebar.page_link("pages/test_QL.py", icon="🤖", label="Test a Qtable model")
 st.sidebar.page_link("pages/test_DQN.py", icon="🤖", label="Test a DQN model")
 
 # ************************************* MAIN APP *************************************
@@ -601,44 +600,45 @@ for i in range(EPISODES):
         episode_area, min_area_scratched, max_area_scratched
     ]
     # ---------------REWARDS EVOLUTION----------------
-    rewards_chart = alt.Chart(train_df[['Episode', 'Reward', 'Min Reward', 'Max Reward']]).transform_fold(
-        ['Reward', 'Min Reward', 'Max Reward'], as_=['Serie', 'Valor']
-    ).mark_line(point=True).encode(
-        x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
-        y=alt.Y('Valor:Q', title='Reward', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
-        color=alt.Color(
-            'Serie:N',
-            legend=alt.Legend(title=None),
-            scale=alt.Scale(domain=['Reward', 'Min Reward', 'Max Reward'], range=["#06e7f7", "#ff0000", "#15f10e"])
-        )
-    ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
-    rewards_placeholder.altair_chart(rewards_chart, use_container_width=False)
-    # ---------------ACTIONS EVOLUTION----------------
-    actions_chart = alt.Chart(train_df[['Episode', 'Actions Done', 'Min Actions', 'Max Actions']]).transform_fold(
-        ['Actions Done', 'Min Actions', 'Max Actions'], as_=['Serie', 'Valor']
-    ).mark_line(point=True).encode(
-        x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
-        y=alt.Y('Valor:Q', title='Actions Done', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
-        color=alt.Color(
-            'Serie:N',
-            legend=alt.Legend(title=None),
-            scale=alt.Scale(domain=['Actions Done', 'Min Actions', 'Max Actions'], range=["#06e7f7", "#15f10e", "#ff0000"])
-        )
-    ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
-    actions_placeholder.altair_chart(actions_chart, use_container_width=False)
-    # ---------------AREAS EVOLUTION----------------
-    areas_chart = alt.Chart(train_df[['Episode', 'Area Scratched', 'Min Area Scratched', 'Max Area Scratched']]).transform_fold(
-        ['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], as_=['Serie', 'Valor']
-    ).mark_line(point=True).encode(
-        x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
-        y=alt.Y('Valor:Q', title='Area Scratched (%)', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
-        color=alt.Color(
-            'Serie:N',
-            legend=alt.Legend(title=None),
-            scale=alt.Scale(domain=['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], range=["#06e7f7", "#15f10e", "#ff0000"])
-        )
-    ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
-    areas_placeholder.altair_chart(areas_chart, use_container_width=False)
+    if i == EPISODES-1:
+        rewards_chart = alt.Chart(train_df[['Episode', 'Reward', 'Min Reward', 'Max Reward']]).transform_fold(
+            ['Reward', 'Min Reward', 'Max Reward'], as_=['Serie', 'Valor']
+        ).mark_line(point=True).encode(
+            x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
+            y=alt.Y('Valor:Q', title='Reward', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
+            color=alt.Color(
+                'Serie:N',
+                legend=alt.Legend(title=None),
+                scale=alt.Scale(domain=['Reward', 'Min Reward', 'Max Reward'], range=["#06e7f7", "#ff0000", "#15f10e"])
+            )
+        ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
+        rewards_placeholder.altair_chart(rewards_chart, use_container_width=False)
+        # ---------------ACTIONS EVOLUTION----------------
+        actions_chart = alt.Chart(train_df[['Episode', 'Actions Done', 'Min Actions', 'Max Actions']]).transform_fold(
+            ['Actions Done', 'Min Actions', 'Max Actions'], as_=['Serie', 'Valor']
+        ).mark_line(point=True).encode(
+            x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
+            y=alt.Y('Valor:Q', title='Actions Done', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
+            color=alt.Color(
+                'Serie:N',
+                legend=alt.Legend(title=None),
+                scale=alt.Scale(domain=['Actions Done', 'Min Actions', 'Max Actions'], range=["#06e7f7", "#15f10e", "#ff0000"])
+            )
+        ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
+        actions_placeholder.altair_chart(actions_chart, use_container_width=False)
+        # ---------------AREAS EVOLUTION----------------
+        areas_chart = alt.Chart(train_df[['Episode', 'Area Scratched', 'Min Area Scratched', 'Max Area Scratched']]).transform_fold(
+            ['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], as_=['Serie', 'Valor']
+        ).mark_line(point=True).encode(
+            x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
+            y=alt.Y('Valor:Q', title='Area Scratched (%)', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
+            color=alt.Color(
+                'Serie:N',
+                legend=alt.Legend(title=None),
+                scale=alt.Scale(domain=['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], range=["#06e7f7", "#15f10e", "#ff0000"])
+            )
+        ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
+        areas_placeholder.altair_chart(areas_chart, use_container_width=False)
     # ---------------UPDATE PROGRESS BAR----------------
     percent = int(100 * (i + 1) / EPISODES) 
     color = get_gradient_color(percent)
@@ -1145,10 +1145,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.download_button(
-    label="Download all data and models as ZIP",
+    label="Download all data and models as .ZIP",
     data=zip_buffer, 
     file_name=f"DQN_{EPISODES}_episodes_{env.total_squares}_squares.zip", 
-    mime="application/zip"
+    mime="application/zip",
+    on_click="ignore"
 )
 
 # ************************************* SECTION SEPARATOR *************************************
@@ -1248,25 +1249,28 @@ zip_button_html = """
 """
 st.markdown(zip_button_html, unsafe_allow_html=True)
 
-@st.fragment
-def download_zip_fragment(zip_buffer: io.BytesIO) -> None:
-    zip_cols = st.columns([1, 2, 1])
-    with zip_cols[1]:
-        st.download_button(label="Download episode gallery as .ZIP", data=zip_buffer, file_name=f"DQN_{EPISODES}_ep_{env.total_squares}.zip")
-download_zip_fragment(zip_buffer)
+zip_cols = st.columns([1, 2, 1])
+with zip_cols[1]:
+    st.download_button(
+        label="Download episode gallery as .ZIP", 
+        data=zip_buffer, 
+        file_name=f"DQN_{EPISODES}_episodes_{env.total_squares}_squares_gallery.zip",
+        mime="application/zip",
+        on_click="ignore"
+)
 
 # ************************************* OTHER PAGE BUTTONS *************************************
 buttons_html = """
     <style>
         .button-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* Tres columnas iguales */
-            grid-template-rows: 1fr;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: 2fr;
             gap: 2em;
             justify-items: center;
             align-items: center;
             margin: 2.5em auto 2em auto;
-            width: 100%;
+            width: 60%;
             max-width: 1920px;
             margin-left: auto;
             margin-right: auto;
@@ -1346,6 +1350,7 @@ buttons_html = """
     <div class="button-grid">
         <a class="fake-button" href="/QL_main_hall" target="_self">GO TO QL HALL</a>
         <a class="fake-button" href="/trained_model_analysis" target="_self">TRAINED MODEL ANALYSIS</a>
+        <a class="fake-button" href="/test_QL" target="_self">QL TESTING</a>
         <a class="fake-button" href="/test_DQN" target="_self">DQN TESTING</a>
     </div>
 """
