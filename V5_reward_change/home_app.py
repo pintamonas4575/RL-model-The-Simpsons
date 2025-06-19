@@ -173,12 +173,10 @@ st.markdown(title_html, unsafe_allow_html=True)
 
 buttons_html = """
     <style>
-        .button-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 4em 2em;
-            justify-items: center;
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4em;
             align-items: center;
             margin-top: 2.5em;
             margin-bottom: 2em;
@@ -186,6 +184,13 @@ buttons_html = """
             max-width: 700px;
             margin-left: auto;
             margin-right: auto;
+        }
+        .button-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2em;
+            width: 100%;
         }
         .fake-button {
             display: inline-flex;
@@ -248,22 +253,29 @@ buttons_html = """
                     0 0 36px 14px #ff5722aa,
                     0 0 44px 20px #ff5722cc,
                     0 0 60px 32px #ffd60088;
-                filter: hue-rotate(180deg);
+                    filter: hue-rotate(180deg);
             }
             100% {
                 box-shadow:
                     0 0 16px 6px #ff980088,
                     0 0 32px 12px #ff5722aa,
                     0 0 48px 24px #ffd60055;
-                filter: hue-rotate(360deg);
+                    filter: hue-rotate(360deg);
             }
         }
     </style>
-    <div class="button-grid">
-        <a class="fake-button" href="/QL_main_hall" target="_self">GO TO QL HALL</a>
-        <a class="fake-button" href="/DQL_main_hall" target="_self">GO TO DQL HALL</a>
-        <a class="fake-button" href="/trained_model_analysis" target="_self">TRAINED MODEL ANALYSIS</a>
-        <a class="fake-button" href="/test_DQN" target="_self">DQN TESTING</a>
+    <div class="button-container">
+        <div class="button-row">
+            <a class="fake-button" href="/QL_main_hall" target="_self">GO TO QL HALL</a>
+            <a class="fake-button" href="/DQL_main_hall" target="_self">GO TO DQL HALL</a>
+        </div>
+        <div class="button-row">
+            <a class="fake-button" href="/trained_model_analysis" target="_self">TRAINED MODEL ANALYSIS</a>
+        </div>
+        <div class="button-row">
+            <a class="fake-button" href="/test_QL" target="_self">QL TESTING</a>
+            <a class="fake-button" href="/test_DQN" target="_self">DQN TESTING</a>
+        </div>
     </div>
 """
 st.markdown(buttons_html, unsafe_allow_html=True)
