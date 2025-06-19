@@ -4,7 +4,7 @@ import torch
 import numpy as np
 import streamlit as st
 from environmentV5_app import Scratch_Game_Environment5_Streamlit
-from agentV5_2_DQN_app import Custom_DQN
+from agentV5_1_Qtable_app import RL_Agent_51_Streamlit
 
 device = "cpu"
 
@@ -140,7 +140,7 @@ title_html = """
     <div class="modern-frame">
         <h1 class="awesome-title">
             <span class="robot">🤖</span>
-            <span class="mint">DQN</span>
+            <span class="mint">QL</span>
             <span class="electric"> Model Testing</span>
             <span class="robot">🤖</span>
         </h1>
@@ -148,17 +148,16 @@ title_html = """
 """
 st.markdown(title_html, unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader("Upload your trained POLICY DQN file", type=["pt", "pth"])
+uploaded_file = st.file_uploader("Upload your trained Qtable file", type=["txt"])
 if uploaded_file is None:
     st.stop()
 else:
     bytes_data = uploaded_file.getvalue()
     buffer = io.BytesIO(bytes_data)
-    policy_checkpoint = torch.load(buffer, map_location=device)
+    agent_qtable = np.loadtxt(buffer)
+    extracted_value = agent_qtable[-1]
 
-test_DQN_agent = Custom_DQN(policy_checkpoint["input_dim"], policy_checkpoint["output_dim"]).to(device)
-test_DQN_agent.load_state_dict(policy_checkpoint["policy_dict"])
-test_DQN_agent.eval()
+test_QL_agent = RL_Agent_51_Streamlit(num_actions=agent_qtable.shape[0], alpha=0, gamma=0, epsilon=0)
 
 # ************************************* ENV SETUP *************************************
 config_cols = st.columns([1, 1, 1])
@@ -224,7 +223,7 @@ with config_cols[1]:
                     box-sizing: border-box;
                 }}
             </style>
-            <div class="mini-banner1">{policy_checkpoint["frame_size"]}</div>
+            <div class="mini-banner1">{frame_size}</div>
         """
         st.markdown(frame_size_html, unsafe_allow_html=True)
     with subcols[2]:
@@ -251,7 +250,7 @@ with config_cols[1]:
                     box-sizing: border-box;
                 }}
             </style>
-            <div class="mini-banner2">{policy_checkpoint["input_dim"]}</div>
+            <div class="mini-banner2">{agent_qtable.shape[0]}</div>
         """
         st.markdown(frames_html, unsafe_allow_html=True)
 
@@ -273,19 +272,15 @@ episode_actions = 0
 episode_reward = 0
 
 current_state = env.frames_mask.copy()
+current_action = env.total_squares // 2
 
 start = time.time()
 while not done:
     episode_actions += 1
 
     possible_actions = [i for i, val in enumerate(current_state) if val == -1]
-    current_state_tensor = torch.FloatTensor(current_state).unsqueeze(0).to(device)  # [batch, num_actions]
-    with torch.no_grad():
-        q_values: torch.Tensor = test_DQN_agent(current_state_tensor)
-    q_values_np = q_values[0].cpu().numpy()
-    masked_q_values = np.full_like(q_values_np, -np.inf)
-    masked_q_values[possible_actions] = q_values_np[possible_actions]
-    action_index = np.argmax(masked_q_values)
+    q_values = test_QL_agent.q_table[current_action, possible_actions]
+    action_index = possible_actions[np.argmax(q_values)]
 
     next_state, reward, done = env.env_step(action_index)
     episode_reward += reward
