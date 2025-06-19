@@ -1,10 +1,8 @@
 import io
 import time
-import torch
 import numpy as np
 import streamlit as st
 from environmentV5_app import Scratch_Game_Environment5_Streamlit
-from agentV5_1_Qtable_app import RL_Agent_51_Streamlit
 
 device = "cpu"
 
@@ -154,10 +152,9 @@ if uploaded_file is None:
 else:
     bytes_data = uploaded_file.getvalue()
     buffer = io.BytesIO(bytes_data)
-    agent_qtable = np.loadtxt(buffer)
-    extracted_value = agent_qtable[-1]
-
-test_QL_agent = RL_Agent_51_Streamlit(num_actions=agent_qtable.shape[0], alpha=0, gamma=0, epsilon=0)
+    buffer2 = io.BytesIO(bytes_data)
+    test_QL_agent = np.loadtxt(buffer.readlines()[:-1])
+    FRAME_SIZE = int(np.loadtxt(buffer2, skiprows=test_QL_agent.shape[0]))
 
 # ************************************* ENV SETUP *************************************
 config_cols = st.columns([1, 1, 1])
@@ -223,7 +220,7 @@ with config_cols[1]:
                     box-sizing: border-box;
                 }}
             </style>
-            <div class="mini-banner1">{frame_size}</div>
+            <div class="mini-banner1">{FRAME_SIZE}</div>
         """
         st.markdown(frame_size_html, unsafe_allow_html=True)
     with subcols[2]:
@@ -250,11 +247,11 @@ with config_cols[1]:
                     box-sizing: border-box;
                 }}
             </style>
-            <div class="mini-banner2">{agent_qtable.shape[0]}</div>
+            <div class="mini-banner2">{test_QL_agent.shape[0]}</div>
         """
         st.markdown(frames_html, unsafe_allow_html=True)
 
-env = Scratch_Game_Environment5_Streamlit(frame_size=policy_checkpoint["frame_size"], scratching_area=(0, 0, 700, 350), random_emojis=RANDOM_EMOJIS)
+env = Scratch_Game_Environment5_Streamlit(frame_size=FRAME_SIZE, scratching_area=(0, 0, 700, 350), random_emojis=RANDOM_EMOJIS)
 game_cols = st.columns([0.3, 0.5, 0.3])
 with game_cols[1]:
     image_placeholder = st.empty()
@@ -279,7 +276,7 @@ while not done:
     episode_actions += 1
 
     possible_actions = [i for i, val in enumerate(current_state) if val == -1]
-    q_values = test_QL_agent.q_table[current_action, possible_actions]
+    q_values = test_QL_agent[current_action, possible_actions]
     action_index = possible_actions[np.argmax(q_values)]
 
     next_state, reward, done = env.env_step(action_index)
