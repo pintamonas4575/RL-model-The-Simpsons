@@ -520,13 +520,13 @@ buttons_html = """
     <style>
         .button-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* Tres columnas iguales */
-            grid-template-rows: 1fr;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: 2fr;
             gap: 2em;
             justify-items: center;
             align-items: center;
             margin: 2.5em auto 2em auto;
-            width: 100%;
+            width: 60%;
             max-width: 1920px;
             margin-left: auto;
             margin-right: auto;
@@ -606,6 +606,7 @@ buttons_html = """
     <div class="button-grid">
         <a class="fake-button" href="/QL_main_hall" target="_self">GO TO QL HALL</a>
         <a class="fake-button" href="/DQL_main_hall" target="_self">GO TO DQL HALL</a>
+        <a class="fake-button" href="/test_QL" target="_self">QL TESTING</a>
         <a class="fake-button" href="/test_DQN" target="_self">DQN TESTING</a>
     </div>
 """
