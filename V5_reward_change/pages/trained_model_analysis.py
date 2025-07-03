@@ -170,7 +170,7 @@ with rewards_cols[0]:
 with actions_cols[0]:
     st.markdown(f"""
         <div style='text-align: center;'>
-            <h1>🎯 Actions/Episodes 🎯)</h1>
+            <h1>🎯 Actions/Episodes 🎯</h1>
         </div>
     """, unsafe_allow_html=True)
     actions_placeholder = st.empty()
