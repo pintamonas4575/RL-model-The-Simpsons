@@ -600,45 +600,44 @@ for i in range(EPISODES):
         episode_area, min_area_scratched, max_area_scratched
     ]
     # ---------------REWARDS EVOLUTION----------------
-    if i == EPISODES-1:
-        rewards_chart = alt.Chart(train_df[['Episode', 'Reward', 'Min Reward', 'Max Reward']]).transform_fold(
-            ['Reward', 'Min Reward', 'Max Reward'], as_=['Serie', 'Valor']
-        ).mark_line(point=True).encode(
-            x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
-            y=alt.Y('Valor:Q', title='Reward', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
-            color=alt.Color(
-                'Serie:N',
-                legend=alt.Legend(title=None),
-                scale=alt.Scale(domain=['Reward', 'Min Reward', 'Max Reward'], range=["#06e7f7", "#ff0000", "#15f10e"])
-            )
-        ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
-        rewards_placeholder.altair_chart(rewards_chart, use_container_width=False)
-        # ---------------ACTIONS EVOLUTION----------------
-        actions_chart = alt.Chart(train_df[['Episode', 'Actions Done', 'Min Actions', 'Max Actions']]).transform_fold(
-            ['Actions Done', 'Min Actions', 'Max Actions'], as_=['Serie', 'Valor']
-        ).mark_line(point=True).encode(
-            x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
-            y=alt.Y('Valor:Q', title='Actions Done', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
-            color=alt.Color(
-                'Serie:N',
-                legend=alt.Legend(title=None),
-                scale=alt.Scale(domain=['Actions Done', 'Min Actions', 'Max Actions'], range=["#06e7f7", "#15f10e", "#ff0000"])
-            )
-        ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
-        actions_placeholder.altair_chart(actions_chart, use_container_width=False)
-        # ---------------AREAS EVOLUTION----------------
-        areas_chart = alt.Chart(train_df[['Episode', 'Area Scratched', 'Min Area Scratched', 'Max Area Scratched']]).transform_fold(
-            ['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], as_=['Serie', 'Valor']
-        ).mark_line(point=True).encode(
-            x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
-            y=alt.Y('Valor:Q', title='Area Scratched (%)', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
-            color=alt.Color(
-                'Serie:N',
-                legend=alt.Legend(title=None),
-                scale=alt.Scale(domain=['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], range=["#06e7f7", "#15f10e", "#ff0000"])
-            )
-        ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
-        areas_placeholder.altair_chart(areas_chart, use_container_width=False)
+    rewards_chart = alt.Chart(train_df[['Episode', 'Reward', 'Min Reward', 'Max Reward']]).transform_fold(
+        ['Reward', 'Min Reward', 'Max Reward'], as_=['Serie', 'Valor']
+    ).mark_line(point=True).encode(
+        x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
+        y=alt.Y('Valor:Q', title='Reward', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
+        color=alt.Color(
+            'Serie:N',
+            legend=alt.Legend(title=None),
+            scale=alt.Scale(domain=['Reward', 'Min Reward', 'Max Reward'], range=["#06e7f7", "#ff0000", "#15f10e"])
+        )
+    ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
+    rewards_placeholder.altair_chart(rewards_chart, use_container_width=False)
+    # ---------------ACTIONS EVOLUTION----------------
+    actions_chart = alt.Chart(train_df[['Episode', 'Actions Done', 'Min Actions', 'Max Actions']]).transform_fold(
+        ['Actions Done', 'Min Actions', 'Max Actions'], as_=['Serie', 'Valor']
+    ).mark_line(point=True).encode(
+        x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
+        y=alt.Y('Valor:Q', title='Actions Done', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
+        color=alt.Color(
+            'Serie:N',
+            legend=alt.Legend(title=None),
+            scale=alt.Scale(domain=['Actions Done', 'Min Actions', 'Max Actions'], range=["#06e7f7", "#15f10e", "#ff0000"])
+        )
+    ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
+    actions_placeholder.altair_chart(actions_chart, use_container_width=False)
+    # ---------------AREAS EVOLUTION----------------
+    areas_chart = alt.Chart(train_df[['Episode', 'Area Scratched', 'Min Area Scratched', 'Max Area Scratched']]).transform_fold(
+        ['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], as_=['Serie', 'Valor']
+    ).mark_line(point=True).encode(
+        x=alt.X('Episode:Q', title='Episode', axis=alt.Axis(labelFontSize=18, titleFontSize=22)),
+        y=alt.Y('Valor:Q', title='Area Scratched (%)', axis=alt.Axis(labelFontSize=18, titleFontSize=22), scale=alt.Scale(zero=False)),
+        color=alt.Color(
+            'Serie:N',
+            legend=alt.Legend(title=None),
+            scale=alt.Scale(domain=['Area Scratched', 'Min Area Scratched', 'Max Area Scratched'], range=["#06e7f7", "#15f10e", "#ff0000"])
+        )
+    ).properties(width=1200, height=400, padding={"top": 20}).configure_axis(grid=False).interactive()
+    areas_placeholder.altair_chart(areas_chart, use_container_width=False)
     # ---------------UPDATE PROGRESS BAR----------------
     percent = int(100 * (i + 1) / EPISODES) 
     color = get_gradient_color(percent)
