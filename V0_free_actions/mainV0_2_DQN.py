@@ -6,7 +6,6 @@ import torch
 from environment import Scratch_Game_Environment # V0_free_actions/environment.py
 from utils.functionalities import plot_results
 from agentV0_2_DQN import RL_Agent_02
-from agentV0_2_DQN_change import RL_Agent_02_change
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("device:", device)
